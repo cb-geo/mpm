@@ -95,26 +95,6 @@ inline Eigen::Matrix<double, 6, 1> mpm::ParticleXMPM<3>::compute_strain_rate(
   return strain_rate;
 }
 
-// Compute strain of the particle
-template <unsigned Tdim>
-void mpm::ParticleXMPM<Tdim>::compute_strain(double dt) noexcept {
-  // Assign strain rate
-  strain_rate_ = this->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
-  // Update dstrain
-  dstrain_ = strain_rate_ * dt;
-  // Update strain
-  strain_ += dstrain_;
-
-  // Compute at centroid
-  // Strain rate for reduced integration
-  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
-      this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Solid);
-
-  // Assign volumetric strain at centroid
-  dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
-  volumetric_strain_centroid_ += dvolumetric_strain_;
-}
-
 //! Map body force
 template <unsigned Tdim>
 void mpm::ParticleXMPM<Tdim>::map_body_force(

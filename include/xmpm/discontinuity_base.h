@@ -216,7 +216,7 @@ struct discontinuity_surface {
   //! \param[in] normal normal vector of the surface
   inline void assign_normal(VectorDim& normal) { normal_ = normal; }
 
-  //! Reture normal of the elements
+  //! Return normal of the elements
   VectorDim normal() const { return normal_; }
 
   //! Return the vertical distance to the surface

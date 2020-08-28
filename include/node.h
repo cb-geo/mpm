@@ -325,7 +325,7 @@ class Node : public NodeBase<Tdim> {
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal property id
   unsigned prop_id_{std::numeric_limits<unsigned>::max()};
-  //! nodal property id
+  //! nodal discontinuity property id
   unsigned discontinuity_prop_id_{std::numeric_limits<unsigned>::max()};
   //! shared ghost id
   Index ghost_id_{std::numeric_limits<Index>::max()};

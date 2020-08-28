@@ -172,7 +172,7 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
     if (discontinuity_) {
 
       // locate points of discontinuity
-      mesh_->locate_discontinuity_mesh();
+      mesh_->locate_discontinuity();
 
       // Iterate over each points to compute shapefn
       mesh_->compute_shapefn_discontinuity();

@@ -463,7 +463,7 @@ class Mesh {
   void initialise_nodal_properties();
 
   //! Set particles lsm values
-  void assign_particle_levelset(std::vector<double>& phi_list);
+  void assign_particle_levelset(const std::vector<double>& phi_list);
 
   // Create the nodal properties' map for discontinuity
   void create_nodal_properties_discontinuity();
@@ -477,7 +477,7 @@ class Mesh {
   }
 
   //! Locate points of discontinuity in a cell
-  void locate_discontinuity_mesh();
+  void locate_discontinuity();
 
   //! Update the discontinuity position
   //! \param[in] dt Analysis time step

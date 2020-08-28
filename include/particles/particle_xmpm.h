@@ -35,7 +35,7 @@ class ParticleXMPM : public Particle<Tdim> {
   ParticleXMPM(Index id, const VectorDim& coord, bool status);
 
   //! Destructor
-  ~ParticleXMPM() override{};
+  ~ParticleXMPM() override = default;
 
   //! Delete copy constructor
   ParticleXMPM(const ParticleXMPM<Tdim>&) = delete;
@@ -62,18 +62,13 @@ class ParticleXMPM : public Particle<Tdim> {
   void compute_updated_position(double dt,
                                 bool velocity_update = false) noexcept override;
 
-  //! Compute strain
-  //! \param[in] dt Analysis time step
-  void compute_strain(double dt) noexcept override;
-
- private:
   //! Compute strain rate
   //! \param[in] dn_dx The spatial gradient of shape function
   //! \param[in] phase Index to indicate phase
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
-
+ private:
   //! Assign the level set function values
   //! \param[in] phivalue The level set values
   void assign_levelsetphi(const double phivalue) { levelset_phi_ = phivalue; };
@@ -82,7 +77,7 @@ class ParticleXMPM : public Particle<Tdim> {
   //! \param[in] x double value
   inline double sgn(double x) noexcept {
     return (x > 0) ? 1. : ((x < 0) ? -1. : 0);
-  };
+  }
 
  private:
   //! particle id

@@ -321,12 +321,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase_size The material phase size
   void initialise_material(unsigned phase_size = 1);
 
- private:
   //! Compute strain rate
   //! \param[in] dn_dx The spatial gradient of shape function
   //! \param[in] phase Index to indicate phase
   //! \retval strain rate at particle inside a cell
-  inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
+  virtual inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
   //! Compute pack size

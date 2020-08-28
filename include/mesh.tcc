@@ -1996,14 +1996,14 @@ void mpm::Mesh<Tdim>::initialise_nodal_properties() {
 
 //! Set particles lsm values
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::assign_particle_levelset(std::vector<double>& phi_list) {
+void mpm::Mesh<Tdim>::assign_particle_levelset(const std::vector<double>& phi_list) {
   for (mpm::Index i = 0; i < nparticles(); ++i)
     particles_[i]->assign_levelsetphi(phi_list[i]);
 }
 
 //! Locate points in a cell
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::locate_discontinuity_mesh() {
+void mpm::Mesh<Tdim>::locate_discontinuity() {
   for (unsigned i = 0; i < discontinuities_.size(); ++i) {
     auto discontinuity = discontinuities_[i];
     discontinuity->locate_discontinuity_mesh(cells_, map_cells_);

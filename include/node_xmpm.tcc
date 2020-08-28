@@ -28,7 +28,6 @@ Eigen::MatrixXd mpm::Node<Tdim, Tdof, Tnphases>::discontinuity_property(
   // Const pointer to location of property: node_id * nprops x mat_id
   auto property_value =
       property_handle_->property(property, discontinuity_prop_id_, 0, nprops);
-  ;
   // mpm::MapProperty property_handle(position, nprops);
   return property_value;
 }
