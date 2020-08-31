@@ -151,28 +151,30 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
     // Compute forces
     mpm_scheme_->compute_forces(gravity_, phase, step_,
                                 set_node_concentrated_force_);
-    
+
     // intergrate momentum Iterate over
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::intergrate_momentum_discontinuity,
                   std::placeholders::_1, phase, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    //Update the discontinuity position
+    // Update the discontinuity position
     if (discontinuity_)
       mesh_->compute_updated_position_discontinuity(this->dt_);
 
-    // Particle kinematics
-    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
-                                             damping_factor_);
+    // // Particle kinematics
+    // mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
+    //                                          damping_factor_);
+    // Iterate over each particle to compute updated position
+    mesh_->iterate_over_particles(
+    std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+              std::placeholders::_1, dt_, velocity_update_));
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);
-
-
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING

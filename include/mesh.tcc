@@ -1964,26 +1964,24 @@ void mpm::Mesh<Tdim>::create_nodal_properties_discontinuity() {
     nodal_properties_ = std::make_shared<mpm::NodalProperties>();
 
   // Check if nodes_ is empty and throw runtime error if they are
-  if (nodes_.size() != 0) {
-    // Compute number of rows in nodal properties for vector entities
-    const unsigned nrows = nodes_.size() * Tdim;
-    // Create pool data for each property in the nodal properties struct
-    // object. Properties must be named in the plural form
-    nodal_properties_->create_property("mass_enrich", nodes_.size(), 1);
-    nodal_properties_->create_property("momenta_enrich", nrows, 1);
-    nodal_properties_->create_property("internal_force_enrich", nrows, 1);
-    nodal_properties_->create_property("external_force_enrich", nrows, 1);
-    nodal_properties_->create_property("normal_unit_vectors_discontinuity",
-                                       nrows, 1);
-    nodal_properties_->create_property("friction_coef", nodes_.size(), 1);
-    // Iterate over all nodes to initialise the property handle in each node
-    // and assign its node id as the prop id in the nodal property data pool
-    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
-      (*nitr)->initialise_discontinuity_property_handle((*nitr)->id(),
-                                                        nodal_properties_);
-  } else {
-    throw std::runtime_error("Number of nodes is zero");
-  }
+  assert(nodes_.size());
+  // Compute number of rows in nodal properties for vector entities
+  const unsigned nrows = nodes_.size() * Tdim;
+  // Create pool data for each property in the nodal properties struct
+  // object. Properties must be named in the plural form
+  nodal_properties_->create_property("mass_enrich", nodes_.size(), 1);
+  nodal_properties_->create_property("momenta_enrich", nrows, 1);
+  nodal_properties_->create_property("internal_force_enrich", nrows, 1);
+  nodal_properties_->create_property("external_force_enrich", nrows, 1);
+  nodal_properties_->create_property("normal_unit_vectors_discontinuity",
+                                      nrows, 1);
+  nodal_properties_->create_property("friction_coef", nodes_.size(), 1);
+  // Iterate over all nodes to initialise the property handle in each node
+  // and assign its node id as the prop id in the nodal property data pool
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    (*nitr)->initialise_discontinuity_property_handle((*nitr)->id(),
+                                                      nodal_properties_);
+
 }
 
 // Initialise the nodal properties' map
@@ -1997,44 +1995,38 @@ void mpm::Mesh<Tdim>::initialise_nodal_properties() {
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::locate_discontinuity() {
   for (unsigned i = 0; i < discontinuities_.size(); ++i) {
-    auto discontinuity = discontinuities_[i];
-    discontinuity->locate_discontinuity_mesh(cells_, map_cells_);
+    discontinuities_[i]->locate_discontinuity_mesh(cells_, map_cells_);
   }
 }
 //! updated_position of discontinuity
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_updated_position_discontinuity(double dt) {
   for (unsigned i = 0; i < discontinuities_.size(); ++i) {
-    auto discontinuity = discontinuities_[i];
-    discontinuity->compute_updated_position(dt);
+    discontinuities_[i]->compute_updated_position(dt);
   }
 }
 //! compute shape function
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_shapefn_discontinuity() {
   for (unsigned i = 0; i < discontinuities_.size(); ++i) {
-    auto discontinuity = discontinuities_[i];
-    discontinuity->compute_shapefn();
+    discontinuities_[i]->compute_shapefn();
   }
 }
 
 // compute the normal vector of enriched nodes at the discontinuity
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
-  // just compute for one discontinuity for now
-  unsigned discontinuity_id = 0;
-  auto discontinuity = discontinuities_[discontinuity_id];
-
   VectorDim normal;
   normal.setZero();
+  for (unsigned i = 0; i < discontinuities_.size(); ++i) {
+    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
 
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+      discontinuities_[i]->compute_normal((*nitr)->coordinates(), normal);
 
-    discontinuity->compute_normal((*nitr)->coordinates(), normal);
-
-    nodal_properties_->assign_property("normal_unit_vectors_discontinuity",
-                                       (*nitr)->discontinuity_prop_id(), 0,
-                                       normal, Tdim);
+      nodal_properties_->assign_property("normal_unit_vectors_discontinuity",
+                                        (*nitr)->discontinuity_prop_id(), 0,
+                                        normal, Tdim);
+    }
   }
 }
 
