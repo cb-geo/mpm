@@ -22,7 +22,7 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
   //! \param[in] the point index of each surface
   virtual bool initialize(const std::vector<VectorDim>& points,
                           const std::vector<std::vector<mpm::Index>>& surfs);
-  
+
   //! create elements from file
   //! \param[in] surfs the point index list of each surface
   virtual bool create_surfaces(
@@ -39,8 +39,8 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
   // return the levelset values of each coordinates
   //! \param[in] coordinates coordinates
   //! \param[in] phi_list the reference of phi for all coordinates
-  void compute_levelset(const std::vector<VectorDim>& coordinates,
-                        std::vector<double>& phi_list) override;
+  void compute_levelset(const VectorDim& coordinates,
+                        double& phi_particle) override;
 
   //! compute the normal vectors of coordinates
   //! \param[in] coordinates The coordinates
@@ -54,7 +54,7 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
  protected:
   //! vector of points
   using mpm::DiscontinuityBase<Tdim>::points_;
-   //! Logger
+  //! Logger
   using mpm::DiscontinuityBase<Tdim>::console_;
   //! friction coefficient
   using mpm::DiscontinuityBase<Tdim>::friction_coef_;
@@ -62,7 +62,6 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
  private:
   // vector of surfaces
   std::vector<discontinuity_surface<Tdim>> surfaces_;
-
 };
 
 }  // namespace mpm

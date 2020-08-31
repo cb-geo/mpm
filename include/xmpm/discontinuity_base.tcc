@@ -34,8 +34,9 @@ bool mpm::DiscontinuityBase<Tdim>::create_points(
 }
 //! Locate points in a cell
 template <unsigned Tdim>
-void mpm::DiscontinuityBase<Tdim>::locate_discontinuity_mesh(const
-    Vector<Cell<Tdim>>& cells, const Map<Cell<Tdim>>& map_cells) noexcept {
+void mpm::DiscontinuityBase<Tdim>::locate_discontinuity_mesh(
+    const Vector<Cell<Tdim>>& cells,
+    const Map<Cell<Tdim>>& map_cells) noexcept {
   for (auto& point : this->points_)
     point.locate_discontinuity_mesh(cells, map_cells);
 }

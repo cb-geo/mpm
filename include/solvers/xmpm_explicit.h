@@ -28,9 +28,8 @@ class XMPMExplicit : public MPMBase<Tdim> {
   void compute_stress_strain(unsigned phase);
 
   //! Initialise discontinuities
-  bool initialise_discontinuities();
-  //! Initialise the level set function values
-  bool initialise_levelset();
+  void initialise_discontinuities();
+
   // return the number of discontinuities
   mpm::Index ndiscontinuities() { return discontinuities_.size(); };
 
@@ -55,6 +54,12 @@ class XMPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
+  //! MPM Scheme
+  using mpm::MPMBase<Tdim>::mpm_scheme_;
+  //! Stress update method
+  using mpm::MPMBase<Tdim>::stress_update_;
+  //! Interface scheme
+  using mpm::MPMBase<Tdim>::contact_;
 
 #ifdef USE_GRAPH_PARTITIONING
   //! Graph

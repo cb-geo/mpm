@@ -462,14 +462,11 @@ class Mesh {
   // Initialise the nodal properties' map
   void initialise_nodal_properties();
 
-  //! Set particles lsm values
-  void assign_particle_levelset(const std::vector<double>& phi_list);
-
   // Create the nodal properties' map for discontinuity
   void create_nodal_properties_discontinuity();
 
   //! Initialise discontinuities
-  //! \param[in] discontinuities List of discontinuities 
+  //! \param[in] discontinuities List of discontinuities
   void initialise_discontinuities(
       const std::map<unsigned, std::shared_ptr<mpm::DiscontinuityBase<Tdim>>>&
           discontinuities) {
@@ -488,6 +485,9 @@ class Mesh {
 
   //! compute the normal vector of enriched nodes at the discontinuity
   void compute_normal_vector_discontinuity();
+
+  //! Initialise the level set function values
+  void initialise_levelset_discontinuity();
 
  private:
   // Read particles from file

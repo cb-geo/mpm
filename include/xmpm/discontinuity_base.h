@@ -50,15 +50,16 @@ class DiscontinuityBase {
 
   //! create elements from file
   //! \param[in] surfs the point index list of each surface
-  virtual bool create_surfaces(const std::vector<std::vector<mpm::Index>>& surfs) {
+  virtual bool create_surfaces(
+      const std::vector<std::vector<mpm::Index>>& surfs) {
     return true;
   };
 
   // return the levelset values of each coordinates
   //! \param[in] coordinates coordinates
   //! \param[in] phi_list the reference of phi for all coordinates
-  virtual void compute_levelset(const std::vector<VectorDim>& coordinates,
-                                std::vector<double>& phi_list) = 0;
+  virtual void compute_levelset(const VectorDim& coordinates,
+                                double& phi_particle) = 0;
 
   //! compute the normal vectors of coordinates
   //! \param[in] coordinates The coordinates
@@ -106,7 +107,6 @@ class DiscontinuityBase {
 
 };  // DiscontinuityBase class
 
-
 //! struct of discontinuity point
 template <unsigned Tdim>
 struct discontinuity_point {
@@ -152,7 +152,7 @@ struct discontinuity_point {
   //! \param[in] cells vector of cells
   //! \param[in] map_cells map of cells
   void locate_discontinuity_mesh(const Vector<Cell<Tdim>>& cells,
-                                const Map<Cell<Tdim>>& map_cells) noexcept;
+                                 const Map<Cell<Tdim>>& map_cells) noexcept;
 
   //! Compute updated position
   void compute_updated_position(double dt) noexcept;
@@ -162,7 +162,9 @@ struct discontinuity_point {
 
   //! Assign point friction coefficient
   //! \param[in] friction_coef
-  void assign_friction_coef(double friction_coef) noexcept {friction_coef_ = friction_coef;};
+  void assign_friction_coef(double friction_coef) noexcept {
+    friction_coef_ = friction_coef;
+  };
 
  private:
   //! point coordinates

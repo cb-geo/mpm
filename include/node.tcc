@@ -34,7 +34,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   acceleration_.setZero();
   status_ = false;
   material_ids_.clear();
-  //mark: need to check
+  // mark: need to check
   discontinuity_enrich_ = true;
 }
 

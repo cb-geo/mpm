@@ -977,8 +977,8 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   unsigned nmaterials = material_id_.size();
   MPI_Pack(&nmaterials, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
-  MPI_Pack(&material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
-           MPI_COMM_WORLD);
+  MPI_Pack(&material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED, data_ptr,
+           data.size(), &position, MPI_COMM_WORLD);
 
   // ID
   MPI_Pack(&id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(), &position,

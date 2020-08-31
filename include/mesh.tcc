@@ -1975,8 +1975,7 @@ void mpm::Mesh<Tdim>::create_nodal_properties_discontinuity() {
     nodal_properties_->create_property("external_force_enrich", nrows, 1);
     nodal_properties_->create_property("normal_unit_vectors_discontinuity",
                                        nrows, 1);
-    nodal_properties_->create_property("friction_coef",
-                                       nodes_.size(), 1);
+    nodal_properties_->create_property("friction_coef", nodes_.size(), 1);
     // Iterate over all nodes to initialise the property handle in each node
     // and assign its node id as the prop id in the nodal property data pool
     for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
@@ -1992,13 +1991,6 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::initialise_nodal_properties() {
   // Call initialise_properties function from the nodal properties
   nodal_properties_->initialise_nodal_properties();
-}
-
-//! Set particles lsm values
-template <unsigned Tdim>
-void mpm::Mesh<Tdim>::assign_particle_levelset(const std::vector<double>& phi_list) {
-  for (mpm::Index i = 0; i < nparticles(); ++i)
-    particles_[i]->assign_levelsetphi(phi_list[i]);
 }
 
 //! Locate points in a cell
@@ -2043,5 +2035,19 @@ void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
     nodal_properties_->assign_property("normal_unit_vectors_discontinuity",
                                        (*nitr)->discontinuity_prop_id(), 0,
                                        normal, Tdim);
+  }
+}
+
+// Initialise level set values particles
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::initialise_levelset_discontinuity() {
+
+  double phi_particle;
+  for (unsigned i = 0; i < discontinuities_.size(); ++i) {
+    for (mpm::Index j = 0; j < nparticles(); ++j) {
+      discontinuities_[i]->compute_levelset(particles_[j]->coordinates(),
+                                            phi_particle);
+      particles_[j]->assign_levelsetphi(phi_particle);
+    }
   }
 }

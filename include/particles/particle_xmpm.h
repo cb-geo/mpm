@@ -68,6 +68,7 @@ class ParticleXMPM : public Particle<Tdim> {
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
+
  private:
   //! Assign the level set function values
   //! \param[in] phivalue The level set values
@@ -142,8 +143,14 @@ class ParticleXMPM : public Particle<Tdim> {
   using Particle<Tdim>::dn_dx_centroid_;
   //! Logger
   using Particle<Tdim>::console_;
+  //! Map of scalar properties
+  using Particle<Tdim>::scalar_properties_;
   //! Map of vector properties
-  using Particle<Tdim>::properties_;
+  using Particle<Tdim>::vector_properties_;
+  //! Map of tensor properties
+  using Particle<Tdim>::tensor_properties_;
+  //! Pack size
+  using Particle<Tdim>::pack_size_;
 
  private:
   //! level set value： phi for discontinuity

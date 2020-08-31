@@ -19,4 +19,3 @@ static Register<mpm::MPM, mpm::MPMExplicit<3>, const std::shared_ptr<mpm::IO>&>
 static Register<mpm::MPM, mpm::XMPMExplicit<3>, const std::shared_ptr<mpm::IO>&>
     xmpm_explicit_3d("XMPMExplicit3D");
 }  // namespace mpm
-

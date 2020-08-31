@@ -279,7 +279,7 @@ class Node : public NodeBase<Tdim> {
   void assign_discontinuity_enrich(bool discontinuity) {
     discontinuity_enrich_ = discontinuity;
   };
-  
+
   //! Return whether the node is enriched
   bool discontinuity_enrich() const { return discontinuity_enrich_; };
 

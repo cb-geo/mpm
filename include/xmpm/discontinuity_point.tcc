@@ -5,7 +5,7 @@ bool mpm::discontinuity_point<Tdim>::assign_cell_xi(
     const Eigen::Matrix<double, Tdim, 1>& xi) {
   bool status = true;
   Eigen::Matrix<double, 1, 1> friction_coef;
-  friction_coef(0,0) = friction_coef_;
+  friction_coef(0, 0) = friction_coef_;
   try {
     // Assign cell to the new cell ptr, if point can be found in new cell
     if (cellptr != nullptr) {
@@ -13,9 +13,10 @@ bool mpm::discontinuity_point<Tdim>::assign_cell_xi(
       cell_ = cellptr;
       cell_id_ = cellptr->id();
       nodes_ = cell_->nodes();
-      for (unsigned i = 0; i < nodes_.size(); ++i){
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
         nodes_[i]->assign_discontinuity_enrich(true);
-        nodes_[i]->update_discontinuity_property(true, "friction_coef", friction_coef, 0, 1);
+        nodes_[i]->update_discontinuity_property(true, "friction_coef",
+                                                 friction_coef, 0, 1);
       }
       // Assign the reference location of particle
       bool xi_nan = false;
@@ -44,7 +45,7 @@ bool mpm::discontinuity_point<Tdim>::assign_cell(
     const std::shared_ptr<Cell<Tdim>>& cellptr) {
   bool status = true;
   Eigen::Matrix<double, 1, 1> friction_coef;
-  friction_coef(0,0) = friction_coef_;
+  friction_coef(0, 0) = friction_coef_;
   try {
     Eigen::Matrix<double, Tdim, 1> xi;
     // Assign cell to the new cell ptr, if point can be found in new cell
@@ -54,10 +55,10 @@ bool mpm::discontinuity_point<Tdim>::assign_cell(
       cell_id_ = cellptr->id();
       nodes_ = cell_->nodes();
       // assign discontinuity_enrich
-      for (unsigned i = 0; i < nodes_.size(); ++i)
-      {
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
         nodes_[i]->assign_discontinuity_enrich(true);
-        nodes_[i]->update_discontinuity_property(true, "friction_coef", friction_coef, 0, 1);
+        nodes_[i]->update_discontinuity_property(true, "friction_coef",
+                                                 friction_coef, 0, 1);
       }
     } else {
       console_->warn("Points of discontinuity cannot be found in cell!");
@@ -87,8 +88,9 @@ bool mpm::discontinuity_point<Tdim>::compute_reference_location() noexcept {
 
 //! Locate points in a cell
 template <unsigned Tdim>
-void mpm::discontinuity_point<Tdim>::locate_discontinuity_mesh(const
-    Vector<Cell<Tdim>>& cells, const Map<Cell<Tdim>>& map_cells) noexcept {
+void mpm::discontinuity_point<Tdim>::locate_discontinuity_mesh(
+    const Vector<Cell<Tdim>>& cells,
+    const Map<Cell<Tdim>>& map_cells) noexcept {
   // Check the current cell if it is not invalid
   if (cell_id() != std::numeric_limits<mpm::Index>::max()) {
     // If a cell id is present, but not a cell locate the cell from map
@@ -120,7 +122,7 @@ void mpm::discontinuity_point<Tdim>::locate_discontinuity_mesh(const
 // Compute updated position of the particle
 template <unsigned Tdim>
 void mpm::discontinuity_point<Tdim>::compute_updated_position(
- const double dt) noexcept {
+    const double dt) noexcept {
   // Check if point has a valid cell ptr
   if (cell_ == nullptr) return;
   // Get interpolated nodal velocity

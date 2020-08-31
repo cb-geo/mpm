@@ -121,8 +121,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
   //  single phase for solid
   unsigned phase = 0;
   const double tolerance = 1.0E-15;
-  
-  //obtain the enriched values of enriched nodes
+
+  // obtain the enriched values of enriched nodes
   Eigen::Matrix<double, 1, 1> mass_enrich =
       property_handle_->property("mass_enrich", discontinuity_prop_id_, 0, 1);
   Eigen::Matrix<double, Tdim, 1> momenta_enrich = property_handle_->property(
@@ -156,7 +156,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
 
   // friction_coef < 0: move together without slide
   // need to be done
-  double friction_coef = property_handle_->property("friction_coef", discontinuity_prop_id_, 0, 1)(0,0);
+  double friction_coef = property_handle_->property(
+      "friction_coef", discontinuity_prop_id_, 0, 1)(0, 0);
 
   if (friction_coef < 0) {
     property_handle_->update_property("momenta_enrich", discontinuity_prop_id_,
@@ -165,7 +166,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
                                       discontinuity_prop_id_, 0,
                                       force_contact.col(phase), Tdim);
   } else {
-    //the contact momentum, force value for sticking contact at normal direction
+    // the contact momentum, force value for sticking contact at normal
+    // direction
     double momentum_contact_norm =
         momentum_contact.col(phase).dot(normal_vector);
     double force_contact_norm = momentum_contact_norm / dt;
@@ -173,17 +175,18 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
     // the maximum friction contact force
     double max_friction_force = friction_coef * abs(force_contact_norm);
 
-  // the contact momentum, force vector for sticking contact at tangential direction
+    // the contact momentum, force vector for sticking contact at tangential
+    // direction
     auto momentum_tangential =
         momentum_contact.col(phase) - momentum_contact_norm * normal_vector;
     auto force_tangential = momentum_tangential / dt;
 
-    //the friction force magnitude
+    // the friction force magnitude
     double force_tangential_value = force_tangential.norm();
 
     double force_friction = force_tangential_value < max_friction_force
-                                  ? force_tangential_value
-                                  : max_friction_force;
+                                ? force_tangential_value
+                                : max_friction_force;
 
     // adjust the momentum and force
     property_handle_->update_property(

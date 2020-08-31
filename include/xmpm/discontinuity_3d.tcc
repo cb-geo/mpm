@@ -41,7 +41,8 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
   if (!normal_status) {
     status = false;
     throw std::runtime_error(
-        "initialization of the center and normal vector of the discontunity failed");
+        "initialization of the center and normal vector of the discontunity "
+        "failed");
   }
 
   this->assign_point_friction_coef();
@@ -80,7 +81,7 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
     VectorDim normal;
     Eigen::Matrix<mpm::Index, 3, 1> points;
 
-    for (auto& surf: surfaces_) {
+    for (auto& surf : surfaces_) {
       points = surf.points();
 
       // the center of the surfaces
@@ -122,34 +123,28 @@ Eigen::Matrix<double, Tdim, 1> mpm::Discontinuity3D<Tdim>::three_cross_product(
 
 // return the levelset values of each coordinates
 template <unsigned Tdim>
-void mpm::Discontinuity3D<Tdim>::compute_levelset(
-    const std::vector<VectorDim>& coordinates, std::vector<double>& phi_list) {
-
-  mpm::Index i = 0;
-  for (const auto& coor : coordinates) {
-    // find the nearest distance from particle to cell: need to do by global
-    // searching and local searching
-    double distance = std::numeric_limits<double>::max();
-    for (const auto& surf : surfaces_) {
-      double vertical_distance =
-          surf.vertical_distance(coor);  // vertical_distance(coor);
-      distance = std::abs(distance) < std::abs(vertical_distance)
-                     ? distance
-                     : vertical_distance;
-      if (!distance) distance = 1e-16;
-    }
-
-    phi_list[i] = distance;
-    ++i;
+void mpm::Discontinuity3D<Tdim>::compute_levelset(const VectorDim& coordinates,
+                                                  double& phi_particle) {
+  // find the nearest distance from particle to cell: need to do by global
+  // searching and local searching
+  double distance = std::numeric_limits<double>::max();
+  for (const auto& surf : surfaces_) {
+    double vertical_distance =
+        surf.vertical_distance(coordinates);  // vertical_distance(coor);
+    distance = std::abs(distance) < std::abs(vertical_distance)
+                   ? distance
+                   : vertical_distance;
+    if (!distance) distance = 1e-16;
   }
+  phi_particle = distance;
 }
 
 // return the normal vectors of given coordinates
 template <unsigned Tdim>
 void mpm::Discontinuity3D<Tdim>::compute_normal(const VectorDim& coordinates,
                                                 VectorDim& normal_vector) {
-  // find the nearest distance from particle to cell: need to do better by global
-  // searching and local searching
+  // find the nearest distance from particle to cell: need to do better by
+  // global searching and local searching
   double distance = std::numeric_limits<double>::max();
   for (const auto& surf : surfaces_) {
     double vertical_distance =
@@ -163,7 +158,6 @@ void mpm::Discontinuity3D<Tdim>::compute_normal(const VectorDim& coordinates,
 
 //! Assign point friction coefficient
 template <unsigned Tdim>
-void mpm::Discontinuity3D<Tdim>::assign_point_friction_coef() noexcept{
-for(auto & point: points_)
-  point.assign_friction_coef(friction_coef_);
+void mpm::Discontinuity3D<Tdim>::assign_point_friction_coef() noexcept {
+  for (auto& point : points_) point.assign_friction_coef(friction_coef_);
 }
