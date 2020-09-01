@@ -32,9 +32,9 @@ Eigen::MatrixXd mpm::Node<Tdim, Tdof, Tnphases>::discontinuity_property(
   return property_value;
 }
 
-//! Compute acceleration and velocity with cundall damping factor
+//! Compute momentum for discontinuity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_momentum_discontinuity(
     unsigned phase, double dt) noexcept {
   momentum_.col(phase) =
       momentum_.col(phase) +
@@ -59,7 +59,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
 
   return true;
 }
-//! Apply velocity constraints
+//! Apply velocity constraints for discontinuity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::apply_velocity_constraints_discontinuity() {
@@ -112,7 +112,7 @@ void mpm::Node<Tdim, Tdof,
     }
   }
 }
-//! Apply velocity constraints
+//! Apply self-contact of the discontinuity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
     double dt) noexcept {
@@ -201,8 +201,3 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
         Tdim);
   }
 }
-
-//! Compute normal direction of each enrich node
-//! Apply velocity constraints
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_normal_vector() noexcept {}

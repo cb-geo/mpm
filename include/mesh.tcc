@@ -1973,15 +1973,14 @@ void mpm::Mesh<Tdim>::create_nodal_properties_discontinuity() {
   nodal_properties_->create_property("momenta_enrich", nrows, 1);
   nodal_properties_->create_property("internal_force_enrich", nrows, 1);
   nodal_properties_->create_property("external_force_enrich", nrows, 1);
-  nodal_properties_->create_property("normal_unit_vectors_discontinuity",
-                                      nrows, 1);
+  nodal_properties_->create_property("normal_unit_vectors_discontinuity", nrows,
+                                     1);
   nodal_properties_->create_property("friction_coef", nodes_.size(), 1);
   // Iterate over all nodes to initialise the property handle in each node
   // and assign its node id as the prop id in the nodal property data pool
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
     (*nitr)->initialise_discontinuity_property_handle((*nitr)->id(),
                                                       nodal_properties_);
-
 }
 
 // Initialise the nodal properties' map
@@ -2024,8 +2023,8 @@ void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
       discontinuities_[i]->compute_normal((*nitr)->coordinates(), normal);
 
       nodal_properties_->assign_property("normal_unit_vectors_discontinuity",
-                                        (*nitr)->discontinuity_prop_id(), 0,
-                                        normal, Tdim);
+                                         (*nitr)->discontinuity_prop_id(), 0,
+                                         normal, Tdim);
     }
   }
 }

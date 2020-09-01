@@ -3,7 +3,6 @@ template <unsigned Tdim>
 mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord)
     : mpm::Particle<Tdim>(id, coord) {
 
-  this->initialise();
   // Logger
   std::string logger =
       "particlexmpm" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -20,12 +19,6 @@ mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord,
   std::string logger =
       "particlexmpm" + std::to_string(Tdim) + "d::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
-}
-
-// Initialise particle properties
-template <unsigned Tdim>
-void mpm::ParticleXMPM<Tdim>::initialise() {
-  levelset_phi_ = 0.;
 }
 
 //! Map particle mass and momentum to nodes

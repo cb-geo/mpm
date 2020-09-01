@@ -5,11 +5,11 @@ mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
 
   try {
     // assign friction_coef_ if it's given in input file
+    friction_coef_ = 0;
     if (discontinuity_props.contains("friction_coefficient"))
       friction_coef_ =
           discontinuity_props.at("friction_coefficient").template get<double>();
-    else
-      friction_coef_ = 0;
+
   } catch (Json::exception& except) {
     console_->error("discontinuity parameter not set: {} {}\n", except.what(),
                     except.id);
@@ -41,8 +41,8 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
   if (!normal_status) {
     status = false;
     throw std::runtime_error(
-        "initialization of the center and normal vector of the discontunity "
-        "failed");
+        "initialization of the center and the normal vector of the "
+        "discontinuity failed");
   }
 
   this->assign_point_friction_coef();
@@ -63,7 +63,7 @@ bool mpm::Discontinuity3D<Tdim>::create_surfaces(
 
       mpm::discontinuity_surface<Tdim> surf(points);
 
-      surfaces_.emplace_back(surf);  //
+      surfaces_.emplace_back(surf);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -97,10 +97,10 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
       normal = three_cross_product(points_[points[0]].coordinates(),
                                    points_[points[1]].coordinates(),
                                    points_[points[2]].coordinates());
-      double det = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] +
-                             normal[2] * normal[2]);
-      normal = 1.0 / det * normal;
-
+      if (normal.norm() > std::numeric_limits<double>::epsilon())
+        normal.normalize();
+      else
+        normal = VectorDim::Zero();
       surf.assign_normal(normal);
     }
   } catch (std::exception& exception) {

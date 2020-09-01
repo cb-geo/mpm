@@ -205,7 +205,7 @@ struct discontinuity_surface {
 
   //! construct with points indices
   discontinuity_surface(const std::vector<mpm::Index>& points) {
-    for (int i = 0; i < points.size(); ++i) points_[i] = points[i];
+    for (int i = 0; i < 3; ++i) points_[i] = points[i];
   }
   //! Return points indices
   Eigen::Matrix<mpm::Index, 3, 1> points() const { return points_; }

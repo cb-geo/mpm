@@ -208,7 +208,7 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
-  //! Apply velocity constraints for discontinuity
+  //! Apply self-contact for discontinuity
   void apply_velocity_constraints_discontinuity() override;
 
   //! Assign friction constraint
@@ -300,11 +300,11 @@ class Node : public NodeBase<Tdim> {
   Eigen::MatrixXd discontinuity_property(const std::string& property,
                                          unsigned nprops = 1) noexcept override;
 
-  //! Compute momentum
+  //! Compute momentum for discontinuity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  virtual bool intergrate_momentum_discontinuity(unsigned phase,
-                                                 double dt) noexcept override;
+  virtual bool compute_momentum_discontinuity(unsigned phase,
+                                              double dt) noexcept override;
 
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
@@ -314,9 +314,6 @@ class Node : public NodeBase<Tdim> {
   virtual unsigned discontinuity_prop_id() const noexcept override {
     return discontinuity_prop_id_;
   };
-
-  //! Compute normal direction for discontinuity
-  void compute_normal_vector() noexcept override;
 
  private:
   //! Mutex

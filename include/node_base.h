@@ -287,11 +287,11 @@ class NodeBase {
       const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
       unsigned nprops) noexcept = 0;
 
-  //! Compute momentum
+  //! Compute momentum for discontinuity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  virtual bool intergrate_momentum_discontinuity(unsigned phase,
-                                                 double dt) noexcept = 0;
+  virtual bool compute_momentum_discontinuity(unsigned phase,
+                                              double dt) noexcept = 0;
 
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
@@ -300,8 +300,6 @@ class NodeBase {
   //! Return the discontinuity_prop_id
   virtual unsigned discontinuity_prop_id() const noexcept = 0;
 
-  //! Compute normal direction for discontinuity
-  virtual void compute_normal_vector() noexcept = 0;
 };  // NodeBase class
 }  // namespace mpm
 
