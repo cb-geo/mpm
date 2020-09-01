@@ -22,7 +22,6 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
   //! \param[in] the point index of each surface
   virtual bool initialize(const std::vector<VectorDim>& points,
                           const std::vector<std::vector<mpm::Index>>& surfs);
-
   //! create elements from file
   //! \param[in] surfs the point index list of each surface
   virtual bool create_surfaces(

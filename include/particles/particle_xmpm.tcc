@@ -2,7 +2,6 @@
 template <unsigned Tdim>
 mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord)
     : mpm::Particle<Tdim>(id, coord) {
-
   // Logger
   std::string logger =
       "particlexmpm" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -14,7 +13,6 @@ template <unsigned Tdim>
 mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord,
                                       bool status)
     : mpm::Particle<Tdim>(id, coord, status) {
-  this->initialise();
   //! Logger
   std::string logger =
       "particlexmpm" + std::to_string(Tdim) + "d::" + std::to_string(id);
