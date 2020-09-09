@@ -210,7 +210,12 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
 
     // Mass momentum and compute velocity at nodes
     REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
+
+    // Create arbitrary gravity
+    Eigen::Vector3d gravity;
+    gravity << 0., -9.81, 0.;
+
     // Contact compute forces
-    REQUIRE_NOTHROW(contact->compute_contact_forces());
+    REQUIRE_NOTHROW(contact->compute_contact_forces(gravity, 0, 0.001, false));
   }
 }

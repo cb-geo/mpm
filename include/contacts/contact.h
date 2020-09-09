@@ -18,7 +18,9 @@ class Contact {
   virtual inline void initialise(){};
 
   //! Compute contact forces
-  virtual inline void compute_contact_forces(){};
+  virtual inline void compute_contact_forces(
+      const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
+      double time, bool concentrated_nodal_forces){};
 
  protected:
   //! Mesh object

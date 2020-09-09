@@ -18,7 +18,9 @@ inline void mpm::ContactFriction<Tdim>::initialise() {
 
 //! Compute contact forces
 template <unsigned Tdim>
-inline void mpm::ContactFriction<Tdim>::compute_contact_forces() {
+inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
+    const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase, double time,
+    bool concentrated_nodal_forces) {
 
   // Map multimaterial properties from particles to nodes
   mesh_->iterate_over_particles(std::bind(
@@ -48,5 +50,25 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_forces() {
   // Compute multimaterial normal unit vector
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
+                std::placeholders::_1));
+
+  // Map multimaterial body force
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_body_force,
+                std::placeholders::_1, gravity));
+
+  // Apply particle traction and map to multimaterial nodes
+  mesh_->apply_multimaterial_traction_on_particles();
+
+  // Iterate over each node to add concentrated node force to multimaterial
+  // external force
+  if (concentrated_nodal_forces)
+    mesh_->iterate_over_nodes(
+        std::bind(&mpm::NodeBase<Tdim>::apply_multimaterial_concentrated_force,
+                  std::placeholders::_1, phase, time));
+
+  // Iterate over each particle to compute multimaterial nodal internal force
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_internal_force,
                 std::placeholders::_1));
 }

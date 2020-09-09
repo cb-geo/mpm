@@ -18,7 +18,9 @@ class ContactFriction : public Contact<Tdim> {
   virtual inline void initialise() override;
 
   //! Compute contact forces
-  virtual inline void compute_contact_forces() override;
+  virtual inline void compute_contact_forces(
+      const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
+      double time, bool concentrated_nodal_forces) override;
 
  protected:
   //! Mesh object
