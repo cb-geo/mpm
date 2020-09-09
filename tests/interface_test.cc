@@ -44,6 +44,10 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                                     Nmaterials);
   nodal_properties->create_property("normal_unit_vectors", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("internal_forces", Nnodes * Dim,
+                                    Nmaterials);
+  nodal_properties->create_property("external_forces", Nnodes * Dim,
+                                    Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -204,6 +208,52 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   node2->compute_multimaterial_normal_unit_vector();
   node3->compute_multimaterial_normal_unit_vector();
 
+  // Assign traction to the particles
+  particle1->assign_traction(1, 1.0);
+  particle2->assign_traction(1, 0.5);
+  particle3->assign_traction(0, 0.8);
+
+  // Apply concentrated forces to the nodes
+  node0->assign_concentrated_force(0, 0, 0.5, nullptr);
+  node1->assign_concentrated_force(0, 1, 0.2, nullptr);
+  node2->assign_concentrated_force(0, 0, 1.0, nullptr);
+  node3->assign_concentrated_force(0, 0, 0.3, nullptr);
+
+  Eigen::Matrix<double, 2, 1> gravity;
+  // clang-format off
+  gravity <<  0.00,
+             -9.81;
+  // clang-format on
+
+  // Map multimaterial body force
+  particle1->map_multimaterial_body_force(gravity);
+  particle2->map_multimaterial_body_force(gravity);
+  particle3->map_multimaterial_body_force(gravity);
+
+  // Map multimaterial traction force
+  particle1->map_multimaterial_traction_force();
+  particle2->map_multimaterial_traction_force();
+  particle3->map_multimaterial_traction_force();
+
+  // Apply multimaterial concentrated force
+  node0->apply_multimaterial_concentrated_force(0, dt);
+  node1->apply_multimaterial_concentrated_force(0, dt);
+  node2->apply_multimaterial_concentrated_force(0, dt);
+  node3->apply_multimaterial_concentrated_force(0, dt);
+
+  // Compute strain and stress at particles
+  particle1->compute_strain(dt);
+  particle2->compute_strain(dt);
+  particle3->compute_strain(dt);
+  particle1->compute_stress();
+  particle2->compute_stress();
+  particle3->compute_stress();
+
+  // Map multimaterial internal force
+  particle1->map_multimaterial_internal_force();
+  particle2->map_multimaterial_internal_force();
+  particle3->map_multimaterial_internal_force();
+
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
   masses << 0.96, 1.46,
@@ -211,6 +261,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
             0.16, 0.56,
             0.64, 0.44;
   // clang-format on
+
   Eigen::Matrix<double, 8, 2> momenta;
   // clang-format off
   momenta << 0.96,  -0.70,
@@ -283,6 +334,30 @@ TEST_CASE("Interface functions are checked", "[interface]") {
              0.89442719099992,  0.88491822238198;
   // clang-format on
 
+  Eigen::Matrix<double, 8, 2> internal_force;
+  // clang-format off
+  internal_force <<  1052129.68849333,   653011.76096631,
+                     3820724.72981564,  2711180.86458996,
+                     -130324.22123331,   242967.26001272,
+                      263827.08200890,  1318738.08010172,
+                     -394151.30324221,  -692943.42021615,
+                    -1185632.54926891, -2214717.10108074,
+                     -527654.16401780,  -203035.60076287,
+                    -2898919.26255563, -1815201.84361093;
+  // clang-format on
+
+  Eigen::Matrix<double, 8, 2> external_force;
+  // clang-format off
+  external_force <<  0.50000000000000,   0.5226274169980,
+                    -8.45760000000000, -13.9069078061835,
+                     0.00000000000000,   0.0905096679919,
+                    -1.91440000000000,  -9.7252718707890,
+                     0.30000000000000,   0.6620386719675,
+                    -1.40960000000000,  -5.4243179676973,
+                     1.00000000000000,   1.0905096679919,
+                    -5.63840000000000,  -4.2124769515459;
+  // clang-format on
+
   // Check if nodal properties were properly mapped and computed
   for (int i = 0; i < Nnodes; ++i) {
     for (int j = 0; j < Nmaterials; ++j) {
@@ -304,6 +379,12 @@ TEST_CASE("Interface functions are checked", "[interface]") {
             Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
         REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
                     k, 0) == Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(
+            nodal_properties->property("external_forces", i, j, Dim)(k, 0) ==
+            Approx(external_force(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(
+            nodal_properties->property("internal_forces", i, j, Dim)(k, 0) ==
+            Approx(internal_force(i * Dim + k, j)).epsilon(tolerance));
       }
       // Check if normal vector are also unit vectors
       REQUIRE(
