@@ -305,6 +305,9 @@ class Mesh {
   //! \param[in] current_time Current time
   void apply_traction_on_particles(double current_time);
 
+  //! Apply traction to particles
+  void apply_multimaterial_traction_on_particles();
+
   //! Create particle velocity constraints tractions
   //! \param[in] setid Node set id
   bool create_particle_velocity_constraint(

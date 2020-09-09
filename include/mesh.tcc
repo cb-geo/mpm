@@ -1283,6 +1283,17 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   }
 }
 
+//! Apply particle tractions
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::apply_multimaterial_traction_on_particles() {
+  // Iterate over particles to map traction forces if there are any
+  if (!particle_tractions_.empty()) {
+    this->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_traction_force,
+                  std::placeholders::_1));
+  }
+}
+
 //! Create particle velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particle_velocity_constraint(
@@ -1932,7 +1943,7 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
     // Compute number of rows in nodal properties for vector entities
     const unsigned nrows = nodes_.size() * Tdim;
     // Create pool data for each property in the nodal properties struct
-    // object. Properties must be named in the plural form
+    // object. Properties are named in the plural form
     nodal_properties_->create_property("masses", nodes_.size(),
                                        materials_.size());
     nodal_properties_->create_property("momenta", nrows, materials_.size());
@@ -1945,6 +1956,10 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
     nodal_properties_->create_property("domain_gradients", nrows,
                                        materials_.size());
     nodal_properties_->create_property("normal_unit_vectors", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("internal_forces", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("external_forces", nrows,
                                        materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node
