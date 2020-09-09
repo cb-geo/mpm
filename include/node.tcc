@@ -631,3 +631,15 @@ void mpm::Node<Tdim, Tdof,
   }
   node_mutex_.unlock();
 }
+
+// Apply concentrated force to the nodes in the multimaterial environment
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_multimaterial_concentrated_force(
+    unsigned phase, double current_time) {
+  const double scalar =
+      (force_function_ != nullptr) ? force_function_->value(current_time) : 1.0;
+  const VectorDim concentrated_force = scalar * concentrated_force_.col(phase);
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr)
+    property_handle_->update_property("external_forces", prop_id_, *mitr,
+                                      concentrated_force, Tdim);
+}

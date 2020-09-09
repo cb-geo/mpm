@@ -253,6 +253,12 @@ class NodeBase {
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
+  //! Apply concentrated force to the nodes in the multimaterial environment
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current time
+  virtual void apply_multimaterial_concentrated_force(unsigned phase,
+                                                      double current_time) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 

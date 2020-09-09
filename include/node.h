@@ -264,6 +264,12 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  //! Apply concentrated force to the nodes in the multimaterial environment
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current time
+  void apply_multimaterial_concentrated_force(unsigned phase,
+                                              double current_time) override;
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
