@@ -149,6 +149,17 @@ class Particle : public ParticleBase<Tdim> {
   //! Map multimaterial domain gradients to nodes
   void map_multimaterial_domain_gradients_to_nodes() noexcept override;
 
+  //! Map multimaterial body force
+  //! \param[in] pgravity Gravity
+  void map_multimaterial_body_force(
+      const VectorDim& pgravity) noexcept override;
+
+  //! Map multimaterial traction force
+  void map_multimaterial_traction_force() noexcept override;
+
+  //! Map multimaterial internal force
+  inline void map_multimaterial_internal_force() noexcept override;
+
   //! Assign nodal mass to particles
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status

@@ -159,6 +159,17 @@ class ParticleBase {
   //! Map multimaterial domain gradients to nodes
   virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
 
+  //! Map multimaterial internal force
+  virtual void map_multimaterial_internal_force() noexcept = 0;
+
+  //! Map multimaterial body force
+  //! \param[in] pgravity Gravity
+  virtual void map_multimaterial_body_force(
+      const VectorDim& pgravity) noexcept = 0;
+
+  //! Map multimaterial traction force
+  virtual void map_multimaterial_traction_force() noexcept = 0;
+
   //! Assign material
   virtual bool assign_material(const std::shared_ptr<Material<Tdim>>& material,
                                unsigned phase = mpm::ParticlePhase::Solid) = 0;
