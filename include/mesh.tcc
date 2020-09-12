@@ -1437,31 +1437,20 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::particles_cells()
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
-                                           const std::string& particle_type) {
-  const unsigned nparticles = this->nparticles(particle_type);
+bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename) {
+  const unsigned nparticles = this->nparticles();
 
-  // FIXME: PODParticle type does not work for twophase particle
   std::vector<PODParticle> particle_data;
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    if ((*pitr)->type() == particle_type) {
-      // TODO: Think a better way to separate static_pointer_cast of PODParticle
-      // or PODParticleTwoPhase
-      if (particle_type == "P2D" || particle_type == "P3D") {
-        auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
-        particle_data.emplace_back(*pod);
-      } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
-        auto pod =
-            std::static_pointer_cast<mpm::PODParticleTwoPhase>((*pitr)->pod());
-        particle_data.emplace_back(*pod);
-      }
-    }
+    auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+    particle_data.emplace_back(*pod);
   }
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
+  const hsize_t NFIELDS = mpm::pod::particle::NFIELDS;
 
   hid_t file_id;
   hsize_t chunk_size = 10000;
@@ -1472,25 +1461,51 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
   file_id =
       H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  // TODO: Think a better way to access mpm::pod::particle namespaces
-  if (particle_type == "P2D" || particle_type == "P3D") {
-    const hsize_t NFIELDS = mpm::pod::particle::NFIELDS;
-    // make a table
-    H5TBmake_table(
-        "Table Title", file_id, "table", NFIELDS, NRECORDS,
-        mpm::pod::particle::dst_size, mpm::pod::particle::field_names,
-        mpm::pod::particle::dst_offset, mpm::pod::particle::field_type,
-        chunk_size, fill_data, compress, particle_data.data());
-  } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
-    const hsize_t NFIELDS = mpm::pod::particletwophase::NFIELDS;
-    // make a table
-    H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
-                   mpm::pod::particletwophase::dst_size,
-                   mpm::pod::particletwophase::field_names,
-                   mpm::pod::particletwophase::dst_offset,
-                   mpm::pod::particletwophase::field_type, chunk_size,
-                   fill_data, compress, particle_data.data());
+  // make a table
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                 mpm::pod::particle::dst_size, mpm::pod::particle::field_names,
+                 mpm::pod::particle::dst_offset, mpm::pod::particle::field_type,
+                 chunk_size, fill_data, compress, particle_data.data());
+
+  H5Fclose(file_id);
+  return true;
+}
+
+//! Write particles to HDF5 for two-phase particle
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::write_particles_hdf5_twophase(
+    const std::string& filename) {
+  const unsigned nparticles = this->nparticles();
+
+  std::vector<PODParticleTwoPhase> particle_data;
+  particle_data.reserve(nparticles);
+
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod =
+        std::static_pointer_cast<mpm::PODParticleTwoPhase>((*pitr)->pod());
+    particle_data.emplace_back(*pod);
   }
+
+  // Calculate the size and the offsets of our struct members in memory
+  const hsize_t NRECORDS = nparticles;
+  const hsize_t NFIELDS = mpm::pod::particletwophase::NFIELDS;
+
+  hid_t file_id;
+  hsize_t chunk_size = 10000;
+  int* fill_data = NULL;
+  int compress = 0;
+
+  // Create a new file using default properties.
+  file_id =
+      H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  // make a table
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                 mpm::pod::particletwophase::dst_size,
+                 mpm::pod::particletwophase::field_names,
+                 mpm::pod::particletwophase::dst_offset,
+                 mpm::pod::particletwophase::field_type, chunk_size, fill_data,
+                 compress, particle_data.data());
 
   H5Fclose(file_id);
   return true;

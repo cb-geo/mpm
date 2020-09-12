@@ -84,6 +84,9 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
+  //! Write HDF5 files for twophase particles
+  void write_hdf5_twophase(mpm::Index step, mpm::Index max_steps) override;
+
   //! Domain decomposition
   //! \param[in] initial_step Start of simulation or later steps
   void mpi_domain_decompose(bool initial_step = false) override;

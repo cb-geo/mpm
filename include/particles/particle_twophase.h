@@ -218,9 +218,9 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::stress_;
   //! Soil skeleton strain rate
   using Particle<Tdim>::strain_rate_;
-  //! Soil skeleton material
+  //! Materials
   using Particle<Tdim>::material_;
-  //! Material id
+  //! Material ids
   using ParticleBase<Tdim>::material_id_;
   //! Particle total volume
   using Particle<Tdim>::volume_;
