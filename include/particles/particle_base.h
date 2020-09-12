@@ -35,6 +35,7 @@ enum ParticlePhase : unsigned int {
 //! Particle type
 extern std::map<std::string, int> ParticleType;
 extern std::map<int, std::string> ParticleTypeName;
+extern std::map<std::string, std::string> ParticleHDF5TypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases

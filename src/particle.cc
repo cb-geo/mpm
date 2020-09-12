@@ -9,6 +9,11 @@ std::map<std::string, int> ParticleType = {
     {"P2D", 0}, {"P3D", 1}, {"P2D2PHASE", 2}, {"P3D2PHASE", 3}};
 std::map<int, std::string> ParticleTypeName = {
     {0, "P2D"}, {1, "P3D"}, {2, "P2D2PHASE"}, {3, "P3D2PHASE"}};
+std::map<std::string, std::string> ParticleHDF5TypeName = {
+    {"P2D", "particles"},
+    {"P3D", "particles"},
+    {"P2D2PHASE", "twophase_particles"},
+    {"P3D2PHASE", "twophase_particles"}};
 }  // namespace mpm
 
 // Particle2D (2 Dim)

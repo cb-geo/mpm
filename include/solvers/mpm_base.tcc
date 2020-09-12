@@ -451,15 +451,17 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     this->step_ = analysis_["resume"]["step"].template get<mpm::Index>();
 
     // Input particle h5 file for resume
-    std::string attribute = "particles";
-    std::string extension = ".h5";
+    for (const auto ptype : particle_types_) {
+      std::string attribute = mpm::ParticleHDF5TypeName.at(ptype);
+      std::string extension = ".h5";
 
-    auto particles_file =
-        io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
-            .string();
+      auto particles_file =
+          io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
+              .string();
 
-    // Load particle information from file
-    mesh_->read_particles_hdf5(particles_file, particle_types_);
+      // Load particle information from file
+      mesh_->read_particles_hdf5(particles_file, attribute);
+    }
 
     // Clear all particle ids
     mesh_->iterate_over_cells(
@@ -503,7 +505,7 @@ template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::write_hdf5_twophase(mpm::Index step,
                                              mpm::Index max_steps) {
   // Write input geometry to vtk file
-  std::string attribute = "twophaseparticles";
+  std::string attribute = "twophase_particles";
   std::string extension = ".h5";
 
   auto particles_file =
