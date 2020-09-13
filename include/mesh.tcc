@@ -1526,15 +1526,9 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename,
 //! Write particles to HDF5
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
-  // Vector of particles
-  Vector<ParticleBase<Tdim>> particles;
-
-  // Clear map of particles
-  map_particles_.clear();
 
   // Create a new file using default properties.
-  const std::string new_file_name = filename;
-  hid_t file_id = H5Fopen(new_file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   // Throw an error if file can't be found
   if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
 
@@ -1543,15 +1537,21 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
   hsize_t nfields = 0;
   H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  std::vector<PODParticle> dst_buf;
-  dst_buf.reserve(nrecords);
-
   if (nfields != mpm::pod::particle::NFIELDS)
     throw std::runtime_error("HDF5 table has incorrect number of fields");
+
+  std::vector<PODParticle> dst_buf;
+  dst_buf.reserve(nrecords);
   // Read the table
   H5TBread_table(file_id, "table", mpm::pod::particle::dst_size,
                  mpm::pod::particle::dst_offset, mpm::pod::particle::dst_sizes,
                  dst_buf.data());
+
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
 
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
@@ -1586,15 +1586,9 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
     const std::string& filename) {
-  // Vector of particles
-  Vector<ParticleBase<Tdim>> particles;
-
-  // Clear map of particles
-  map_particles_.clear();
 
   // Create a new file using default properties.
-  const std::string new_file_name = filename;
-  hid_t file_id = H5Fopen(new_file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   // Throw an error if file can't be found
   if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
 
@@ -1603,15 +1597,21 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
   hsize_t nfields = 0;
   H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  std::vector<PODParticleTwoPhase> dst_buf;
-  dst_buf.reserve(nrecords);
-
   if (nfields != mpm::pod::particletwophase::NFIELDS)
     throw std::runtime_error("HDF5 table has incorrect number of fields");
+
+  std::vector<PODParticleTwoPhase> dst_buf;
+  dst_buf.reserve(nrecords);
   // Read the table
   H5TBread_table(file_id, "table", mpm::pod::particletwophase::dst_size,
                  mpm::pod::particletwophase::dst_offset,
                  mpm::pod::particletwophase::dst_sizes, dst_buf.data());
+
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
 
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
