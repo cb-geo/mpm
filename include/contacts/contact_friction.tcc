@@ -72,3 +72,34 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
       std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_internal_force,
                 std::placeholders::_1));
 }
+
+//! Compute contact nodal kinematics
+template <unsigned Tdim>
+inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
+
+  // Iterate over each node to compute the acceleration and velocity of each
+  // material
+  mesh_->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::compute_contact_acceleration_velocity,
+                std::placeholders::_1, dt));
+
+  // Iterate over each node to compute the relative velocity of each material
+  mesh_->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_relative_velocity,
+                std::placeholders::_1));
+
+  // Iterate over each node to apply this contact's mechanics law
+  mesh_->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::apply_contact_mechanics,
+                std::placeholders::_1, friction_));  
+}
+
+//! Update particle position
+template <unsigned Tdim>
+inline void mpm::ContactFriction<Tdim>::update_particles_contact(double dt) {
+
+  // Iterate over all particles and compute updated position
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_contact_updated_position,
+                std::placeholders::_1, dt));
+}
