@@ -11,10 +11,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSF<Tdim>>(mesh_, dt_);
 
   //! Interface scheme
-  if (this->interface_)
     contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_);
-  else
-    contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
 }
 
 //! MPM Explicit compute stress strain
@@ -132,8 +129,17 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                                      set_node_concentrated_force_);
 
     // Particle kinematics
-    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
-                                             damping_factor_);
+    mpm_scheme_->compute_particle_kinematics(phase, "Cundall", damping_factor_);
+
+    // Nodal kinematics for contact nodes
+    contact_->compute_contact_kinematics(dt_);
+
+    // Compute particle updated position
+    if (interface_) {
+      contact_->update_particles_contact(dt_);
+    } else {
+      mpm_scheme_->update_particles(velocity_update_);
+    }
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
