@@ -876,7 +876,29 @@ void mpm::Particle<Tdim>::compute_updated_position(
   else
     this->velocity_ = nodal_velocity;
 
-  // New position  current position + velocity * dt
+  // New position = current position + velocity * dt
+  this->coordinates_ += nodal_velocity * dt;
+  // Update displacement (displacement is initialized from zero)
+  this->displacement_ += nodal_velocity * dt;
+}
+
+// Compute updated position of the particle
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_contact_updated_position(double dt) noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get interpolated nodal velocity considering this particle's material id
+  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodal_velocity +=
+      shapefn_[i] * nodes_[i]->property("velocities", this->material_id(), Tdim);
+
+  // Update particle velocity using interpolated nodal velocity
+  this->velocity_ = nodal_velocity;
+
+  // New position = current position + velocity * dt
   this->coordinates_ += nodal_velocity * dt;
   // Update displacement (displacement is initialized from zero)
   this->displacement_ += nodal_velocity * dt;

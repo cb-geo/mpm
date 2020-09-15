@@ -272,6 +272,10 @@ class ParticleBase {
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
 
+  //! Compute updated position of the particle from contact nodes
+  //! \param[in] dt Analysis time step
+  virtual void compute_contact_updated_position(double dt) noexcept = 0;
+
   //! Return a state variable
   virtual double state_variable(
       const std::string& var,
