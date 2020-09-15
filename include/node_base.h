@@ -184,6 +184,10 @@ class NodeBase {
   virtual bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept = 0;
 
+  //! Compute acceleration and velocity for contact interfaces
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_contact_acceleration_velocity(double dt) noexcept = 0;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -192,6 +196,9 @@ class NodeBase {
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
+
+  //! Apply velocity constraints to contact
+  virtual void apply_contact_velocity_constraints() = 0;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -244,6 +251,13 @@ class NodeBase {
                                const Eigen::MatrixXd& property_value,
                                unsigned mat_id, unsigned nprops) noexcept = 0;
 
+  //! Return nodal property for a given material
+  //! \param[in] property Name of the property to be returned
+  //! \param[in] mat_id Material id
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  virtual Eigen::MatrixXd property(const std::string& property, unsigned mat_id,
+                                   unsigned nprops = 1) = 0;
+
   //! Compute multimaterial change in momentum
   virtual void compute_multimaterial_change_in_momentum() = 0;
 
@@ -253,11 +267,17 @@ class NodeBase {
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
+  //! Compute multimaterial relative velocities
+  virtual void compute_multimaterial_relative_velocity() = 0;
+
   //! Apply concentrated force to the nodes in the multimaterial environment
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] current time
   virtual void apply_multimaterial_concentrated_force(unsigned phase,
                                                       double current_time) = 0;
+
+  //! Apply contact mechanics to the nodes
+  virtual void apply_contact_mechanics(double friction) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

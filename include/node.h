@@ -192,6 +192,10 @@ class Node : public NodeBase<Tdim> {
   bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept override;
 
+  //! Compute acceleration and velocity for contact interface
+  //! \param[in] dt Timestep in analysis
+  bool compute_contact_acceleration_velocity(double dt) noexcept override;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -200,6 +204,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
+
+  //! Apply velocity constraints to contact
+  void apply_contact_velocity_constraints() override;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -253,7 +260,16 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   void update_property(bool update, const std::string& property,
                        const Eigen::MatrixXd& property_value, unsigned mat_id,
-                       unsigned nprops) noexcept override;
+                       unsigned nprops = 1) noexcept override;
+
+  //! Return nodal property for a given material
+  //! \param[in] property Name of the property to be returned
+  //! \param[in] mat_id Material id
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  Eigen::MatrixXd property(const std::string& property, unsigned mat_id,
+                           unsigned nprops = 1) override {
+    return property_handle_->property(property, prop_id_, mat_id, nprops);
+  }
 
   //! Compute multimaterial change in momentum
   void compute_multimaterial_change_in_momentum() override;
@@ -264,11 +280,17 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  //! Compute multimaterial relative velocities
+  void compute_multimaterial_relative_velocity() override;
+
   //! Apply concentrated force to the nodes in the multimaterial environment
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] current time
   void apply_multimaterial_concentrated_force(unsigned phase,
                                               double current_time) override;
+
+  //! Apply contact mechanics to the nodes
+  void apply_contact_mechanics(double friction) override;
 
  private:
   //! Mutex

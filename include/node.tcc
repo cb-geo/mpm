@@ -288,6 +288,45 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
   return status;
 }
 
+//! Compute acceleration and velocity for contact interfaces
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
+    double dt) noexcept {
+  bool status = false;
+  const double tolerance = 1.0E-15;
+
+  // Iterate over all materials in this node
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // Get mass of the current material
+    double mass = property_handle_->property("masses", prop_id_, *mitr)(0,0);
+
+    if (mass > tolerance) {
+      // Get internal and external forces of the current material
+      auto internal_force =
+          property_handle_->property("internal_forces", prop_id_, *mitr, Tdim);
+      auto external_force =
+          property_handle_->property("external_forces", prop_id_, *mitr, Tdim);
+
+      // Compute the acceleration and of the current material
+      // acceleration = (unbalanced force / mass)
+      auto acceleration = (1 / mass) * (external_force - internal_force);
+      property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                        acceleration, Tdim);
+
+      // velocity += acceleration * dt
+      property_handle_->update_property("velocities", prop_id_, *mitr,
+                                        acceleration * dt, Tdim);
+      
+      // Apply velocity constraints, which also sets acceleration to 0,
+      // when velocity is set.
+      this->apply_contact_velocity_constraints();
+
+      status = true;
+    }
+  }
+  return status;
+}
+
 //! Assign velocity constraint
 //! Constrain directions can take values between 0 and Dim * Nphases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
@@ -342,6 +381,65 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
       // Transform back to global coordinate
       this->velocity_ = rotation_matrix_ * local_velocity;
       this->acceleration_ = rotation_matrix_ * local_acceleration;
+    }
+  }
+}
+
+//! Apply velocity constraints to contact
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_velocity_constraints() {
+  // Set velocity constraint
+  for (const auto& constraint : this->velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+
+    // Iterate over all materials in this node if phase == 0
+    if (phase == 0) {
+      for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+           ++mitr) {
+        // Get veloocity and acceleration for current material
+        auto velocity =
+            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+        auto acceleration =
+            property_handle_->property("accelerations", prop_id_, *mitr, Tdim);
+
+        if (!generic_boundary_constraints_) {
+          // Velocity constraints are applied on Cartesian boundaries
+          velocity(direction, 0) = constraint.second;
+          // Set acceleration to 0 in direction of velocity constraint
+          acceleration(direction, 0) = 0;
+
+          // Apply constrained velocity and acceleration to property pool
+          property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                            velocity, Tdim);
+          property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                            acceleration, Tdim);
+        } else {
+          // Velocity constraints on general boundaries
+          // Compute inverse rotation matrix
+          const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
+              rotation_matrix_.inverse();
+          // Transform to local coordinate
+          velocity = inverse_rotation_matrix * velocity;
+          acceleration = inverse_rotation_matrix * acceleration;
+          // Apply boundary condition in local coordinate
+          velocity(direction, 0) = constraint.second;
+          acceleration(direction, 0) = 0.;
+          // Transform back to global coordinate
+          velocity = rotation_matrix_ * velocity;
+          acceleration = rotation_matrix_ * acceleration;
+
+          // Apply constrained velocity and acceleration to property pool
+          property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                            velocity, Tdim);
+          property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                            acceleration, Tdim);
+        }
+      }
     }
   }
 }
@@ -632,6 +730,24 @@ void mpm::Node<Tdim, Tdof,
   node_mutex_.unlock();
 }
 
+//! Compute multimaterial normal unit vector
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_relative_velocity() {
+  // Iterate over all materials in the material_ids set
+  node_mutex_.lock();
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    auto velocity_material =
+        property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+    auto relative_velocity = velocity_material - this->velocity_;
+
+    // Assign relative velocities
+    property_handle_->assign_property("relative_velocities", prop_id_, *mitr,
+                                      relative_velocity, Tdim);
+  }
+  node_mutex_.unlock();
+}
+
 // Apply concentrated force to the nodes in the multimaterial environment
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_multimaterial_concentrated_force(
@@ -642,4 +758,51 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_multimaterial_concentrated_force(
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr)
     property_handle_->update_property("external_forces", prop_id_, *mitr,
                                       concentrated_force, Tdim);
+}
+
+//! Apply contact mechanics to the nodes
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
+
+  // Check if there is one than one material in the material_ids_ set
+  if (material_ids_.size() > 1) {
+    // Iterate over all materials in the node
+    for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+         ++mitr) {
+      // Determine the normal component of the relative velocity and the
+      // tangential unit vector
+      auto normal_unit_vector =
+          property_handle_->property("normal_vectors", prop_id_, *mitr, Tdim);
+      auto relative_velocity = property_handle_->property(
+          "relative_velocities", prop_id_, *mitr, Tdim);
+      double velocity_normal = (relative_velocity.transpose() * normal_unit_vector)(0,0);
+      auto tangent_unit_vector =
+          (relative_velocity - velocity_normal * normal_unit_vector)
+              .normalized();
+      double velocity_tangent = (relative_velocity.transpose() * tangent_unit_vector)(0,0);
+
+      // Check if the material is approaching the other materials (v_norm < 0)
+      if (velocity_normal < 0) {
+
+        // Check if material is sliding (mu * v_norm + v_tan > 0) or stuck (mu *
+        // v_norm + v_tan <=0) to the other materials
+        if (friction * velocity_normal + velocity_tangent > 0) {
+          // Compute normal and tangential correction
+          auto normal_correction = -velocity_normal * normal_unit_vector;
+          auto tangent_correction =
+              -friction * velocity_normal * tangent_unit_vector;
+
+          // Update the velocity with the computed corrections
+          auto corrections = normal_correction + tangent_correction;
+          property_handle_->update_property("velocities", prop_id_, *mitr,
+                                            corrections, Tdim);
+        } else {
+          // If material is stuck, use the velocity calculated considering all
+          // materials as the same (conventional MPM algorithm)
+          property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                            this->velocity_, Tdim);
+        }
+      }
+    }
+  }
 }
