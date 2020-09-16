@@ -75,7 +75,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   this->initialise_mesh();
 
   // Initialise particles
-  this->initialise_particles();
+  if (!resume) this->initialise_particles();
 
   // Initialise loading conditions
   this->initialise_loads();
@@ -84,15 +84,19 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (interface_) mesh_->create_nodal_properties();
 
   // Compute mass
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+  if (!resume)
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
   // Check point resume
-  if (resume) this->checkpoint_resume();
-
-  // Domain decompose
-  bool initial_step = (resume == true) ? false : true;
-  this->mpi_domain_decompose(initial_step);
+  if (resume) {
+    this->checkpoint_resume();
+    mesh_->resume_domain_cell_ranks();
+  } else {
+    // Domain decompose
+    bool initial_step = (resume == true) ? false : true;
+    this->mpi_domain_decompose(initial_step);
+  }
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
