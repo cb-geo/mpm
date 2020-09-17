@@ -957,9 +957,16 @@ void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
+  const unsigned rank_max = std::numeric_limits<unsigned>::max();
+
   // Assign MPI rank if the cell has particles
-  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
-    if ((*citr)->nparticles() > 0) (*citr)->rank(mpi_rank);
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int cell_rank = 0;
+    if ((*citr)->nparticles() > 0) cell_rank = mpi_rank;
+    int recv_rank = 0;
+    MPI_Allreduce(&cell_rank, &recv_rank, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    (*citr)->rank(recv_rank);
+  }
 
 #ifdef USE_MPI
   // Identify shared nodes across MPI domains
@@ -1508,7 +1515,8 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
                  mpm::hdf5::particle::dst_offset,
                  mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
-  const std::string particle_type = "P2D";
+  // Particle type
+  const std::string particle_type = (Tdim == 2) ? "P2D" : "P3D";
 
   // Iterate over all HDF5 particles
   for (unsigned i = 0; i < nrecords; ++i) {

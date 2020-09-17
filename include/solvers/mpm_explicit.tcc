@@ -92,6 +92,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (resume) {
     this->checkpoint_resume();
     mesh_->resume_domain_cell_ranks();
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+#endif
   } else {
     // Domain decompose
     bool initial_step = (resume == true) ? false : true;
