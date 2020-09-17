@@ -314,8 +314,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
                                         acceleration, Tdim);
 
       // velocity += acceleration * dt
+      auto velocity = acceleration * dt;
       property_handle_->update_property("velocities", prop_id_, *mitr,
-                                        acceleration * dt, Tdim);
+                                        velocity, Tdim);
       
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
@@ -765,21 +766,24 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
 
   // Check if there is one than one material in the material_ids_ set
+  node_mutex_.lock();
   if (material_ids_.size() > 1) {
     // Iterate over all materials in the node
     for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
          ++mitr) {
       // Determine the normal component of the relative velocity and the
       // tangential unit vector
-      auto normal_unit_vector =
-          property_handle_->property("normal_vectors", prop_id_, *mitr, Tdim);
+      auto normal_unit_vector = property_handle_->property(
+          "normal_unit_vectors", prop_id_, *mitr, Tdim);
       auto relative_velocity = property_handle_->property(
           "relative_velocities", prop_id_, *mitr, Tdim);
-      double velocity_normal = (relative_velocity.transpose() * normal_unit_vector)(0,0);
+      double velocity_normal =
+          (relative_velocity.transpose() * normal_unit_vector)(0, 0);
       auto tangent_unit_vector =
           (relative_velocity - velocity_normal * normal_unit_vector)
               .normalized();
-      double velocity_tangent = (relative_velocity.transpose() * tangent_unit_vector)(0,0);
+      double velocity_tangent =
+          (relative_velocity.transpose() * tangent_unit_vector)(0, 0);
 
       // Check if the material is approaching the other materials (v_norm < 0)
       if (velocity_normal < 0) {
@@ -805,4 +809,5 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
       }
     }
   }
+  node_mutex_.unlock();
 }
