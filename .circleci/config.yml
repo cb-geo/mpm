@@ -131,6 +131,7 @@ workflows:
             - clang
             - cppcheck
             - codecov
+            - benchmarks
     nightly:
         jobs:
             - benchmarks
