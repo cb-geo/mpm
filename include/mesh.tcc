@@ -848,15 +848,15 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
 
         // Send number of particles to receiver rank
         unsigned nparticles = cell->nparticles();
-        MPI_Isend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0, MPI_COMM_WORLD,
-                  &send_requests[nsend_requests]);
+        MPI_Ibsend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0,
+                   MPI_COMM_WORLD, &send_requests[nsend_requests]);
 
         auto particle_ids = cell->particles();
         for (auto& id : particle_ids) {
           // Create a vector of serialized particle
           std::vector<uint8_t> buffer = map_particles_[id]->serialize();
-          MPI_Isend(buffer.data(), buffer.size(), MPI_UINT8_T, cell->rank(), 0,
-                    MPI_COMM_WORLD, &send_particle_requests[np]);
+          MPI_Ibsend(buffer.data(), buffer.size(), MPI_UINT8_T, cell->rank(), 0,
+                     MPI_COMM_WORLD, &send_particle_requests[np]);
           ++np;
 
           // Particles to be removed from the current rank
