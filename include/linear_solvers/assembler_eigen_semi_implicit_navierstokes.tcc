@@ -214,13 +214,13 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<
     }
 
     // Cell pointer
-    unsigned nnodes_per_cell = global_node_indices_.at(0).size();
     const auto& cells = mesh_->cells();
 
     // Iterate over cells
     unsigned cid = 0;
     for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend(); ++cell_itr) {
       if ((*cell_itr)->status()) {
+        unsigned nnodes_per_cell = global_node_indices_.at(cid).size();
         auto cell_correction_matrix = (*cell_itr)->correction_matrix();
         for (unsigned k = 0; k < Tdim; k++) {
           for (unsigned i = 0; i < nnodes_per_cell; i++) {
