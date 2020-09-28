@@ -1233,7 +1233,7 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
     // Reinitialize state variables
     auto mat_state_vars = (this->material(mpm::ParticlePhase::Liquid))
                               ->initialise_state_variables();
-    if (mat_state_vars.size() == nliquid_state_vars)
+    if (mat_state_vars.size() != nliquid_state_vars)
       throw std::runtime_error(
           "Deserialize particle(): Liquid phase state_vars size mismatch");
     unsigned i = 0;
