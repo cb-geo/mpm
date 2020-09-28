@@ -31,6 +31,33 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, pcoords);
 
+    // Assign material
+    unsigned solid_mid = 1;
+    unsigned liquid_mid = 2;
+    // Initialise material
+    Json jsolid_material;
+    Json jliquid_material;
+    jsolid_material["density"] = 1000.;
+    jsolid_material["youngs_modulus"] = 1.0E+7;
+    jsolid_material["poisson_ratio"] = 0.3;
+    jsolid_material["porosity"] = 0.3;
+    jsolid_material["k_x"] = 0.001;
+    jsolid_material["k_y"] = 0.001;
+    jsolid_material["k_z"] = 0.001;
+    jliquid_material["density"] = 1000.;
+    jliquid_material["bulk_modulus"] = 2.0E9;
+    jliquid_material["dynamic_viscosity"] = 8.90E-4;
+
+    auto solid_material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(solid_mid), jsolid_material);
+    auto liquid_material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Newtonian3D", std::move(liquid_mid), jliquid_material);
+    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+    materials.emplace_back(solid_material);
+    materials.emplace_back(liquid_material);
+
     mpm::PODParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
@@ -112,34 +139,7 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
       h5_particle.liquid_svars[i] = 0.;
 
     // Reinitialise particle from POD data
-    REQUIRE(particle->initialise_particle(h5_particle) == true);
-
-    // Assign material
-    unsigned solid_mid = 1;
-    unsigned liquid_mid = 2;
-    // Initialise material
-    Json jsolid_material;
-    Json jliquid_material;
-    jsolid_material["density"] = 1000.;
-    jsolid_material["youngs_modulus"] = 1.0E+7;
-    jsolid_material["poisson_ratio"] = 0.3;
-    jsolid_material["porosity"] = 0.3;
-    jsolid_material["k_x"] = 0.001;
-    jsolid_material["k_y"] = 0.001;
-    jsolid_material["k_z"] = 0.001;
-    jliquid_material["density"] = 1000.;
-    jliquid_material["bulk_modulus"] = 2.0E9;
-    jliquid_material["dynamic_viscosity"] = 8.90E-4;
-
-    auto solid_material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic3D", std::move(solid_mid), jsolid_material);
-    auto liquid_material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "Newtonian3D", std::move(liquid_mid), jliquid_material);
-    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
-    materials.emplace_back(solid_material);
-    materials.emplace_back(liquid_material);
+    REQUIRE(particle->initialise_particle(h5_particle, materials) == true);
 
     // Serialize particle
     auto buffer = particle->serialize();
@@ -224,6 +224,17 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
     // Check liquid material id
     REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
             rparticle->material_id(mpm::ParticlePhase::Liquid));
+
+    // Check state variables
+    for (unsigned phase = 0; phase < materials.size(); phase++) {
+      REQUIRE(particle->state_variables(phase).size() ==
+              rparticle->state_variables(phase).size());
+      auto state_variables = materials[phase]->state_variables();
+      for (const auto& state_var : state_variables) {
+        REQUIRE(particle->state_variable(state_var, phase) ==
+                rparticle->state_variable(state_var, phase));
+      }
+    }
 
     SECTION("Performance benchmarks") {
       // Number of iterations
