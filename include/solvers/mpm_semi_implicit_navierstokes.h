@@ -33,10 +33,10 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   //! Class private functions
  private:
   //! Initialise matrix
-  virtual bool initialise_matrix();
+  bool initialise_matrix();
 
   //! Initialise matrix
-  virtual bool reinitialise_matrix();
+  bool reinitialise_matrix();
 
   //! Compute poisson equation
   bool compute_poisson_equation(std::string solver_type = "cg");

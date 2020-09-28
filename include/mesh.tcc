@@ -800,39 +800,36 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
   if (mpi_size > 1) {
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(ghost_cells_.size());
-    unsigned i = 0;
 
+    unsigned i = 0;
+    unsigned np = 0;
     std::vector<mpm::Index> remove_pids;
     // Iterate through the ghost cells and send particles
     for (auto citr = this->ghost_cells_.cbegin();
          citr != this->ghost_cells_.cend(); ++citr, ++i) {
-      // Create a vector of h5_particles
-      std::vector<mpm::HDF5Particle> h5_particles;
+
+      // Send number of particles to receiver rank
       auto particle_ids = (*citr)->particles();
-      // Create a vector of HDF5 data of particles to send
-      // delete particle
+      unsigned nparticles = particle_ids.size();
+      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 1,
+                MPI_COMM_WORLD, &send_requests[i]);
+    }
+
+    // Iterate through the ghost cells and send particles
+    for (auto citr = this->ghost_cells_.cbegin();
+         citr != this->ghost_cells_.cend(); ++citr, ++i) {
+      // Send number of particles to receiver rank
+      auto particle_ids = (*citr)->particles();
       for (auto& id : particle_ids) {
-        // Append to vector of particles
-        h5_particles.emplace_back(map_particles_[id]->hdf5());
+        // Create a vector of serialized particle
+        std::vector<uint8_t> buffer = map_particles_[id]->serialize();
+        MPI_Send(buffer.data(), buffer.size(), MPI_UINT8_T, (*citr)->rank(), 0,
+                 MPI_COMM_WORLD);
+        ++np;
         // Particles to be removed from the current rank
         remove_pids.emplace_back(id);
       }
       (*citr)->clear_particle_ids();
-
-      // Send number of particles to receiver rank
-      unsigned nparticles = h5_particles.size();
-      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
-                MPI_COMM_WORLD, &send_requests[i]);
-      if (nparticles != 0) {
-        mpm::HDF5Particle h5_particle;
-        // Initialize MPI datatypes and send vector of particles
-        MPI_Datatype particle_type =
-            mpm::register_mpi_particle_type(h5_particle);
-        MPI_Send(h5_particles.data(), nparticles, particle_type,
-                 (*citr)->rank(), 0, MPI_COMM_WORLD);
-        mpm::deregister_mpi_particle_type(particle_type);
-      }
-      h5_particles.clear();
     }
     // Remove all sent particles
     this->remove_particles(remove_pids);
@@ -840,48 +837,76 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
     for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
 
+    // Particle id
+    mpm::Index pid = 0;
+    // Initial particle coordinates
+    Eigen::Matrix<double, Tdim, 1> pcoordinates =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
+
     // Iterate through the local ghost cells and receive particles
     for (auto citr = this->local_ghost_cells_.cbegin();
          citr != this->local_ghost_cells_.cend(); ++citr) {
       std::vector<unsigned> neighbour_ranks =
           ghost_cells_neighbour_ranks_[(*citr)->id()];
-
-      for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
-        // Receive number of particles
-        unsigned nrecv_particles;
-        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
+      // Total number of particles
+      std::vector<unsigned> nrank_particles(neighbour_ranks.size(), 0);
+      for (unsigned i = 0; i < neighbour_ranks.size(); ++i)
+        MPI_Recv(&nrank_particles[i], 1, MPI_UNSIGNED, neighbour_ranks[i], 1,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        if (nrecv_particles != 0) {
-          std::vector<mpm::HDF5Particle> recv_particles;
-          recv_particles.resize(nrecv_particles);
-          // Receive the vector of particles
-          mpm::HDF5Particle received;
-          MPI_Datatype particle_type =
-              mpm::register_mpi_particle_type(received);
-          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   neighbour_ranks[i], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-          mpm::deregister_mpi_particle_type(particle_type);
+      // Receive number of particles
+      unsigned nrecv_particles =
+          std::accumulate(nrank_particles.begin(), nrank_particles.end(), 0);
 
-          // Iterate through n number of received particles
-          for (const auto& rparticle : recv_particles) {
-            mpm::Index id = 0;
-            // Initial particle coordinates
-            Eigen::Matrix<double, Tdim, 1> pcoordinates;
-            pcoordinates.setZero();
+      for (unsigned j = 0; j < nrecv_particles; ++j) {
+        // Retrieve information about the incoming message
+        MPI_Status status;
+        MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
-            // Received particle
-            auto received_particle =
-                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
-            // Get material
-            auto material = materials_.at(rparticle.material_id);
-            // Reinitialise particle from HDF5 data
-            received_particle->initialise_particle(rparticle, material);
+        // Get buffer size
+        int size;
+        MPI_Get_count(&status, MPI_UINT8_T, &size);
 
-            // Add particle to mesh
-            this->add_particle(received_particle, true);
-          }
+        // Allocate the buffer now that we know how many elements there are
+        std::vector<uint8_t> buffer;
+        buffer.resize(size);
+
+        // Finally receive the message
+        MPI_Recv(buffer.data(), size, MPI_UINT8_T, MPI_ANY_SOURCE, 0,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        uint8_t* bufptr = const_cast<uint8_t*>(&buffer[0]);
+        int position = 0;
+
+        // Get particle type
+        int ptype;
+        MPI_Unpack(bufptr, buffer.size(), &position, &ptype, 1, MPI_INT,
+                   MPI_COMM_WORLD);
+        std::string particle_type = mpm::ParticleTypeName.at(ptype);
+
+        // Get materials material id
+        int nmaterials = 0;
+        MPI_Unpack(bufptr, buffer.size(), &position, &nmaterials, 1,
+                   MPI_UNSIGNED, MPI_COMM_WORLD);
+        // Vector of materials
+        std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+        materials.reserve(nmaterials);
+        for (unsigned k = 0; k < nmaterials; ++k) {
+          int mat_id;
+          MPI_Unpack(bufptr, buffer.size(), &position, &mat_id, 1, MPI_UNSIGNED,
+                     MPI_COMM_WORLD);
+          materials.emplace_back(materials_.at(mat_id));
         }
+
+        // Create particle
+        auto particle =
+            Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                ->create(particle_type, static_cast<mpm::Index>(pid),
+                         pcoordinates);
+        particle->deserialize(buffer, materials);
+        // Add particle to mesh
+        this->add_particle(particle, true);
       }
     }
   }
@@ -902,8 +927,10 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
   if (mpi_size > 1) {
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(exchange_cells.size());
+    std::vector<MPI_Request> send_particle_requests;
+    send_particle_requests.reserve(exchange_cells.size() * 100);
     unsigned nsend_requests = 0;
-
+    unsigned np = 0;
     std::vector<mpm::Index> remove_pids;
     // Iterate through the ghost cells and send particles
     for (auto cid : exchange_cells) {
@@ -913,33 +940,24 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
       // then send all particles
       if ((cell->rank() != cell->previous_mpirank()) &&
           (cell->previous_mpirank() == mpi_rank)) {
-        // Create a vector of h5_particles
-        std::vector<mpm::HDF5Particle> h5_particles;
+
+        // Send number of particles to receiver rank
+        unsigned nparticles = cell->nparticles();
+        MPI_Ibsend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0,
+                   MPI_COMM_WORLD, &send_requests[nsend_requests]);
+
         auto particle_ids = cell->particles();
-        // Create a vector of HDF5 data of particles to send
-        // delete particle
         for (auto& id : particle_ids) {
-          // Append to vector of particles
-          h5_particles.emplace_back(map_particles_[id]->hdf5());
+          // Create a vector of serialized particle
+          std::vector<uint8_t> buffer = map_particles_[id]->serialize();
+          MPI_Ibsend(buffer.data(), buffer.size(), MPI_UINT8_T, cell->rank(), 0,
+                     MPI_COMM_WORLD, &send_particle_requests[np]);
+          ++np;
+
           // Particles to be removed from the current rank
           remove_pids.emplace_back(id);
         }
         cell->clear_particle_ids();
-
-        // Send number of particles to receiver rank
-        unsigned nparticles = particle_ids.size();
-        MPI_Isend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0, MPI_COMM_WORLD,
-                  &send_requests[nsend_requests]);
-        if (nparticles > 0) {
-          mpm::HDF5Particle h5_particle;
-          // Initialize MPI datatypes and send vector of particles
-          MPI_Datatype particle_type =
-              mpm::register_mpi_particle_type(h5_particle);
-          MPI_Send(h5_particles.data(), nparticles, particle_type, cell->rank(),
-                   0, MPI_COMM_WORLD);
-          mpm::deregister_mpi_particle_type(particle_type);
-        }
-        h5_particles.clear();
         ++nsend_requests;
       }
     }
@@ -948,8 +966,17 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
     // Send complete iterate only upto valid send requests
     for (unsigned i = 0; i < nsend_requests; ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+    // Send particles complete
+    for (unsigned i = 0; i < np; ++i)
+      MPI_Wait(&send_particle_requests[i], MPI_STATUS_IGNORE);
 
-    // Iterate through the ghost cells and send particles
+    // Particle id
+    mpm::Index pid = 0;
+    // Initial particle coordinates
+    Eigen::Matrix<double, Tdim, 1> pcoordinates =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
+
+    // Iterate through the ghost cells and receive particles
     for (auto cid : exchange_cells) {
       // Get cell pointer
       auto cell = map_cells_[cid];
@@ -961,36 +988,55 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
         MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, cell->previous_mpirank(), 0,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        if (nrecv_particles != 0) {
-          std::vector<mpm::HDF5Particle> recv_particles;
-          recv_particles.resize(nrecv_particles);
-          // Receive the vector of particles
-          mpm::HDF5Particle received;
-          MPI_Datatype particle_type =
-              mpm::register_mpi_particle_type(received);
-          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   cell->previous_mpirank(), 0, MPI_COMM_WORLD,
-                   MPI_STATUS_IGNORE);
-          mpm::deregister_mpi_particle_type(particle_type);
+        for (unsigned j = 0; j < nrecv_particles; ++j) {
+          // Retrieve information about the incoming message
+          MPI_Status status;
+          MPI_Probe(cell->previous_mpirank(), 0, MPI_COMM_WORLD, &status);
 
-          // Iterate through n number of received particles
-          for (const auto& rparticle : recv_particles) {
-            mpm::Index id = 0;
-            // Initial particle coordinates
-            Eigen::Matrix<double, Tdim, 1> pcoordinates;
-            pcoordinates.setZero();
+          // Get buffer size
+          int size;
+          MPI_Get_count(&status, MPI_UINT8_T, &size);
 
-            // Received particle
-            auto received_particle =
-                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+          // Allocate the buffer now that we know how many elements there are
+          std::vector<uint8_t> buffer;
+          buffer.resize(size);
+
+          // Finally receive the message
+          MPI_Recv(buffer.data(), size, MPI_UINT8_T, cell->previous_mpirank(),
+                   0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+          uint8_t* bufptr = const_cast<uint8_t*>(&buffer[0]);
+          int position = 0;
+
+          // Get particle type
+          int ptype;
+          MPI_Unpack(bufptr, buffer.size(), &position, &ptype, 1, MPI_INT,
+                     MPI_COMM_WORLD);
+          std::string particle_type = mpm::ParticleTypeName.at(ptype);
+
+          // Get materials material id
+          int nmaterials = 0;
+          MPI_Unpack(bufptr, buffer.size(), &position, &nmaterials, 1,
+                     MPI_UNSIGNED, MPI_COMM_WORLD);
+          std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+          materials.reserve(nmaterials);
+          for (unsigned k = 0; k < nmaterials; ++k) {
+            int mat_id;
+            MPI_Unpack(bufptr, buffer.size(), &position, &mat_id, 1,
+                       MPI_UNSIGNED, MPI_COMM_WORLD);
             // Get material
-            auto material = materials_.at(rparticle.material_id);
-            // Reinitialise particle from HDF5 data
-            received_particle->initialise_particle(rparticle, material);
-
-            // Add particle to mesh
-            this->add_particle(received_particle, true);
+            materials.emplace_back(materials_.at(mat_id));
           }
+
+          // Create particle
+          auto particle =
+              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                  ->create(particle_type, static_cast<mpm::Index>(pid),
+                           pcoordinates);
+          particle->deserialize(buffer, materials);
+          // Add particle to mesh
+          this->add_particle(particle, true);
         }
       }
     }
@@ -1180,28 +1226,53 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
+//! Return particle scalar data
+template <unsigned Tdim>
+std::vector<double> mpm::Mesh<Tdim>::particles_scalar_data(
+    const std::string& attribute) const {
+  std::vector<double> scalar_data;
+  scalar_data.reserve(particles_.size());
+  // Iterate over particles and add scalar value to data
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    scalar_data.emplace_back((*pitr)->scalar_data(attribute));
+  return scalar_data;
+}
+
+//! Return particle vector data
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
+    const std::string& attribute) const {
+  std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
+  // Iterate over particles
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    Eigen::Matrix<double, 3, 1> data;
+    data.setZero();
+    auto pdata = (*pitr)->vector_data(attribute);
+    // Fill vector_data to the size of dimensions
+    for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
+
+    // Add to a tensor of data
+    vector_data.emplace_back(data);
+  }
+  return vector_data;
+}
+
 //! Return particle tensor data
 template <unsigned Tdim>
 template <unsigned Tsize>
 std::vector<Eigen::Matrix<double, Tsize, 1>>
-    mpm::Mesh<Tdim>::particles_tensor_data(const std::string& attribute) {
+    mpm::Mesh<Tdim>::particles_tensor_data(const std::string& attribute) const {
   std::vector<Eigen::Matrix<double, Tsize, 1>> tensor_data;
-  try {
-    // Iterate over particles
-    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      Eigen::Matrix<double, Tsize, 1> data;
-      data.setZero();
-      auto pdata = (*pitr)->tensor_data(attribute);
-      // Fill stresses to the size of dimensions
-      for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
+  // Iterate over particles
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    Eigen::Matrix<double, Tsize, 1> data;
+    data.setZero();
+    auto pdata = (*pitr)->tensor_data(attribute);
+    // Fill tensor_data to the size of dimensions
+    for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
 
-      // Add to a tensor of data
-      tensor_data.emplace_back(data);
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
-                    attribute);
-    tensor_data.clear();
+    // Add to a tensor of data
+    tensor_data.emplace_back(data);
   }
   return tensor_data;
 }
@@ -2487,7 +2558,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
         (*pitr)->assign_free_surface(status);
       }
     }
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }

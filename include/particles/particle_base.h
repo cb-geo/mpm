@@ -1,6 +1,11 @@
 #ifndef MPM_PARTICLEBASE_H_
 #define MPM_PARTICLEBASE_H_
 
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 #include <array>
 #include <limits>
 #include <memory>
@@ -25,6 +30,10 @@ enum ParticlePhase : unsigned int {
   Liquid = 1,
   Gas = 2
 };
+
+//! Particle type
+extern std::map<std::string, int> ParticleType;
+extern std::map<int, std::string> ParticleTypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -270,10 +279,20 @@ class ParticleBase {
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
 
+  //! Return scalar data of particles
+  //! \param[in] property Property string
+  //! \retval data Scalar data of particle property
+  virtual double scalar_data(const std::string& property) const = 0;
+
+  //! Return vector data of particles
+  //! \param[in] property Property string
+  //! \retval data Vector data of particle property
+  virtual VectorDim vector_data(const std::string& property) const = 0;
+
   //! Return tensor data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Tensor data of particle property
-  virtual Eigen::VectorXd tensor_data(const std::string& property) = 0;
+  //! \retval data Tensor data of particle property
+  virtual Eigen::VectorXd tensor_data(const std::string& property) const = 0;
 
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
@@ -310,6 +329,20 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
+
+  //! Type of particle
+  virtual std::string type() const = 0;
+
+  //! Serialize
+  //! \retval buffer Serialized buffer data
+  virtual std::vector<uint8_t> serialize() = 0;
+
+  //! Deserialize
+  //! \param[in] buffer Serialized buffer data
+  //! \param[in] material Particle material pointers
+  virtual void deserialize(
+      const std::vector<uint8_t>& buffer,
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
 
   //! Assigning beta parameter to particle
   //! \param[in] pressure parameter determining type of projection

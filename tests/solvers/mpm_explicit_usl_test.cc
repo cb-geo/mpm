@@ -16,10 +16,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicit2D";
-  const std::string stress_update = "usl";
+  const std::string mpm_scheme = "usl";
   const bool resume = false;
-  REQUIRE(mpm_test::write_json(2, resume, analysis, stress_update, fname) ==
-          true);
+  REQUIRE(mpm_test::write_json(2, resume, analysis, mpm_scheme, fname) == true);
 
   // Write JSON Entity Sets file
   REQUIRE(mpm_test::write_entity_set() == true);
@@ -45,17 +44,17 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Initialise external loading
-    REQUIRE(mpm->initialise_loads() == true);
+    REQUIRE_NOTHROW(mpm->initialise_loads());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
@@ -73,9 +72,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     // Write JSON file
     const std::string fname = "mpm-explicit-usl";
     const std::string analysis = "MPMExplicit2D";
-    const std::string stress_update = "usl";
+    const std::string mpm_scheme = "usl";
     bool resume = true;
-    REQUIRE(mpm_test::write_json(2, resume, analysis, stress_update, fname) ==
+    REQUIRE(mpm_test::write_json(2, resume, analysis, mpm_scheme, fname) ==
             true);
 
     // Create an IO object
@@ -99,10 +98,9 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicit3D";
-  const std::string stress_update = "usl";
+  const std::string mpm_scheme = "usl";
   const bool resume = false;
-  REQUIRE(mpm_test::write_json(3, resume, analysis, stress_update, fname) ==
-          true);
+  REQUIRE(mpm_test::write_json(3, resume, analysis, mpm_scheme, fname) == true);
 
   // Write JSON Entity Sets file
   REQUIRE(mpm_test::write_entity_set() == true);
@@ -128,14 +126,11 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
-
-    // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+    REQUIRE_NOTHROW(mpm->initialise_particles());
   }
 
   SECTION("Check solver") {
@@ -153,9 +148,9 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     // Write JSON file
     const std::string fname = "mpm-explicit-usl";
     const std::string analysis = "MPMExplicit3D";
-    const std::string stress_update = "usl";
+    const std::string mpm_scheme = "usl";
     bool resume = true;
-    REQUIRE(mpm_test::write_json(3, resume, analysis, stress_update, fname) ==
+    REQUIRE(mpm_test::write_json(3, resume, analysis, mpm_scheme, fname) ==
             true);
 
     // Create an IO object

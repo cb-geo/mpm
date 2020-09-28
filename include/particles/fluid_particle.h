@@ -63,6 +63,11 @@ class FluidParticle : public mpm::Particle<Tdim> {
   //! Update pressure after solving poisson equation
   bool compute_updated_pressure() override;
 
+  //! Type of particle
+  std::string type() const override {
+    return (Tdim == 2) ? "P2DFLUID" : "P3DFLUID";
+  }
+
  private:
   //! Compute turbulent stress
   virtual Eigen::Matrix<double, 6, 1> compute_turbulent_stress();

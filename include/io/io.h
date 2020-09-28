@@ -57,6 +57,9 @@ class IO {
   //! Return post processing object
   Json post_processing() const;
 
+  //! Return JSON analysis boolean
+  bool analysis_bool(const std::string& key) const;
+
   //! Return the entity sets from the input set JSON file
   //! \param[in] filename File name
   //! \param[in] sets_type type of sets

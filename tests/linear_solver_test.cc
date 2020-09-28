@@ -8,7 +8,6 @@
 
 #include "catch.hpp"
 #include "cg_eigen.h"
-#include "mpi_datatypes.h"
 #include "solver_base.h"
 
 // Generate 3x3 test matrix

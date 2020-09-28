@@ -178,8 +178,8 @@ The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm c
 For example:
 
 ```
-export OMP_SCHEDULE="static, 4"
-./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json -p 8
+export OMP_SCHEDULE="static,4"
+./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json
 ```
 
 Where:

@@ -143,6 +143,7 @@ endif()
 # Include directories
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
+  ${mpm_SOURCE_DIR}/include/contacts/
   ${mpm_SOURCE_DIR}/include/containers/
   ${mpm_SOURCE_DIR}/include/elements/
   ${mpm_SOURCE_DIR}/include/elements/2d
@@ -155,6 +156,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/
   ${mpm_SOURCE_DIR}/include/solvers/
+  ${mpm_SOURCE_DIR}/include/solvers/mpm_scheme/
   ${mpm_SOURCE_DIR}/include/utilities/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
@@ -191,6 +193,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/test_main.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/contact_test.cc
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
@@ -221,17 +224,18 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
-    ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
     ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc
     ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
+    ${mpm_SOURCE_DIR}/tests/particle_serialize_deserialize_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
