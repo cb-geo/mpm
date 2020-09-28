@@ -38,6 +38,19 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, pcoords);
 
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["bulk_modulus"] = 2.E9;
+    jmaterial["dynamic_viscosity"] = 8.9E-4;
+    unsigned mid = 1;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Newtonian3D", std::move(mid), jmaterial);
+    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+    materials.emplace_back(material);
+
     mpm::PODParticle h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
@@ -94,21 +107,12 @@ TEST_CASE("Particle is checked for serialization and deserialization",
 
     h5_particle.material_id = 1;
 
-    // Reinitialise particle from POD data
-    REQUIRE(particle->initialise_particle(h5_particle) == true);
+    h5_particle.nstate_vars = 1;
 
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    unsigned mid = 1;
+    h5_particle.svars[0] = 1000.0;
 
-    auto material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic3D", std::move(mid), jmaterial);
-    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
-    materials.emplace_back(material);
+    // Reinitialise particle from HDF5 data
+    REQUIRE(particle->initialise_particle(h5_particle, materials) == true);
 
     // Serialize particle
     auto buffer = particle->serialize();
@@ -128,6 +132,8 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     REQUIRE(particle->volume() == rparticle->volume());
     // Check particle mass density
     REQUIRE(particle->mass_density() == rparticle->mass_density());
+    // Check particle pressure
+    REQUIRE(particle->pressure() == rparticle->pressure());
     // Check particle status
     REQUIRE(particle->status() == rparticle->status());
 
@@ -176,6 +182,17 @@ TEST_CASE("Particle is checked for serialization and deserialization",
 
     // Check material id
     REQUIRE(particle->material_id() == rparticle->material_id());
+
+    // Check state variable size
+    REQUIRE(particle->state_variables().size() ==
+            rparticle->state_variables().size());
+
+    // Check state variables
+    auto state_variables = material->state_variables();
+    for (const auto& state_var : state_variables) {
+      REQUIRE(particle->state_variable(state_var) ==
+              rparticle->state_variable(state_var));
+    }
 
     SECTION("Performance benchmarks") {
       // Number of iterations
