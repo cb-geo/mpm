@@ -357,15 +357,6 @@ class Particle : public ParticleBase<Tdim> {
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
 
- protected:
-  //! Initialise particle material container
-  //! \details This function allocate memory and initialise the material related
-  //! containers according to the particle phase, i.e. solid or fluid particle
-  //! has phase_size = 1, whereas two-phase (solid-fluid) or three-phase
-  //! (solid-water-air) particle have phase_size = 2 and 3, respectively.
-  //! \param[in] phase_size The material phase size
-  void initialise_material(unsigned phase_size = 1);
-
  private:
   //! Compute strain rate
   //! \param[in] dn_dx The spatial gradient of shape function
@@ -375,6 +366,14 @@ class Particle : public ParticleBase<Tdim> {
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
  protected:
+  //! Initialise particle material container
+  //! \details This function allocate memory and initialise the material related
+  //! containers according to the particle phase, i.e. solid or fluid particle
+  //! has phase_size = 1, whereas two-phase (solid-fluid) or three-phase
+  //! (solid-water-air) particle have phase_size = 2 and 3, respectively.
+  //! \param[in] phase_size The material phase size
+  void initialise_material(unsigned phase_size = 1);
+
   //! Compute pack size
   //! \retval pack size of serialized object
   int compute_pack_size() const;
