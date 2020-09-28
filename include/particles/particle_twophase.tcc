@@ -1117,6 +1117,9 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   // volume
   MPI_Unpack(data_ptr, data.size(), &position, &volume_, 1, MPI_DOUBLE,
              MPI_COMM_WORLD);
+  // mass density
+  this->mass_density_ = mass_ / volume_;
+
   // pressure
   double pressure;
   MPI_Unpack(data_ptr, data.size(), &position, &pressure, 1, MPI_DOUBLE,
@@ -1168,7 +1171,7 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   if (nstate_vars > 0) {
     std::vector<double> svars;
     svars.reserve(nstate_vars);
-    MPI_Unpack(data_ptr, data.size(), &position, &svars, nstate_vars,
+    MPI_Unpack(data_ptr, data.size(), &position, &svars[0], nstate_vars,
                MPI_DOUBLE, MPI_COMM_WORLD);
 
     // Reinitialize state variables
@@ -1191,6 +1194,9 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   // liquid mass
   MPI_Unpack(data_ptr, data.size(), &position, &liquid_mass_, 1, MPI_DOUBLE,
              MPI_COMM_WORLD);
+  // Liquid mass Density
+  this->liquid_mass_density_ = liquid_mass_ / volume_;
+
   // Liquid velocity
   MPI_Unpack(data_ptr, data.size(), &position, liquid_velocity_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
@@ -1221,7 +1227,7 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   if (nliquid_state_vars > 0) {
     std::vector<double> svars;
     svars.reserve(nliquid_state_vars);
-    MPI_Unpack(data_ptr, data.size(), &position, &svars, nliquid_state_vars,
+    MPI_Unpack(data_ptr, data.size(), &position, &svars[0], nliquid_state_vars,
                MPI_DOUBLE, MPI_COMM_WORLD);
 
     // Reinitialize state variables

@@ -157,6 +157,8 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
     REQUIRE(particle->mass() == rparticle->mass());
     // Check particle volume
     REQUIRE(particle->volume() == rparticle->volume());
+    // Check particle mass density
+    REQUIRE(particle->mass_density() == rparticle->mass_density());
     // Check particle status
     REQUIRE(particle->status() == rparticle->status());
 
