@@ -30,9 +30,9 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
-//! Initialise particle data from HDF5
+//! Initialise particle data from POD
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
+bool mpm::Particle<Tdim>::initialise_particle(PODParticle& particle) {
 
   // Assign id
   this->id_ = particle.id;
@@ -102,16 +102,20 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   return true;
 }
 
-//! Initialise particle data from HDF5
+//! Initialise particle data from POD
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::initialise_particle(
-    const HDF5Particle& particle,
-    const std::shared_ptr<mpm::Material<Tdim>>& material) {
+    PODParticle& particle,
+    const std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
   bool status = this->initialise_particle(particle);
-  if (material != nullptr) {
-    if (this->material_id() == material->id() ||
+
+  assert(materials.size() == 1);
+
+  if (materials.at(mpm::ParticlePhase::Solid) != nullptr) {
+    if (this->material_id() == materials.at(mpm::ParticlePhase::Solid)->id() ||
         this->material_id() == std::numeric_limits<unsigned>::max()) {
-      bool assign_mat = this->assign_material(material);
+      bool assign_mat =
+          this->assign_material(materials.at(mpm::ParticlePhase::Solid));
       if (!assign_mat) throw std::runtime_error("Material assignment failed");
       // Reinitialize state variables
       auto mat_state_vars = (this->material())->initialise_state_variables();
@@ -132,12 +136,12 @@ bool mpm::Particle<Tdim>::initialise_particle(
   return status;
 }
 
-//! Return particle data in HDF5 format
+//! Return particle data as POD
 template <unsigned Tdim>
 // cppcheck-suppress *
-mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
-
-  mpm::HDF5Particle particle_data;
+std::shared_ptr<void> mpm::Particle<Tdim>::pod() {
+  // Initialise particle data
+  auto particle_data = std::make_shared<mpm::PODParticle>();
 
   Eigen::Vector3d coordinates;
   coordinates.setZero();
@@ -161,63 +165,63 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
 
   Eigen::Matrix<double, 6, 1> strain = this->strain_;
 
-  particle_data.id = this->id();
-  particle_data.mass = this->mass();
-  particle_data.volume = this->volume();
-  particle_data.pressure =
+  particle_data->id = this->id();
+  particle_data->mass = this->mass();
+  particle_data->volume = this->volume();
+  particle_data->pressure =
       (state_variables_[mpm::ParticlePhase::Solid].find("pressure") !=
        state_variables_[mpm::ParticlePhase::Solid].end())
           ? state_variables_[mpm::ParticlePhase::Solid].at("pressure")
           : 0.;
 
-  particle_data.coord_x = coordinates[0];
-  particle_data.coord_y = coordinates[1];
-  particle_data.coord_z = coordinates[2];
+  particle_data->coord_x = coordinates[0];
+  particle_data->coord_y = coordinates[1];
+  particle_data->coord_z = coordinates[2];
 
-  particle_data.displacement_x = displacement[0];
-  particle_data.displacement_y = displacement[1];
-  particle_data.displacement_z = displacement[2];
+  particle_data->displacement_x = displacement[0];
+  particle_data->displacement_y = displacement[1];
+  particle_data->displacement_z = displacement[2];
 
-  particle_data.nsize_x = nsize[0];
-  particle_data.nsize_y = nsize[1];
-  particle_data.nsize_z = nsize[2];
+  particle_data->nsize_x = nsize[0];
+  particle_data->nsize_y = nsize[1];
+  particle_data->nsize_z = nsize[2];
 
-  particle_data.velocity_x = velocity[0];
-  particle_data.velocity_y = velocity[1];
-  particle_data.velocity_z = velocity[2];
+  particle_data->velocity_x = velocity[0];
+  particle_data->velocity_y = velocity[1];
+  particle_data->velocity_z = velocity[2];
 
-  particle_data.stress_xx = stress[0];
-  particle_data.stress_yy = stress[1];
-  particle_data.stress_zz = stress[2];
-  particle_data.tau_xy = stress[3];
-  particle_data.tau_yz = stress[4];
-  particle_data.tau_xz = stress[5];
+  particle_data->stress_xx = stress[0];
+  particle_data->stress_yy = stress[1];
+  particle_data->stress_zz = stress[2];
+  particle_data->tau_xy = stress[3];
+  particle_data->tau_yz = stress[4];
+  particle_data->tau_xz = stress[5];
 
-  particle_data.strain_xx = strain[0];
-  particle_data.strain_yy = strain[1];
-  particle_data.strain_zz = strain[2];
-  particle_data.gamma_xy = strain[3];
-  particle_data.gamma_yz = strain[4];
-  particle_data.gamma_xz = strain[5];
+  particle_data->strain_xx = strain[0];
+  particle_data->strain_yy = strain[1];
+  particle_data->strain_zz = strain[2];
+  particle_data->gamma_xy = strain[3];
+  particle_data->gamma_yz = strain[4];
+  particle_data->gamma_xz = strain[5];
 
-  particle_data.epsilon_v = this->volumetric_strain_centroid_;
+  particle_data->epsilon_v = this->volumetric_strain_centroid_;
 
-  particle_data.status = this->status();
+  particle_data->status = this->status();
 
-  particle_data.cell_id = this->cell_id();
+  particle_data->cell_id = this->cell_id();
 
-  particle_data.material_id = this->material_id();
+  particle_data->material_id = this->material_id();
 
   // Write state variables
   if (this->material() != nullptr) {
-    particle_data.nstate_vars =
+    particle_data->nstate_vars =
         state_variables_[mpm::ParticlePhase::Solid].size();
     if (state_variables_[mpm::ParticlePhase::Solid].size() > 20)
       throw std::runtime_error("# of state variables cannot be more than 20");
     unsigned i = 0;
     auto state_variables = (this->material())->state_variables();
     for (const auto& state_var : state_variables) {
-      particle_data.svars[i] =
+      particle_data->svars[i] =
           state_variables_[mpm::ParticlePhase::Solid].at(state_var);
       ++i;
     }
@@ -284,6 +288,16 @@ bool mpm::Particle<Tdim>::assign_material_state_vars(
     }
   }
   return status;
+}
+
+//! Assign a state variable
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::assign_state_variable(const std::string& var,
+                                                double value, unsigned phase) {
+  if (state_variables_[phase].find(var) != state_variables_[phase].end())
+    state_variables_[phase].at(var) = value;
+  else
+    throw std::runtime_error(var + " cannot be found in state variables!");
 }
 
 // Assign a cell to particle
@@ -1062,9 +1076,10 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
            MPI_COMM_WORLD);
 
   // state variables
-  if (this->material() != nullptr) {
+  if (this->material(mpm::ParticlePhase::Solid) != nullptr) {
     std::vector<double> svars;
-    auto state_variables = (this->material())->state_variables();
+    auto state_variables =
+        (this->material(mpm::ParticlePhase::Solid))->state_variables();
     for (const auto& state_var : state_variables)
       svars.emplace_back(
           state_variables_[mpm::ParticlePhase::Solid].at(state_var));

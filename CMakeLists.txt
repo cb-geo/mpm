@@ -74,6 +74,7 @@ if (HDF5_FOUND)
   include_directories(${HDF5_INCLUDE_DIRS})
   link_libraries(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_HL_LIBRARIES})
   add_definitions(${HDF5_DEFINITIONS})
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
 endif()
 
 # OpenMP
@@ -155,6 +156,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/loads_bcs/
   ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/
+  ${mpm_SOURCE_DIR}/include/particles/pod_particles
   ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/include/solvers/mpm_scheme/
   ${mpm_SOURCE_DIR}/include/utilities/
@@ -171,7 +173,8 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
-  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
+  ${mpm_SOURCE_DIR}/src/pod_particle.cc
+  ${mpm_SOURCE_DIR}/src/pod_particle_twophase.cc
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
@@ -225,21 +228,28 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/nodal_properties_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_map_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_cell_crossing_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_serialize_deserialize_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_serialize_deserialize_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usf_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usf_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
-    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_map_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_serialize_deserialize_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
   add_executable(mpmtest ${mpm_src} ${test_src})
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)

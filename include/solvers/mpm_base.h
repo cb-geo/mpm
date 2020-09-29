@@ -84,13 +84,12 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
+  //! Write HDF5 files
+  void write_hdf5_twophase(mpm::Index step, mpm::Index max_steps) override;
+
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
-
- protected:
-  //! Locate particle
-  void locate_particle();
 
   //! Domain decomposition
   //! \param[in] initial_step Start of simulation or later steps
@@ -124,6 +123,12 @@ class MPMBase : public MPM {
   void nodal_frictional_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
 
+  //! Nodal pressure constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_pressure_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
   //! Cell entity sets
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] check Check duplicates
@@ -155,11 +160,12 @@ class MPMBase : public MPM {
       const Json& mesh_prop,
       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
-  //! Nodal pressure constraints
+  // Particles pore pressures
   //! \param[in] mesh_prop Mesh properties
-  //! \param[in] mesh_io Mesh IO handle
-  void nodal_pressure_constraints(
-      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+  //! \param[in] particle_io Particle IO handle
+  void particles_pore_pressures(
+      const Json& mesh_prop,
+      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
   //! Particle entity sets
   //! \param[in] mesh_prop Mesh properties
@@ -206,6 +212,8 @@ class MPMBase : public MPM {
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Constraints object
   std::shared_ptr<mpm::Constraints<Tdim>> constraints_;
+  //! Particle types
+  std::set<std::string> particle_types_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions

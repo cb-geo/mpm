@@ -1532,20 +1532,20 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::particles_cells()
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
-                                           const std::string& filename) {
+bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename) {
   const unsigned nparticles = this->nparticles();
 
-  std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
+  std::vector<PODParticle> particle_data;
   particle_data.reserve(nparticles);
 
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particle_data.emplace_back((*pitr)->hdf5());
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+    particle_data.emplace_back(*pod);
+  }
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
-
-  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+  const hsize_t NFIELDS = mpm::pod::particle::NFIELDS;
 
   hid_t file_id;
   hsize_t chunk_size = 10000;
@@ -1557,20 +1557,70 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   // make a table
-  H5TBmake_table(
-      "Table Title", file_id, "table", NFIELDS, NRECORDS,
-      mpm::hdf5::particle::dst_size, mpm::hdf5::particle::field_names,
-      mpm::hdf5::particle::dst_offset, mpm::hdf5::particle::field_type,
-      chunk_size, fill_data, compress, particle_data.data());
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                 mpm::pod::particle::dst_size, mpm::pod::particle::field_names,
+                 mpm::pod::particle::dst_offset, mpm::pod::particle::field_type,
+                 chunk_size, fill_data, compress, particle_data.data());
 
   H5Fclose(file_id);
   return true;
 }
 
+//! Write particles to HDF5 for two-phase particle
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::write_particles_hdf5_twophase(
+    const std::string& filename) {
+  const unsigned nparticles = this->nparticles();
+
+  std::vector<PODParticleTwoPhase> particle_data;
+  particle_data.reserve(nparticles);
+
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod =
+        std::static_pointer_cast<mpm::PODParticleTwoPhase>((*pitr)->pod());
+    particle_data.emplace_back(*pod);
+  }
+
+  // Calculate the size and the offsets of our struct members in memory
+  const hsize_t NRECORDS = nparticles;
+  const hsize_t NFIELDS = mpm::pod::particletwophase::NFIELDS;
+
+  hid_t file_id;
+  hsize_t chunk_size = 10000;
+  int* fill_data = NULL;
+  int compress = 0;
+
+  // Create a new file using default properties.
+  file_id =
+      H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  // make a table
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                 mpm::pod::particletwophase::dst_size,
+                 mpm::pod::particletwophase::field_names,
+                 mpm::pod::particletwophase::dst_offset,
+                 mpm::pod::particletwophase::field_type, chunk_size, fill_data,
+                 compress, particle_data.data());
+
+  H5Fclose(file_id);
+  return true;
+}
+
+//! Write particles to HDF5 with type name
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename,
+                                          const std::string& type_name) {
+  bool status = false;
+  if (type_name == "particles")
+    status = this->read_particles_hdf5(filename);
+  else if (type_name == "twophase_particles")
+    status = this->read_particles_hdf5_twophase(filename);
+  return status;
+}
+
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
-                                          const std::string& filename) {
+bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
 
   // Create a new file using default properties.
   hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1582,15 +1632,15 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   hsize_t nfields = 0;
   H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  if (nfields != mpm::hdf5::particle::NFIELDS)
+  if (nfields != mpm::pod::particle::NFIELDS)
     throw std::runtime_error("HDF5 table has incorrect number of fields");
 
-  std::vector<HDF5Particle> dst_buf;
+  std::vector<PODParticle> dst_buf;
   dst_buf.reserve(nrecords);
   // Read the table
-  H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
-                 mpm::hdf5::particle::dst_offset,
-                 mpm::hdf5::particle::dst_sizes, dst_buf.data());
+  H5TBread_table(file_id, "table", mpm::pod::particle::dst_size,
+                 mpm::pod::particle::dst_offset, mpm::pod::particle::dst_sizes,
+                 dst_buf.data());
 
   // Vector of particles
   Vector<ParticleBase<Tdim>> particles;
@@ -1601,11 +1651,74 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if (i < nrecords) {
-      HDF5Particle particle = dst_buf[i];
+      PODParticle particle = dst_buf[i];
       // Get particle's material from list of materials
-      auto material = materials_.at(particle.material_id);
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      materials.emplace_back(materials_.at(particle.material_id));
+
       // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, material);
+      (*pitr)->initialise_particle(particle, materials);
+      // Add particle to map
+      map_particles_.insert(particle.id, *pitr);
+      particles.add(*pitr);
+      ++i;
+    }
+  }
+  // close the file
+  H5Fclose(file_id);
+
+  // Overwrite particles container
+  this->particles_ = particles;
+
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->clear_particle_ids();
+
+  return true;
+}
+
+//! Write particles to HDF5 for twophase particles
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
+    const std::string& filename) {
+
+  // Create a new file using default properties.
+  hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  // Throw an error if file can't be found
+  if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
+
+  // Calculate the size and the offsets of our struct members in memory
+  hsize_t nrecords = 0;
+  hsize_t nfields = 0;
+  H5TBget_table_info(file_id, "table", &nfields, &nrecords);
+
+  if (nfields != mpm::pod::particletwophase::NFIELDS)
+    throw std::runtime_error("HDF5 table has incorrect number of fields");
+
+  std::vector<PODParticleTwoPhase> dst_buf;
+  dst_buf.reserve(nrecords);
+  // Read the table
+  H5TBread_table(file_id, "table", mpm::pod::particletwophase::dst_size,
+                 mpm::pod::particletwophase::dst_offset,
+                 mpm::pod::particletwophase::dst_sizes, dst_buf.data());
+
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
+
+  unsigned i = 0;
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    if (i < nrecords) {
+      PODParticleTwoPhase particle = dst_buf[i];
+      // Get particle's material from list of materials
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      materials.emplace_back(materials_.at(particle.material_id));
+      materials.emplace_back(materials_.at(particle.liquid_material_id));
+
+      // Initialise particle with HDF5 data
+      (*pitr)->initialise_particle(particle, materials);
       // Add particle to map
       map_particles_.insert(particle.id, *pitr);
       particles.add(*pitr);
@@ -1627,14 +1740,16 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-std::vector<mpm::HDF5Particle> mpm::Mesh<Tdim>::particles_hdf5() const {
+std::vector<mpm::PODParticle> mpm::Mesh<Tdim>::particles_hdf5() const {
   const unsigned nparticles = this->nparticles();
 
-  std::vector<mpm::HDF5Particle> particles_hdf5;
+  std::vector<mpm::PODParticle> particles_hdf5;
   particles_hdf5.reserve(nparticles);
 
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particles_hdf5.emplace_back((*pitr)->hdf5());
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+    particles_hdf5.emplace_back(*pod);
+  }
 
   return particles_hdf5;
 }
@@ -2103,7 +2218,7 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
 
 //! Compute free surface cells, nodes, and particles
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::compute_free_surface(std::string method,
+bool mpm::Mesh<Tdim>::compute_free_surface(const std::string& method,
                                            double volume_tolerance) {
   if (method == "density") {
     return this->compute_free_surface_by_density(volume_tolerance);
@@ -2161,7 +2276,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
     // First, we detect the cell with possible free surfaces
     // Compute boundary cells and nodes based on geometry
     std::set<mpm::Index> free_surface_candidate_cells;
-    std::set<mpm::Index> free_surface_candidate_nodes;
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
          ++citr) {
       // Cell contains particles
@@ -2201,18 +2315,17 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
         if (candidate_cell) {
           (*citr)->assign_free_surface(true);
           free_surface_candidate_cells.insert((*citr)->id());
-          free_surface_candidate_nodes.insert(node_id.begin(), node_id.end());
         }
       }
     }
 
     // Compute particle neighbours for particles at candidate cells
-    std::vector<mpm::Index> free_surface_candidate_particles;
+    std::vector<mpm::Index> free_surface_candidate_particles_first;
     for (const auto cell_id : free_surface_candidate_cells) {
       this->find_particle_neighbours(map_cells_[cell_id]);
       const auto& particle_ids = map_cells_[cell_id]->particles();
-      free_surface_candidate_particles.insert(
-          free_surface_candidate_particles.end(), particle_ids.begin(),
+      free_surface_candidate_particles_first.insert(
+          free_surface_candidate_particles_first.end(), particle_ids.begin(),
           particle_ids.end());
     }
 
@@ -2227,14 +2340,13 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     std::set<mpm::Index> free_surface_candidate_particles_second;
-    for (const auto p_id : free_surface_candidate_particles) {
+    for (const auto p_id : free_surface_candidate_particles_first) {
       const auto& particle = map_particles_[p_id];
-      bool status = particle->compute_free_surface_by_density();
+      status = particle->compute_free_surface_by_density();
       if (status) free_surface_candidate_particles_second.insert(p_id);
     }
 
     // Find free surface particles through geometry
-    std::set<mpm::Index> free_surface_particles;
     for (const auto p_id : free_surface_candidate_particles_second) {
       // Initialize renormalization matrix
       Eigen::Matrix<double, Tdim, Tdim> renormalization_matrix_inv;
@@ -2339,32 +2451,8 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
       if (free_surface) {
         particle->assign_free_surface(true);
         particle->assign_normal(normal);
-        free_surface_particles.insert(p_id);
       }
     }
-
-    // Compute node sign distance function
-    for (const auto node_id : free_surface_candidate_nodes) {
-      const auto& node_coord = map_nodes_[node_id]->coordinates();
-      double closest_distance = std::numeric_limits<double>::max();
-      double signed_distance = std::numeric_limits<double>::max();
-      for (const auto fs_id : free_surface_particles) {
-        const auto& fs_particle = map_particles_[fs_id];
-        const VectorDim fs_coord =
-            fs_particle->coordinates() +
-            0.5 * fs_particle->diameter() * fs_particle->normal();
-        const VectorDim rel_coord = fs_coord - node_coord;
-        const double distance = rel_coord.norm();
-        if (distance < closest_distance) {
-          closest_distance = distance;
-          signed_distance = (rel_coord).dot(fs_particle->normal());
-        }
-      }
-
-      // Assign signed distance to node
-      map_nodes_[node_id]->assign_signed_distance(signed_distance);
-    }
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -2597,4 +2685,34 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::initialise_nodal_properties() {
   // Call initialise_properties function from the nodal properties
   nodal_properties_->initialise_nodal_properties();
+}
+
+//! Assign particle pore pressures
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
+    const std::vector<std::tuple<mpm::Index, double>>&
+        particle_pore_pressures) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign pore "
+          "pressures");
+
+    for (const auto& particle_pore_pressure : particle_pore_pressures) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_pore_pressure);
+      // Pore pressure
+      double pore_pressure = std::get<1>(particle_pore_pressure);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        map_particles_[pid]->assign_pressure(pore_pressure,
+                                             mpm::ParticlePhase::Liquid);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }

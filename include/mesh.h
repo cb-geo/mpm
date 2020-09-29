@@ -31,7 +31,6 @@ using Json = nlohmann::json;
 #include "function_base.h"
 #include "generators/injection.h"
 #include "geometry.h"
-#include "hdf5_particle.h"
 #include "io.h"
 #include "io_mesh.h"
 #include "logger.h"
@@ -40,6 +39,7 @@ using Json = nlohmann::json;
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "pod_particle.h"
 #include "radial_basis_function.h"
 #include "traction.h"
 #include "vector.h"
@@ -242,6 +242,15 @@ class Mesh {
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
+  //! Number of particles in the mesh with specific type
+  //! \param[in] particle particle_type A string denoting particle type
+  mpm::Index nparticles(const std::string& particle_type) const {
+    mpm::Index counter = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+      if ((*pitr)->type() == particle_type) counter++;
+    return counter;
+  }
+
   //! Locate particles in a cell
   //! Iterate over all cells in a mesh to find the cell in which particles
   //! are located.
@@ -400,20 +409,35 @@ class Mesh {
   void find_ghost_boundary_cells();
 
   //! Write HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \retval status Status of writing HDF5 output
-  bool write_particles_hdf5(unsigned phase, const std::string& filename);
+  bool write_particles_hdf5(const std::string& filename);
+
+  //! Write HDF5 particles for two-phase-one-point particle
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \retval status Status of writing HDF5 output
+  bool write_particles_hdf5_twophase(const std::string& filename);
+
+  //! Read HDF5 particles with type name
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] typename Name of particle type name
+  //! \retval status Status of reading HDF5 output
+  bool read_particles_hdf5(const std::string& filename,
+                           const std::string& type_name);
 
   //! Read HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \retval status Status of reading HDF5 output
-  bool read_particles_hdf5(unsigned phase, const std::string& filename);
+  bool read_particles_hdf5(const std::string& filename);
+
+  //! Read HDF5 particles for twophase particle
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \retval status Status of reading HDF5 output
+  bool read_particles_hdf5_twophase(const std::string& filename);
 
   //! Return HDF5 particles
   //! \retval particles_hdf5 Vector of HDF5 particles
-  std::vector<mpm::HDF5Particle> particles_hdf5() const;
+  std::vector<mpm::PODParticle> particles_hdf5() const;
 
   //! Return nodal coordinates
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
@@ -471,7 +495,7 @@ class Mesh {
   //! \param[in] volume_tolerance for volume_fraction approach
   //! \retval status Status of compute_free_surface
   bool compute_free_surface(
-      std::string method,
+      const std::string& method,
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Compute free surface by density method
@@ -526,6 +550,12 @@ class Mesh {
 
   // Initialise the nodal properties' map
   void initialise_nodal_properties();
+
+  //! Assign particles pore pressures
+  //! \param[in] particle_pore_pressure Initial pore pressure of particle
+  bool assign_particles_pore_pressures(
+      const std::vector<std::tuple<mpm::Index, double>>&
+          particle_pore_pressures);
 
  private:
   // Read particles from file

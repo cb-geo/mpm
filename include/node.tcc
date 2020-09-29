@@ -38,6 +38,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   status_ = false;
   solving_status_ = false;
   material_ids_.clear();
+  // Specific variables for two phase
+  drag_force_coefficient_.setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -190,6 +192,49 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
     node_mutex_.lock();
     pressure_(phase) += mass_pressure / mass_(phase);
     node_mutex_.unlock();
+  }
+}
+
+//! Assign pressure constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure_constraint(
+    const unsigned phase, const double pressure,
+    const std::shared_ptr<FunctionBase>& function) {
+  bool status = true;
+  try {
+    // Constrain directions can take values between 0 and Tnphases
+    if (phase < Tnphases * 2) {
+      this->pressure_constraints_.insert(std::make_pair<unsigned, double>(
+          static_cast<unsigned>(phase), static_cast<double>(pressure)));
+      // Assign pressure function
+      if (function != nullptr)
+        this->pressure_function_.insert(
+            std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
+                static_cast<unsigned>(phase),
+                static_cast<std::shared_ptr<FunctionBase>>(function)));
+    } else
+      throw std::runtime_error("Pressure constraint phase is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Apply pressure constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_pressure_constraint(
+    unsigned phase, double dt, Index step) noexcept {
+  // Assert
+  assert(phase < Tnphases);
+
+  if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
+    const double scalar =
+        (pressure_function_.find(phase) != pressure_function_.end())
+            ? pressure_function_[phase]->value(step * dt)
+            : 1.0;
+    this->pressure_(phase) = scalar * pressure_constraints_[phase];
   }
 }
 
@@ -591,33 +636,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
   }
 }
 
-//! Assign pressure constraint
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure_constraint(
-    const unsigned phase, const double pressure,
-    const std::shared_ptr<FunctionBase>& function) {
-  bool status = true;
-  try {
-    // Constrain directions can take values between 0 and Tnphases
-    if (phase < Tnphases) {
-      this->pressure_constraints_.insert(std::make_pair<unsigned, double>(
-          static_cast<unsigned>(phase), static_cast<double>(pressure)));
-      // Assign pressure function
-      if (function != nullptr)
-        this->pressure_function_.insert(
-            std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
-                static_cast<unsigned>(phase),
-                static_cast<std::shared_ptr<FunctionBase>>(function)));
-    } else
-      throw std::runtime_error("Pressure constraint phase is out of bounds");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Update pressure increment at the node
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
@@ -704,8 +722,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_change_in_momentum() {
-  // iterate over all materials in the material_ids set and update the change in
-  // momentum
+  // iterate over all materials in the material_ids set and update the change
+  // in momentum
   node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const Eigen::Matrix<double, 1, 1> mass =
@@ -713,7 +731,7 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-        velocity_ * mass - momentum;
+        velocity_.col(mpm::NodePhase::nSolid) * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
@@ -725,8 +743,8 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_separation_vector() {
   // iterate over all materials in the material_ids set, update the
-  // displacements and calculate the displacement of the center of mass for this
-  // node
+  // displacements and calculate the displacement of the center of mass for
+  // this node
   node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const auto& material_displacement =
@@ -736,8 +754,8 @@ void mpm::Node<Tdim, Tdof,
 
     // displacement of the center of mass
     contact_displacement_ += material_displacement / mass_(0, 0);
-    // assign nodal-multimaterial displacement by dividing it by this material's
-    // mass
+    // assign nodal-multimaterial displacement by dividing it by this
+    // material's mass
     property_handle_->assign_property(
         "displacements", prop_id_, *mitr,
         material_displacement / material_mass(0, 0), Tdim);

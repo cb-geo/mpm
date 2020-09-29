@@ -67,6 +67,9 @@ class MPM {
   //! Write HDF5 files
   virtual void write_hdf5(mpm::Index step, mpm::Index max_steps) = 0;
 
+  //! Write HDF5 files for twophase particles
+  virtual void write_hdf5_twophase(mpm::Index step, mpm::Index max_steps) = 0;
+
 #ifdef USE_VTK
   //! Write VTK files
   virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;

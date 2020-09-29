@@ -845,27 +845,6 @@ inline unsigned mpm::Cell<Tdim>::previous_mpirank() const {
   return this->previous_mpirank_;
 }
 
-//! Map cell volume to nodes
-template <unsigned Tdim>
-bool mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
-  bool status = true;
-  try {
-    if (this->status()) {
-      // Check if cell volume is set
-      if (volume_ == std::numeric_limits<double>::lowest())
-        this->compute_volume();
-
-      for (unsigned i = 0; i < nodes_.size(); ++i) {
-        nodes_[i]->update_volume(true, phase, volume_ / nnodes_);
-      }
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Return local node indices
 template <unsigned Tdim>
 Eigen::VectorXi mpm::Cell<Tdim>::local_node_indices() {
@@ -947,5 +926,25 @@ void mpm::Cell<Tdim>::compute_local_correction_matrix(
   for (unsigned i = 0; i < Tdim; i++) {
     correction_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
         shapefn * grad_shapefn.col(i).transpose() * pvolume;
+  }
+}
+
+//! Assign volume traction to node
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_volume_fraction(double volume_fraction) {
+  volume_fraction_ = volume_fraction;
+}
+
+//! Map cell volume to nodes
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
+  if (this->status()) {
+    // Check if cell volume is set
+    if (volume_ == std::numeric_limits<double>::lowest())
+      this->compute_volume();
+
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      nodes_[i]->update_volume(true, phase, volume_ / nnodes_);
+    }
   }
 }

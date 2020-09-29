@@ -51,6 +51,18 @@ class IOMeshAscii : public IOMesh<Tdim> {
   std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
       const std::string& particles_stresses) override;
 
+  //! Read particle scalar properties
+  //! \param[in] scalar_file file name with particle scalar properties
+  //! \retval Vector of particles scalar properties
+  std::vector<std::tuple<mpm::Index, double>> read_particles_scalar_properties(
+      const std::string& scalar_file) override;
+
+  //! Read pressure constraints file
+  //! \param[in] pressure_constraints_files file name with pressure
+  //! constraints
+  std::vector<std::tuple<mpm::Index, double>> read_pressure_constraints(
+      const std::string& pressure_constraints_file) override;
+
   //! Read nodal euler angles file
   //! \param[in] nodal_euler_angles_file file name with nodal id and respective
   //! euler angles
@@ -90,12 +102,6 @@ class IOMeshAscii : public IOMesh<Tdim> {
   //! \param[in] forces_files file name with nodal concentrated force
   std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) override;
-
-  //! Read pressure constraints file
-  //! \param[in] pressure_constraints_files file name with pressure
-  //! constraints
-  std::vector<std::tuple<mpm::Index, double>> read_pressure_constraints(
-      const std::string& pressure_constraints_file) override;
 
  private:
   //! Logger

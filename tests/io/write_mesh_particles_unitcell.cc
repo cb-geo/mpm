@@ -4,7 +4,7 @@ namespace mpm_test {
 
 // Write JSON Configuration file
 bool write_json_unitcell(unsigned dim, const std::string& analysis,
-                         const std::string& stress_update,
+                         const std::string& mpm_scheme,
                          const std::string& file_name) {
   // Make json object with input files
   // 2D
@@ -87,12 +87,12 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
          {"fxvalues", fxvalues}}}},
       {"analysis",
        {{"type", analysis},
-        {"stress_update", stress_update},
+        {"mpm_scheme", mpm_scheme},
         {"locate_particles", true},
         {"dt", 0.001},
         {"nsteps", 10},
         {"boundary_friction", 0.5},
-        {"damping", {{"type", "Cundall"}, {"damping_ratio", 0.02}}},
+        {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
        {{"path", "results/"},
@@ -100,6 +100,128 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"vtk_statevars",
          {{{"phase_id", 0}, {"statevars", "test_statevar"}},
           {{"phase_id", 4}, {"statevars", {"test_statevar"}}}}},
+        {"output_steps", 10}}}};
+
+  // Dump JSON as an input file to be read
+  std::ofstream file;
+  file.open((file_name + "-" + dimension + "-unitcell.json").c_str());
+  file << json_file.dump(2);
+  file.close();
+
+  return true;
+}
+
+// Write JSON Configuration file for two-phase
+bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
+                                  const std::string& mpm_scheme,
+                                  const std::string& file_name) {
+  // Make json object with input files
+  // 2D
+  std::string dimension = "2d";
+  auto particle_type = "P2D2PHASE";
+  auto node_type = "N2D2P";
+  auto cell_type = "ED2Q4";
+  auto io_type = "Ascii2D";
+  std::string material = "LinearElastic2D";
+  std::string liquid_material = "Newtonian2D";
+  std::vector<unsigned> material_id{{1, 2}};
+  std::vector<double> gravity{{0., -9.81}};
+  std::vector<double> xvalues{{0.0, 0.5, 1.0}};
+  std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
+
+  // 3D
+  if (dim == 3) {
+    dimension = "3d";
+    particle_type = "P3D2PHASE";
+    node_type = "N3D2P";
+    cell_type = "ED3H8";
+    io_type = "Ascii3D";
+    material = "LinearElastic3D";
+    liquid_material = "Newtonian3D";
+    gravity.clear();
+    gravity = {0., 0., -9.81};
+  }
+
+  Json json_file = {
+      {"title", "Example JSON Input for MPM"},
+      {"mesh",
+       {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
+        {"io_type", io_type},
+        {"isoparametric", false},
+        {"node_type", node_type},
+        {"boundary_conditions",
+         {{"velocity_constraints", {{"file", "velocity-constraints.txt"}}},
+          {"friction_constraints", {{"file", "friction-constraints.txt"}}}}},
+        {"cell_type", cell_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"generator",
+          {{"type", "file"},
+           {"io_type", io_type},
+           {"material_id", material_id},
+           {"pset_id", 0},
+           {"particle_type", particle_type},
+           {"check_duplicates", true},
+           {"location", "particles-" + dimension + "-unitcell.txt"}}}}}},
+      {"materials",
+       {{{"id", 0},
+         {"type", material},
+         {"density", 1000.},
+         {"youngs_modulus", 1.0E+8},
+         {"poisson_ratio", 0.495},
+         {"porosity", 0.3},
+         {"k_x", 0.001},
+         {"k_y", 0.001},
+         {"k_z", 0.001}},
+        {{"id", 1},
+         {"type", material},
+         {"density", 2300.},
+         {"youngs_modulus", 1.5E+6},
+         {"poisson_ratio", 0.25},
+         {"porosity", 0.3},
+         {"k_x", 0.001},
+         {"k_y", 0.001},
+         {"k_z", 0.001}},
+        {{"id", 2},
+         {"type", liquid_material},
+         {"density", 2300.},
+         {"bulk_modulus", 1.E+9},
+         {"mu", 0.3},
+         {"dynamic_viscosity", 0.}}}},
+      {"external_loading_conditions",
+       {{"gravity", gravity},
+        {"particle_surface_traction",
+         {{{"math_function_id", 0},
+           {"pset_id", -1},
+           {"dir", 1},
+           {"traction", 10.5}}}},
+        {"concentrated_nodal_forces",
+         {{{"math_function_id", 0},
+           {"nset_id", -1},
+           {"dir", 1},
+           {"force", 10.5}}}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"analysis",
+       {{"type", analysis},
+        {"mpm_scheme", mpm_scheme},
+        {"locate_particles", true},
+        {"dt", 0.0001},
+        {"nsteps", 10},
+        {"boundary_friction", 0.5},
+        {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
+        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+      {"post_processing",
+       {{"path", "results/"},
+        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
         {"output_steps", 10}}}};
 
   // Dump JSON as an input file to be read

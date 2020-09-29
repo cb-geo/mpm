@@ -140,6 +140,21 @@ class Node : public NodeBase<Tdim> {
   void update_mass_pressure(unsigned phase,
                             double mass_pressure) noexcept override;
 
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_pressure_constraint(
+      const unsigned phase, const double pressure,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Apply pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] step Step in analysis
+  void apply_pressure_constraint(unsigned phase, double dt = 0,
+                                 Index step = 0) noexcept override;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -327,14 +342,6 @@ class Node : public NodeBase<Tdim> {
       return std::numeric_limits<double>::max();
   }
 
-  //! Assign pressure constraint
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure Applied pressure constraint
-  //! \param[in] function math function
-  bool assign_pressure_constraint(
-      const unsigned phase, const double pressure,
-      const std::shared_ptr<FunctionBase>& function) override;
-
   //! Update pressure increment at the node
   void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
                                  unsigned phase,
@@ -369,6 +376,31 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  //! TwoPhase functions--------------------------------------------------------
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  void update_drag_force_coefficient(bool update,
+                                     const VectorDim& drag_force) override;
+
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept override;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \param[in] dt Timestep in analysis \param[in] damping_factor
+  //! Damping factor
+  bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept override;
+
+  //! Return drag force at a given node
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+  //----------------------------------------------------------------------------
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
@@ -394,6 +426,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Drag force
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
@@ -418,12 +452,12 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Mathematical function for pressure
+  std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Concentrated force
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
   //! Mathematical function for force
   std::shared_ptr<FunctionBase> force_function_{nullptr};
-  //! Mathematical function for pressure
-  std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Nodal property pool
   std::shared_ptr<mpm::NodalProperties> property_handle_{nullptr};
   //! Logger
@@ -448,5 +482,6 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
+#include "node_twophase.tcc"
 
 #endif  // MPM_NODE_H_

@@ -17,6 +17,14 @@
 
 namespace mpm {
 
+//! Particle phases
+enum NodePhase : unsigned int {
+  nSolid = 0,
+  nLiquid = 1,
+  nGas = 2,
+  nMixture = 0
+};
+
 //! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
 //! \details NodeBase class: id_ and coordinates.
@@ -133,11 +141,28 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual void update_drag_force_coefficient(bool update,
+                                             const VectorDim& drag_force) = 0;
+
+  //! Return drag force at a given node
+  virtual VectorDim drag_force_coefficient() const = 0;
+
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
   virtual void update_mass_pressure(unsigned phase,
                                     double mass_pressure) noexcept = 0;
+
+  //! Apply pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] step Step in analysis
+  virtual void apply_pressure_constraint(unsigned phase, double dt = 0,
+                                         Index step = 0) noexcept = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -189,6 +214,24 @@ class NodeBase {
   //! \param[in] damping_factor Damping factor
   virtual bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept = 0;
+
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  virtual bool assign_pressure_constraint(
+      const unsigned phase, double pressure,
+      const std::shared_ptr<FunctionBase>& function) = 0;
 
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -287,14 +330,6 @@ class NodeBase {
   //! Return pressure constraint
   virtual double pressure_constraint(const unsigned phase,
                                      const double current_time) = 0;
-
-  //! Assign pressure constraint
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure Applied pressure constraint
-  //! \param[in] function math function
-  virtual bool assign_pressure_constraint(
-      const unsigned phase, double pressure,
-      const std::shared_ptr<FunctionBase>& function) = 0;
 
   //! Update pressure increment at the node
   virtual void update_pressure_increment(

@@ -246,6 +246,93 @@ std::vector<Eigen::Matrix<double, 6, 1>>
   return stresses;
 }
 
+//! Return particles scalar properties
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, double>>
+    mpm::IOMeshAscii<Tdim>::read_particles_scalar_properties(
+        const std::string& scalar_file) {
+
+  // Particles scalar properties
+  std::vector<std::tuple<mpm::Index, double>> scalar_properties;
+
+  // input file stream
+  std::fstream file;
+  file.open(scalar_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Scalar
+            double scalar;
+            // Read stream
+            istream >> id >> scalar;
+            scalar_properties.emplace_back(std::make_tuple(id, scalar));
+          }
+        }
+      }
+      file.close();
+    }
+  } catch (std::exception& exception) {
+    console_->error("Read particle {} #{}: {}\n", __FILE__, __LINE__,
+                    exception.what());
+    file.close();
+  }
+  return scalar_properties;
+}
+
+//! Read pressure constraints file
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, double>>
+    mpm::IOMeshAscii<Tdim>::read_pressure_constraints(
+        const std::string& pressure_constraints_file) {
+  // Particle pressure constraints
+  std::vector<std::tuple<mpm::Index, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(pressure_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Pressure
+            double pressure;
+            // Read stream
+            istream >> id >> pressure;
+            constraints.emplace_back(std::make_tuple(id, pressure));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read pressure constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
 //! Return euler angles of nodes
 template <unsigned Tdim>
 std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>
@@ -481,49 +568,6 @@ std::vector<std::tuple<mpm::Index, unsigned, int, double>>
     file.close();
   } catch (std::exception& exception) {
     console_->error("Read friction constraints: {}", exception.what());
-    file.close();
-  }
-  return constraints;
-}
-
-//! Read pressure constraints file
-template <unsigned Tdim>
-std::vector<std::tuple<mpm::Index, double>>
-    mpm::IOMeshAscii<Tdim>::read_pressure_constraints(
-        const std::string& pressure_constraints_file) {
-  // Particle pressure constraints
-  std::vector<std::tuple<mpm::Index, double>> constraints;
-  constraints.clear();
-
-  // input file stream
-  std::fstream file;
-  file.open(pressure_constraints_file.c_str(), std::ios::in);
-
-  try {
-    if (file.is_open() && file.good()) {
-      // Line
-      std::string line;
-      while (std::getline(file, line)) {
-        boost::algorithm::trim(line);
-        std::istringstream istream(line);
-        // ignore comment lines (# or !) or blank lines
-        if ((line.find('#') == std::string::npos) &&
-            (line.find('!') == std::string::npos) && (line != "")) {
-          while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Pressure
-            double pressure;
-            // Read stream
-            istream >> id >> pressure;
-            constraints.emplace_back(std::make_tuple(id, pressure));
-          }
-        }
-      }
-    }
-    file.close();
-  } catch (std::exception& exception) {
-    console_->error("Read pressure constraints: {}", exception.what());
     file.close();
   }
   return constraints;

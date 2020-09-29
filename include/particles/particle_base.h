@@ -14,8 +14,9 @@
 #include "cell.h"
 #include "data_types.h"
 #include "function_base.h"
-#include "hdf5_particle.h"
 #include "material.h"
+#include "pod_particle.h"
+#include "pod_particle_twophase.h"
 
 namespace mpm {
 
@@ -26,6 +27,7 @@ class Material;
 //! Particle phases
 enum ParticlePhase : unsigned int {
   SinglePhase = 0,
+  Mixture = 0,
   Solid = 0,
   Liquid = 1,
   Gas = 2
@@ -34,6 +36,7 @@ enum ParticlePhase : unsigned int {
 //! Particle type
 extern std::map<std::string, int> ParticleType;
 extern std::map<int, std::string> ParticleTypeName;
+extern std::map<std::string, std::string> ParticleHDF5TypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -65,22 +68,23 @@ class ParticleBase {
   //! Delete assignement operator
   ParticleBase& operator=(const ParticleBase<Tdim>&) = delete;
 
-  //! Initialise particle HDF5 data
-  //! \param[in] particle HDF5 data of particle
-  //! \retval status Status of reading HDF5 particle
-  virtual bool initialise_particle(const HDF5Particle& particle) = 0;
+  //! Initialise particle POD data
+  //! \param[in] particle POD data of particle
+  //! \retval status Status of reading POD particle
+  virtual bool initialise_particle(PODParticle& particle) = 0;
 
-  //! Initialise particle HDF5 data and material
-  //! \param[in] particle HDF5 data of particle
-  //! \param[in] material Material associated with the particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle POD data and material
+  //! \param[in] particle POD data of particle
+  //! \param[in] materials Material associated with the particle arranged in a
+  //! vector
+  //! \retval status Status of reading POD particle
   virtual bool initialise_particle(
-      const HDF5Particle& particle,
-      const std::shared_ptr<Material<Tdim>>& material) = 0;
+      PODParticle& particle,
+      const std::vector<std::shared_ptr<Material<Tdim>>>& materials) = 0;
 
-  //! Retrun particle data as HDF5
-  //! \retval particle HDF5 data of the particle
-  virtual HDF5Particle hdf5() const = 0;
+  //! Return particle data as POD
+  //! \retval particle POD of the particle
+  virtual std::shared_ptr<void> pod() = 0;
 
   //! Return id of the particleBase
   Index id() const { return id_; }
@@ -344,6 +348,7 @@ class ParticleBase {
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
 
+  //! Navier-Stokes functions----------------------------------
   //! Assigning beta parameter to particle
   //! \param[in] pressure parameter determining type of projection
   virtual void assign_projection_parameter(double parameter) {
@@ -386,6 +391,107 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
     return 0;
   };
+
+  //! TwoPhase functions--------------------------------------------------------
+  //! Update porosity
+  //! \param[in] dt Analysis time step
+  virtual void update_porosity(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (update_porosity) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Assign saturation degree
+  virtual bool assign_saturation_degree() {
+    throw std::runtime_error(
+        "Calling the base class function (assign_saturation_degree) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign velocity to the particle liquid phase
+  //! \param[in] velocity A vector of particle liquid phase velocity
+  //! \retval status Assignment status
+  virtual bool assign_liquid_velocity(const VectorDim& velocity) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Compute pore pressure
+  //! \param[in] dt Time step size
+  virtual void compute_pore_pressure(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (compute_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Map drag force coefficient
+  virtual bool map_drag_force_coefficient() {
+    throw std::runtime_error(
+        "Calling the base class function (map_drag_force_coefficient) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool initialise_pore_pressure_watertable(
+      const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
+      std::map<double, double>& reference_points) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(initial_pore_pressure_watertable) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool assign_porosity() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_porosity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool assign_permeability() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_permeability) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
+  virtual double liquid_mass() const {
+    throw std::runtime_error(
+        "Calling the base class function (liquid_mass) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  virtual VectorDim liquid_velocity() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return porosity
+  //! \retval porosity Porosity
+  virtual double porosity() const {
+    throw std::runtime_error(
+        "Calling the base class function (porosity) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+  //----------------------------------------------------------------------------
 
  protected:
   //! particleBase id
