@@ -1611,7 +1611,7 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename,
                                           const std::string& type_name) {
   bool status = false;
-  if (type_name == "particles")
+  if (type_name == "particles" || type_name == "fluid_particles")
     status = this->read_particles_hdf5(filename);
   else if (type_name == "twophase_particles")
     status = this->read_particles_hdf5_twophase(filename);

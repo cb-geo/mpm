@@ -491,21 +491,24 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 //! Write HDF5 files
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
-  // Write input geometry to vtk file
-  std::string attribute = "particles";
-  std::string extension = ".h5";
+  // Write hdf5 file for single phase particle
+  for (const auto ptype : particle_types_) {
+    std::string attribute = mpm::ParticleHDF5TypeName.at(ptype);
+    std::string extension = ".h5";
 
-  auto particles_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    auto particles_file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
 
-  mesh_->write_particles_hdf5(particles_file);
+    // Load particle information from file
+    mesh_->write_particles_hdf5(particles_file);
+  }
 }
 
 //! Write HDF5 files for twophase particles
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::write_hdf5_twophase(mpm::Index step,
                                              mpm::Index max_steps) {
-  // Write input geometry to vtk file
+  // Write hdf5 file for single phase particle
   std::string attribute = "twophase_particles";
   std::string extension = ".h5";
 
