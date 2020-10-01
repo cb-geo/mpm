@@ -1,7 +1,7 @@
 #include "particle.h"
 #include "factory.h"
-#include "fluid_particle.h"
 #include "particle_base.h"
+#include "particle_fluid.h"
 #include "particle_twophase.h"
 
 namespace mpm {

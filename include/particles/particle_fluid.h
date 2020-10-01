@@ -104,6 +104,6 @@ class FluidParticle : public mpm::Particle<Tdim> {
 };  // FluidParticle class
 }  // namespace mpm
 
-#include "fluid_particle.tcc"
+#include "particle_fluid.tcc"
 
 #endif  // MPM_FLUID_PARTICLE_H__
