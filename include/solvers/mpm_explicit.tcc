@@ -135,7 +135,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     contact_->compute_contact_forces();
 
     // Update stress first
-    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_, state_vars_smoothing_, state_vars_var_);
+    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
 
     // Compute forces
     mpm_scheme_->compute_forces(gravity_, phase, step_,
@@ -146,7 +146,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                                              damping_factor_);
 
     // Update Stress Last
-    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_, state_vars_smoothing_, state_vars_var_);
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);
