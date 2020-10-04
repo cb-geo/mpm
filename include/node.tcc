@@ -28,6 +28,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   external_force_.setZero();
   internal_force_.setZero();
   pressure_.setZero();
+  state_vars_.setZero();
   contact_displacement_.setZero();
   velocity_.setZero();
   momentum_.setZero();
@@ -179,6 +180,31 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
   // Compute pressure from mass*pressure
   node_mutex_.lock();
   pressure_(phase) = pressure;
+  node_mutex_.unlock();
+}
+
+//! Update state_vars at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_state_vars(
+    unsigned phase, double mass_state_vars) noexcept {
+  // Assert
+  assert(phase < Tnphases);
+
+  const double tolerance = 1.E-16;
+  // Compute state_vars from mass*state_vars
+  if (state_vars_(phase) > tolerance) {
+    node_mutex_.lock();
+    state_vars_(phase) += mass_state_vars / mass_(phase);
+    node_mutex_.unlock();
+  }
+}
+
+//! Assign state_vars at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_state_vars(unsigned phase,
+                                                        double state_vars) {
+  node_mutex_.lock();
+  state_vars_(phase) = state_vars;
   node_mutex_.unlock();
 }
 

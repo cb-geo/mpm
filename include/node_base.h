@@ -143,6 +143,22 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual double pressure(unsigned phase) const = 0;
 
+  //! Update state_vars at the nodes from particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_state_vars Product of mass x state_vars of a particle
+  virtual void update_mass_state_vars(unsigned phase,
+                                      double mass_state_vars) noexcept = 0;
+
+  //! Assign state_vars at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] state_vars of a particle
+  virtual void assign_state_vars(unsigned phase, double state_vars) = 0;
+
+  //! Return state_vars at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double state_vars(unsigned phase) const = 0;
+
   //! Update nodal momentum
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

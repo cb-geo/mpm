@@ -239,6 +239,18 @@ class ParticleBase {
   virtual bool compute_pressure_smoothing(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
 
+  //! Map particle state_vars to nodes
+  //! \param[in] var state variable
+  virtual bool map_state_vars_to_nodes(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
+
+  //! Compute state_vars smoothing of the particle based on nodal state_vars
+  //! \param[in] var state variable
+  virtual bool compute_state_vars_smoothing(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
+
   //! Assign velocity
   virtual bool assign_velocity(const VectorDim& velocity) = 0;
 

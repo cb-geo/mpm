@@ -144,6 +144,24 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double pressure(unsigned phase) const override { return pressure_(phase); }
 
+  //! Update state_vars at the nodes from particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_state_vars Product of mass x state_vars of a particle
+  void update_mass_state_vars(unsigned phase,
+                              double mass_state_vars) noexcept override;
+
+  //! Assign state_vars at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] state_vars of a particle
+  void assign_state_vars(unsigned phase, double state_vars) override;
+
+  //! Return state_vars at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double state_vars(unsigned phase) const override {
+    return state_vars_(phase);
+  }
+
   //! Update momentum at the nodes
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -289,6 +307,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
+  //! state_vars
+  Eigen::Matrix<double, 1, Tnphases> state_vars_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
   //! Velocity

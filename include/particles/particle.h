@@ -247,6 +247,18 @@ class Particle : public ParticleBase<Tdim> {
                : std::numeric_limits<double>::quiet_NaN();
   }
 
+  //! Map state_vars pressure to nodes
+  //! \param[in] var state variable
+  bool map_state_vars_to_nodes(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
+
+  //! Compute state_vars smoothing of the particle based on nodal state_vars
+  //! \param[in] var state variable
+  bool compute_state_vars_smoothing(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
+
   //! Map particle pressure to nodes
   bool map_pressure_to_nodes(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
