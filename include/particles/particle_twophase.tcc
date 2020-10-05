@@ -449,24 +449,22 @@ void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() noexcept {
 //! Map both mixture and liquid internal force
 template <unsigned Tdim>
 inline void mpm::TwoPhaseParticle<Tdim>::map_internal_force() noexcept {
-  mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force(
-      mpm::ParticlePhase::Mixture);
+  mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force();
   mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force();
 }
 
 //! Map liquid phase internal force
 template <>
 inline void mpm::TwoPhaseParticle<1>::map_liquid_internal_force() noexcept {
-  // initialise a vector of pore pressure
-  Eigen::Matrix<double, 6, 1> pressure;
-  pressure.setZero();
-  pressure(0) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  // pore pressure
+  const double pressure =
+      -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 1, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure[0] * this->porosity_;
+    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
 
     force *= -1. * this->volume_;
 
@@ -477,18 +475,16 @@ inline void mpm::TwoPhaseParticle<1>::map_liquid_internal_force() noexcept {
 //! Map liquid phase internal force
 template <>
 inline void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
-  // initialise a vector of pore pressure
-  Eigen::Matrix<double, 6, 1> pressure;
-  pressure.setZero();
-  pressure(0) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
-  pressure(1) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  // pore pressure
+  const double pressure =
+      -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 2, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure[0] * this->porosity_;
-    force[1] = dn_dx_(i, 1) * pressure[1] * this->porosity_;
+    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
+    force[1] = dn_dx_(i, 1) * pressure * this->porosity_;
 
     force *= -1. * this->volume_;
 
@@ -498,20 +494,17 @@ inline void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
 
 template <>
 inline void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
-  // initialise a vector of pore pressure
-  Eigen::Matrix<double, 6, 1> pressure;
-  pressure.setZero();
-  pressure(0) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
-  pressure(1) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
-  pressure(2) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  // pore pressure
+  const double pressure =
+      -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 3, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure[0] * this->porosity_;
-    force[1] = dn_dx_(i, 1) * pressure[1] * this->porosity_;
-    force[2] = dn_dx_(i, 2) * pressure[2] * this->porosity_;
+    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
+    force[1] = dn_dx_(i, 1) * pressure * this->porosity_;
+    force[2] = dn_dx_(i, 2) * pressure * this->porosity_;
 
     force *= -1. * this->volume_;
 
@@ -521,12 +514,13 @@ inline void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
 
 //! Map mixture internal force
 template <>
-inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force(
-    unsigned mixture) noexcept {
-  // initialise a vector of pore pressure
+inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force() noexcept {
+  // pore pressure
+  const double pressure =
+      -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -=
-      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  total_stress(0) += pressure;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -536,20 +530,20 @@ inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force(
 
     force *= -1. * this->volume_;
 
-    nodes_[i]->update_internal_force(true, mixture, force);
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Mixture, force);
   }
 }
 
 //! Map mixture internal force
 template <>
-inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force(
-    unsigned mixture) noexcept {
-  // initialise a vector of pore pressure
+inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force() noexcept {
+  // pore pressure
+  const double pressure =
+      -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -=
-      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
-  total_stress(1) -=
-      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  total_stress(0) += pressure;
+  total_stress(1) += pressure;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -560,21 +554,20 @@ inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force(
 
     force *= -1. * this->volume_;
 
-    nodes_[i]->update_internal_force(true, mixture, force);
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Mixture, force);
   }
 }
 
 template <>
-inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force(
-    unsigned mixture) noexcept {
-  // initialise a vector of pore pressure
+inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force() noexcept {
+  // pore pressure
+  const double pressure =
+      -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -=
-      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
-  total_stress(1) -=
-      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
-  total_stress(2) -=
-      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  total_stress(0) += pressure;
+  total_stress(1) += pressure;
+  total_stress(2) += pressure;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -591,7 +584,7 @@ inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force(
 
     force *= -1. * this->volume_;
 
-    nodes_[i]->update_internal_force(true, mixture, force);
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Mixture, force);
   }
 }
 
@@ -971,8 +964,8 @@ std::vector<uint8_t> mpm::TwoPhaseParticle<Tdim>::serialize() {
            data.size(), &position, MPI_COMM_WORLD);
 
   // ID
-  MPI_Pack(&this->id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(),
-           &position, MPI_COMM_WORLD);
+  MPI_Pack(&id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
 
   // Solid Phase
   // Mass
@@ -994,31 +987,31 @@ std::vector<uint8_t> mpm::TwoPhaseParticle<Tdim>::serialize() {
   MPI_Pack(coordinates_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
            &position, MPI_COMM_WORLD);
   // Displacement
-  MPI_Pack(this->displacement_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+  MPI_Pack(displacement_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
            &position, MPI_COMM_WORLD);
   // Natural size
-  MPI_Pack(this->natural_size_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+  MPI_Pack(natural_size_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
            &position, MPI_COMM_WORLD);
   // Velocity
-  MPI_Pack(this->velocity_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
-           &position, MPI_COMM_WORLD);
+  MPI_Pack(velocity_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
   // Stress
   MPI_Pack(stress_.data(), 6, MPI_DOUBLE, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
   // Strain
-  MPI_Pack(this->strain_.data(), 6, MPI_DOUBLE, data_ptr, data.size(),
-           &position, MPI_COMM_WORLD);
+  MPI_Pack(strain_.data(), 6, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
 
   // epsv
-  MPI_Pack(&this->volumetric_strain_centroid_, 1, MPI_DOUBLE, data_ptr,
-           data.size(), &position, MPI_COMM_WORLD);
+  MPI_Pack(&volumetric_strain_centroid_, 1, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
 
   // Cell id
-  MPI_Pack(&this->cell_id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(),
+  MPI_Pack(&cell_id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(),
            &position, MPI_COMM_WORLD);
 
   // Status
-  MPI_Pack(&this->status_, 1, MPI_C_BOOL, data_ptr, data.size(), &position,
+  MPI_Pack(&status_, 1, MPI_C_BOOL, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
 
   // nstate variables
@@ -1107,8 +1100,8 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
              MPI_COMM_WORLD);
 
   // ID
-  MPI_Unpack(data_ptr, data.size(), &position, &this->id_, 1,
-             MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+  MPI_Unpack(data_ptr, data.size(), &position, &id_, 1, MPI_UNSIGNED_LONG_LONG,
+             MPI_COMM_WORLD);
 
   // Solid Phase
   // mass
@@ -1129,29 +1122,29 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   MPI_Unpack(data_ptr, data.size(), &position, coordinates_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Displacement
-  MPI_Unpack(data_ptr, data.size(), &position, this->displacement_.data(), Tdim,
+  MPI_Unpack(data_ptr, data.size(), &position, displacement_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Natural size
-  MPI_Unpack(data_ptr, data.size(), &position, this->natural_size_.data(), Tdim,
+  MPI_Unpack(data_ptr, data.size(), &position, natural_size_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Velocity
-  MPI_Unpack(data_ptr, data.size(), &position, this->velocity_.data(), Tdim,
+  MPI_Unpack(data_ptr, data.size(), &position, velocity_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Stress
   MPI_Unpack(data_ptr, data.size(), &position, stress_.data(), 6, MPI_DOUBLE,
              MPI_COMM_WORLD);
   // Strain
-  MPI_Unpack(data_ptr, data.size(), &position, this->strain_.data(), 6,
-             MPI_DOUBLE, MPI_COMM_WORLD);
+  MPI_Unpack(data_ptr, data.size(), &position, strain_.data(), 6, MPI_DOUBLE,
+             MPI_COMM_WORLD);
 
   // epsv
-  MPI_Unpack(data_ptr, data.size(), &position,
-             &this->volumetric_strain_centroid_, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+  MPI_Unpack(data_ptr, data.size(), &position, &volumetric_strain_centroid_, 1,
+             MPI_DOUBLE, MPI_COMM_WORLD);
   // cell id
-  MPI_Unpack(data_ptr, data.size(), &position, &this->cell_id_, 1,
+  MPI_Unpack(data_ptr, data.size(), &position, &cell_id_, 1,
              MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
   // status
-  MPI_Unpack(data_ptr, data.size(), &position, &this->status_, 1, MPI_C_BOOL,
+  MPI_Unpack(data_ptr, data.size(), &position, &status_, 1, MPI_C_BOOL,
              MPI_COMM_WORLD);
 
   // Assign materials
