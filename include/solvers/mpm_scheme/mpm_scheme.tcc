@@ -116,22 +116,23 @@ inline void mpm::MPMScheme<Tdim>::pressure_smoothing(unsigned phase) {
 
 //! State variable smoothing
 template <unsigned Tdim>
-inline void mpm::MPMScheme<Tdim>::state_vars_smoothing(const std::string& var, unsigned phase) {
+inline void mpm::MPMScheme<Tdim>::state_vars_smoothing(const std::string& var,
+                                                       unsigned phase) {
   // Assign state variable to nodes
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_state_vars_to_nodes,
                 std::placeholders::_1, var, phase));
 
-// TODO  
-// #ifdef USE_MPI
-//   // Run if there is more than a single MPI task
-//   if (mpi_size_ > 1)  
-//     // MPI all reduce nodal state_variable
-//     mesh_->template nodal_halo_exchange<double, 1>(
-//         std::bind(&mpm::NodeBase<Tdim>::state_vars, std::placeholders::_1, phase),
-//         std::bind(&mpm::NodeBase<Tdim>::assign_state_vars,
-//                   std::placeholders::_1, phase, std::placeholders::_2));
-// #endif
+  // TODO
+  // #ifdef USE_MPI
+  //   // Run if there is more than a single MPI task
+  //   if (mpi_size_ > 1)
+  //     // MPI all reduce nodal state_variable
+  //     mesh_->template nodal_halo_exchange<double, 1>(
+  //         std::bind(&mpm::NodeBase<Tdim>::state_vars, std::placeholders::_1,
+  //         phase), std::bind(&mpm::NodeBase<Tdim>::assign_state_vars,
+  //                   std::placeholders::_1, phase, std::placeholders::_2));
+  // #endif
 
   // Smooth state variable over particles
   mesh_->iterate_over_particles(

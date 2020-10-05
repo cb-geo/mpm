@@ -67,7 +67,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // State_vars smoothing
   if (analysis_.find("state_variable_smoothing") != analysis_.end()) {
-    for(const auto& svars : analysis_["state_variable_smoothing"]){
+    for (const auto& svars : analysis_["state_variable_smoothing"]) {
       state_vars_smoothing_ = svars.at("smoothing").template get<bool>();
       state_vars_var_ = svars.at("state_variable").template get<std::string>();
     }
@@ -146,7 +146,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // State variable smoothing
-    if(state_vars_smoothing_ ) mpm_scheme_->state_vars_smoothing(state_vars_var_, phase); 
+    if (state_vars_smoothing_)
+      mpm_scheme_->state_vars_smoothing(state_vars_var_, phase);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);

@@ -853,7 +853,7 @@ bool mpm::Particle<Tdim>::map_state_vars_to_nodes(const std::string& var,
                                                   unsigned phase) noexcept {
   // Mass is initialized
   assert(mass_ != std::numeric_limits<double>::max());
-  
+
   bool status = false;
   // Check if particle mass is set and state variable pressure is found
   if (mass_ != std::numeric_limits<double>::max() &&
@@ -877,8 +877,8 @@ bool mpm::Particle<Tdim>::compute_state_vars_smoothing(
 
   bool status = false;
   // Check if particle has a valid cell ptr
-  if (cell_ != nullptr && (state_variables_[phase].find(var) !=
-                           state_variables_[phase].end())) {
+  if (cell_ != nullptr &&
+      (state_variables_[phase].find(var) != state_variables_[phase].end())) {
 
     double state_var = 0.;
     // Update particle state_vars to interpolated nodal state_vars
