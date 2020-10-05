@@ -845,12 +845,6 @@ inline unsigned mpm::Cell<Tdim>::previous_mpirank() const {
   return this->previous_mpirank_;
 }
 
-//! Assign volume traction to node
-template <unsigned Tdim>
-void mpm::Cell<Tdim>::assign_volume_fraction(double volume_fraction) {
-  volume_fraction_ = volume_fraction;
-}
-
 //! Map cell volume to nodes
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
