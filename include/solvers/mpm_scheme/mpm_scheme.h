@@ -51,7 +51,8 @@ class MPMScheme {
   //! State variable smoothing
   //! \param[in] var state variable to smooth
   //! \param[in] phase Phase to smooth pressure
-  virtual inline void state_vars_smoothing(const std::string& var, unsigned phase);
+  virtual inline void state_vars_smoothing(const std::string& var,
+                                           unsigned phase);
 
   //! Compute forces
   //! \param[in] gravity Acceleration due to gravity
