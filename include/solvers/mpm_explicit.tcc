@@ -31,9 +31,6 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);
 
-  // State_vars smoothing
-  if (state_vars_smoothing_) this->state_vars_smoothing(state_vars_var_, phase);
-
   // Iterate over each particle to compute stress
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
@@ -147,6 +144,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
+
+    // State variable smoothing
+    if(state_vars_smoothing_ ) mpm_scheme_->state_vars_smoothing(state_vars_var_, phase); 
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);

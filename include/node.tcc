@@ -190,9 +190,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_state_vars(
   // Assert
   assert(phase < Tnphases);
 
-  const double tolerance = 1.E-16;
+  const double tolerance = 0.;
   // Compute state_vars from mass*state_vars
-  if (state_vars_(phase) > tolerance) {
+  if (state_vars_(phase) >= tolerance) {
     node_mutex_.lock();
     state_vars_(phase) += mass_state_vars / mass_(phase);
     node_mutex_.unlock();

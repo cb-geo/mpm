@@ -92,11 +92,6 @@ class MPMBase : public MPM {
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
 
-  //! State_vars smoothing
-  //! \param[in] var is state variable name to smooth
-  //! \param[in] phase Phase to smooth state_vars
-  void state_vars_smoothing(const std::string& var, unsigned phase);
-
  private:
   //! Return if a mesh will be isoparametric or not
   //! \retval isoparametric Status of mesh type
