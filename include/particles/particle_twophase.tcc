@@ -759,13 +759,13 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient() {
     drag_force_coefficient.setZero();
 
     // Check if permeability coefficient is valid
+    const double liquid_unit_weight =
+        9.81 * this->material(mpm::ParticlePhase::Liquid)
+                   ->template property<double>(std::string("density"));
     for (unsigned i = 0; i < Tdim; ++i) {
       if (k_p > 0.)
-        drag_force_coefficient(i) =
-            porosity_ * porosity_ * 9.81 *
-            this->material(mpm::ParticlePhase::Liquid)
-                ->template property<double>(std::string("density")) /
-            (k_p * permeability_(i));
+        drag_force_coefficient(i) = porosity_ * porosity_ * liquid_unit_weight /
+                                    (k_p * permeability_(i));
       else
         throw std::runtime_error("Porosity coefficient is invalid");
     }

@@ -269,11 +269,11 @@ std::vector<std::tuple<mpm::Index, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Scalar
+          double scalar;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Scalar
-            double scalar;
             // Read stream
             istream >> id >> scalar;
             scalar_properties.emplace_back(std::make_tuple(id, scalar));
