@@ -891,9 +891,16 @@ void mpm::Particle<Tdim>::compute_contact_updated_position(double dt) noexcept {
   Eigen::Matrix<double, Tdim, 1> nodal_velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
 
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_velocity +=
-      shapefn_[i] * nodes_[i]->property("velocities", this->material_id(), Tdim);
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    Eigen::Matrix<double, Tdim, 1> velocity =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
+    if (nodes_[i]->material_ids().size() > 1)
+      velocity = nodes_[i]->property("velocities", this->material_id(), Tdim);
+    else
+      velocity = nodes_[i]->velocity(0);
+
+    nodal_velocity += shapefn_[i] * velocity;
+  }
 
   // Update particle velocity using interpolated nodal velocity
   this->velocity_ = nodal_velocity;
