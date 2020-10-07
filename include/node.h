@@ -280,6 +280,9 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  //! Compute multimaterial velocity from mass and momentum
+  void compute_multimaterial_velocity() override;
+
   //! Compute multimaterial relative velocities
   void compute_multimaterial_relative_velocity() override;
 

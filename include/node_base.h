@@ -267,6 +267,9 @@ class NodeBase {
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
+  //! Compute multimaterial velocity from mass and momentum
+  virtual void compute_multimaterial_velocity() = 0;
+
   //! Compute multimaterial relative velocities
   virtual void compute_multimaterial_relative_velocity() = 0;
 

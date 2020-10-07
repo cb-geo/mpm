@@ -27,6 +27,11 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
       &mpm::ParticleBase<Tdim>::map_multimaterial_mass_momentum_to_nodes,
       std::placeholders::_1));
 
+  // Compute multimaterial velocities from mass and momentum
+  mesh_->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_velocity,
+                std::placeholders::_1));
+
   // Map multimaterial displacements from particles to nodes
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::map_multimaterial_displacements_to_nodes,

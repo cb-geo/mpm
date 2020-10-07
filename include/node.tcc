@@ -302,19 +302,19 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
 
     if (mass > tolerance) {
       // Get internal and external forces of the current material
-      auto internal_force =
+      VectorDim internal_force =
           property_handle_->property("internal_forces", prop_id_, *mitr, Tdim);
-      auto external_force =
+      VectorDim external_force =
           property_handle_->property("external_forces", prop_id_, *mitr, Tdim);
 
       // Compute the acceleration and of the current material
       // acceleration = (unbalanced force / mass)
-      auto acceleration = (1 / mass) * (external_force - internal_force);
+      VectorDim acceleration = (1 / mass) * (external_force - internal_force);
       property_handle_->assign_property("accelerations", prop_id_, *mitr,
                                         acceleration, Tdim);
 
       // velocity += acceleration * dt
-      auto velocity = acceleration * dt;
+      VectorDim velocity = acceleration * dt;
       property_handle_->update_property("velocities", prop_id_, *mitr,
                                         velocity, Tdim);
       
@@ -731,16 +731,37 @@ void mpm::Node<Tdim, Tdof,
   node_mutex_.unlock();
 }
 
-//! Compute multimaterial normal unit vector
+//! Compute multimaterial velocity from mass and momentum
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
+  // Iterate over all materials in the material_ids set
+  node_mutex_.lock();
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // Calculate the velocity by dividing the momentum by the mass
+    VectorDim momentum =
+        property_handle_->property("momenta", prop_id_, *mitr, Tdim);
+    double mass =
+        property_handle_->property("masses", prop_id_, *mitr, 1)(0, 0);
+    VectorDim velocity = (1 / mass) * momentum;
+
+    // Assign the velocity to its corresponding node and material ids in the
+    // property pool
+    property_handle_->assign_property("velocities", prop_id_, *mitr, velocity,
+                                      Tdim);
+  }
+  node_mutex_.unlock();
+}
+
+//! Compute multimaterial relative velocities
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_relative_velocity() {
   // Iterate over all materials in the material_ids set
   node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
-    auto velocity_material =
+    VectorDim velocity_material =
         property_handle_->property("velocities", prop_id_, *mitr, Tdim);
-    auto relative_velocity = velocity_material - this->velocity_;
+    VectorDim relative_velocity = velocity_material - this->velocity_;
 
     // Assign relative velocities
     property_handle_->assign_property("relative_velocities", prop_id_, *mitr,
@@ -767,37 +788,45 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
 
   // Check if there is one than one material in the material_ids_ set
   node_mutex_.lock();
+  double tolerance = 1.0e-12;
   if (material_ids_.size() > 1) {
     // Iterate over all materials in the node
     for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
          ++mitr) {
-      // Determine the normal component of the relative velocity and the
-      // tangential unit vector
-      auto normal_unit_vector = property_handle_->property(
-          "normal_unit_vectors", prop_id_, *mitr, Tdim);
-      auto relative_velocity = property_handle_->property(
-          "relative_velocities", prop_id_, *mitr, Tdim);
+      // Determine the normal component of the relative velocity
+      Eigen::Matrix<double, Tdim, 1> normal_unit_vector =
+          property_handle_->property("normal_unit_vectors", prop_id_, *mitr,
+                                     Tdim);
+      Eigen::Matrix<double, Tdim, 1> relative_velocity =
+          property_handle_->property("relative_velocities", prop_id_, *mitr,
+                                     Tdim);
       double velocity_normal =
           (relative_velocity.transpose() * normal_unit_vector)(0, 0);
-      auto tangent_unit_vector =
-          (relative_velocity - velocity_normal * normal_unit_vector)
-              .normalized();
-      double velocity_tangent =
-          (relative_velocity.transpose() * tangent_unit_vector)(0, 0);
+      velocity_normal =
+          (abs(velocity_normal) < tolerance) ? 0.0 : velocity_normal;
 
-      // Check if the material is approaching the other materials (v_norm < 0)
-      if (velocity_normal < 0) {
+      // Check if the material is approaching the other materials (v_norm > 0)
+      if (velocity_normal > 0) {
+
+        // Determine the tangent_unit_vector
+        Eigen::Matrix<double, Tdim, 1> tangent_unit_vector =
+            (relative_velocity - velocity_normal * normal_unit_vector)
+                .normalized();
+        double velocity_tangent =
+            (relative_velocity.transpose() * tangent_unit_vector)(0, 0);
 
         // Check if material is sliding (mu * v_norm + v_tan > 0) or stuck (mu *
         // v_norm + v_tan <=0) to the other materials
-        if (friction * velocity_normal + velocity_tangent > 0) {
+        if (std::abs(velocity_tangent) > friction * std::abs(velocity_normal)) {
           // Compute normal and tangential correction
-          auto normal_correction = -velocity_normal * normal_unit_vector;
-          auto tangent_correction =
+          Eigen::Matrix<double, Tdim, 1> normal_correction =
+              -velocity_normal * normal_unit_vector;
+          Eigen::Matrix<double, Tdim, 1> tangent_correction =
               -friction * velocity_normal * tangent_unit_vector;
 
           // Update the velocity with the computed corrections
-          auto corrections = normal_correction + tangent_correction;
+          Eigen::Matrix<double, Tdim, 1> corrections =
+              normal_correction + tangent_correction;
           property_handle_->update_property("velocities", prop_id_, *mitr,
                                             corrections, Tdim);
         } else {
