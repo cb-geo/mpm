@@ -515,6 +515,16 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 #endif
 }
 
+//! Number of particles in the mesh with specific type
+template <unsigned Tdim>
+mpm::Index mpm::Mesh<Tdim>::nparticles(const std::string& particle_type) const {
+  return std::count_if(
+      particles_.cbegin(), particles_.cend(),
+      [&ptype = particle_type](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return (ptr)->type() == ptype;
+      });
+}
+
 //! Find ncells in rank
 template <unsigned Tdim>
 mpm::Index mpm::Mesh<Tdim>::ncells_rank(bool active_cells) {
@@ -2147,7 +2157,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
   // Initialise the shared pointer to nodal properties
   nodal_properties_ = std::make_shared<mpm::NodalProperties>();
 
-  // Check if nodes_ and materials_is empty and throw runtime error if they are
+  // Check if nodes_ and materials_is empty and throw runtime error if they
+  // are
   if (nodes_.size() != 0 && materials_.size() != 0) {
     // Compute number of rows in nodal properties for vector entities
     const unsigned nrows = nodes_.size() * Tdim;
@@ -2226,7 +2237,8 @@ bool mpm::Mesh<Tdim>::compute_free_surface(const std::string& method,
     return this->compute_free_surface_by_geometry(volume_tolerance);
   } else {
     console_->info(
-        "The selected free-surface computation method: {}\n is not available. "
+        "The selected free-surface computation method: {}\n is not "
+        "available. "
         "Using density approach as default method.",
         method);
     return this->compute_free_surface_by_density(volume_tolerance);

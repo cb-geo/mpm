@@ -271,7 +271,9 @@ class Cell {
 
   //! Assign volume traction to node
   //! \param[in] volume_fraction cell volume fraction
-  void assign_volume_fraction(double volume_fraction);
+  void assign_volume_fraction(double volume_fraction) {
+    volume_fraction_ = volume_fraction;
+  };
 
   //! Return cell volume fraction
   //! \retval volume_fraction_ cell volume fraction

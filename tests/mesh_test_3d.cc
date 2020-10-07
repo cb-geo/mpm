@@ -198,11 +198,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->status() == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
+    REQUIRE(mesh->nparticles("P3D") == 2);
 
     // Remove particle 2 and check
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+    REQUIRE(mesh->nparticles("P3D") == 1);
 
     int mpi_size;
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -225,6 +227,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+    REQUIRE(mesh->nparticles("P3D") == 0);
 
     // Add and use remove all particles
     REQUIRE(mesh->add_particle(particle1) == true);

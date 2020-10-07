@@ -187,6 +187,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->status() == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
+    REQUIRE(mesh->nparticles("P2D") == 2);
 
     // Update coordinates
     Eigen::Vector2d coordinates;
@@ -217,11 +218,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+    REQUIRE(mesh->nparticles("P2D") == 1);
 
     // Remove all non-rank particles in mesh
     mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+    REQUIRE(mesh->nparticles("P2D") == 0);
 
     // Add and use remove all particles
     REQUIRE(mesh->add_particle(particle1) == true);

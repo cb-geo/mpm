@@ -161,29 +161,29 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // MPI all reduce nodal mass for solid phase
       mesh_->template nodal_halo_exchange<double, 1>(
           std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1,
-                    mpm::ParticlePhase::Solid),
+                    mpm::NodePhase::nSolid),
           std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                    false, mpm::ParticlePhase::Solid, std::placeholders::_2));
+                    false, mpm::NodePhase::nSolid, std::placeholders::_2));
       // MPI all reduce nodal momentum for solid phase
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                    mpm::ParticlePhase::Solid),
+                    mpm::NodePhase::nSolid),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, mpm::ParticlePhase::Solid,
+                    std::placeholders::_1, false, mpm::NodePhase::nSolid,
                     std::placeholders::_2));
 
       // MPI all reduce nodal mass for liquid phase
       mesh_->template nodal_halo_exchange<double, 1>(
           std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1,
-                    mpm::ParticlePhase::Liquid),
+                    mpm::NodePhase::nLiquid),
           std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                    false, mpm::ParticlePhase::Liquid, std::placeholders::_2));
+                    false, mpm::NodePhase::nLiquid, std::placeholders::_2));
       // MPI all reduce nodal momentum for liquid phase
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                    mpm::ParticlePhase::Liquid),
+                    mpm::NodePhase::nLiquid),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, mpm::ParticlePhase::Liquid,
+                    std::placeholders::_1, false, mpm::NodePhase::nLiquid,
                     std::placeholders::_2));
     }
 #endif

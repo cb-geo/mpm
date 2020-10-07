@@ -244,12 +244,7 @@ class Mesh {
 
   //! Number of particles in the mesh with specific type
   //! \param[in] particle particle_type A string denoting particle type
-  mpm::Index nparticles(const std::string& particle_type) const {
-    mpm::Index counter = 0;
-    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-      if ((*pitr)->type() == particle_type) counter++;
-    return counter;
-  }
+  mpm::Index nparticles(const std::string& particle_type) const;
 
   //! Locate particles in a cell
   //! Iterate over all cells in a mesh to find the cell in which particles

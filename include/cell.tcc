@@ -929,12 +929,6 @@ void mpm::Cell<Tdim>::compute_local_correction_matrix(
   }
 }
 
-//! Assign volume traction to node
-template <unsigned Tdim>
-void mpm::Cell<Tdim>::assign_volume_fraction(double volume_fraction) {
-  volume_fraction_ = volume_fraction;
-}
-
 //! Map cell volume to nodes
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {

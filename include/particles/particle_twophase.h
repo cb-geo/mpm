@@ -194,8 +194,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   virtual void map_liquid_internal_force() noexcept;
 
   //! Map two phase mixture internal force
-  //! \param[in] mixture Identification for Mixture
-  virtual void map_mixture_internal_force(unsigned mixture) noexcept;
+  virtual void map_mixture_internal_force() noexcept;
 
   //! Compute updated velocity of the particle based on nodal velocity
   //! \param[in] dt Analysis time step
@@ -204,34 +203,50 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
                                                bool velocity_update) noexcept;
 
  protected:
+  //! particle id
+  using ParticleBase<Tdim>::id_;
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
+  //! Status
+  using ParticleBase<Tdim>::status_;
   //! Cell
   using ParticleBase<Tdim>::cell_;
+  //! Cell id
+  using ParticleBase<Tdim>::cell_id_;
   //! Nodes
   using ParticleBase<Tdim>::nodes_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
   //! Shape functions
   using Particle<Tdim>::shapefn_;
-  //! Effective stress of soil skeleton
-  using Particle<Tdim>::stress_;
-  //! Soil skeleton strain rate
-  using Particle<Tdim>::strain_rate_;
-  //! Materials
-  using Particle<Tdim>::material_;
-  //! Material ids
-  using ParticleBase<Tdim>::material_id_;
-  //! Particle total volume
-  using Particle<Tdim>::volume_;
-  //! Particle mass for solid phase
-  using Particle<Tdim>::mass_;
-  //! Particle mass density
-  using Particle<Tdim>::mass_density_;
   //! dN/dX
   using Particle<Tdim>::dn_dx_;
   //! dN/dX at cell centroid
   using Particle<Tdim>::dn_dx_centroid_;
+  //! Size of particle in natural coordinates
+  using Particle<Tdim>::natural_size_;
+  //! Materials
+  using Particle<Tdim>::material_;
+  //! Material ids
+  using ParticleBase<Tdim>::material_id_;
+  //! Particle mass for solid phase
+  using Particle<Tdim>::mass_;
+  //! Particle total volume
+  using Particle<Tdim>::volume_;
+  //! Particle mass density
+  using Particle<Tdim>::mass_density_;
+  //! Displacement
+  using Particle<Tdim>::displacement_;
+  //! Velocity
+  using Particle<Tdim>::velocity_;
+  //! Effective stress of soil skeleton
+  using Particle<Tdim>::stress_;
+  //! Solid skeleton strains
+  using Particle<Tdim>::strain_;
+  //! Volumetric strain at centroid
+  using Particle<Tdim>::volumetric_strain_centroid_;
+  //! Soil skeleton strain rate
+  using Particle<Tdim>::strain_rate_;
   //! Set traction
   using Particle<Tdim>::set_traction_;
   //! Surface Traction (given as a stress; force/area)
