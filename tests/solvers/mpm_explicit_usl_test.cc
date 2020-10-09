@@ -82,6 +82,10 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE_NOTHROW(mpm->initialise_materials());
+    // Initialise mesh
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
     // Test check point restart
     REQUIRE(mpm->checkpoint_resume() == true);
     // Solve
@@ -158,6 +162,10 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE_NOTHROW(mpm->initialise_materials());
+    // Initialise mesh
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
     // Test check point restart
     REQUIRE(mpm->checkpoint_resume() == true);
     // Solve
