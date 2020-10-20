@@ -10,12 +10,15 @@
 namespace mpm {
 
 // Namespace for radial basis function handling
+// NOTES: only accessible through function kernel() and gradient()
 namespace RadialBasisFunction {
+// Private functions
+namespace {
 
 //! Cubic Spline Radial Basis Function
 //! Source: Monaghan, 1985; Monaghan, 1992
 template <unsigned Tdim>
-double cubic_spline(const double smoothing_length, const double norm_distance) {
+double cubic_spline(double smoothing_length, double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
@@ -43,8 +46,7 @@ double cubic_spline(const double smoothing_length, const double norm_distance) {
 //! Cubic Spline Radial Basis Function derivative
 //! Source: Monaghan, 1985; Monaghan, 1992
 template <unsigned Tdim>
-double cubic_spline_derivative(const double smoothing_length,
-                               const double norm_distance) {
+double cubic_spline_derivative(double smoothing_length, double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
@@ -71,8 +73,7 @@ double cubic_spline_derivative(const double smoothing_length,
 //! Quintic Spline Radial Basis Function
 //! Source: Liu, 2010
 template <unsigned Tdim>
-double quintic_spline(const double smoothing_length,
-                      const double norm_distance) {
+double quintic_spline(double smoothing_length, double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
@@ -104,8 +105,8 @@ double quintic_spline(const double smoothing_length,
 //! Quintic Spline Radial Basis Function derivative
 //! Source: Liu, 2010
 template <unsigned Tdim>
-double quintic_spline_derivative(const double smoothing_length,
-                                 const double norm_distance) {
+double quintic_spline_derivative(double smoothing_length,
+                                 double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
@@ -137,21 +138,20 @@ double quintic_spline_derivative(const double smoothing_length,
 //! Gaussian Kernel
 //! Source: Liu, 2010
 template <unsigned Tdim>
-double gaussian(const double smoothing_length, const double norm_distance) {
+double gaussian(double smoothing_length, double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
-  if (Tdim == 2)
-    multiplier = 1.0 / (M_PI * std::pow(smoothing_length, 2));
-  else if (Tdim == 3)
-    multiplier = 1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), 3);
+  if (Tdim == 2 || Tdim == 3)
+    multiplier =
+        1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), int(Tdim));
   else
     throw std::runtime_error("Tdim is invalid");
 
   // Compute basis function
   double basis_function = multiplier;
   const double radius = norm_distance / smoothing_length;
-  if (radius >= 0.0 && radius < 3.0)
+  if (radius >= 0.0 && radius <= 3.0)
     basis_function *= std::exp(-std::pow(radius, 2));
   else
     basis_function = 0.0;
@@ -162,15 +162,13 @@ double gaussian(const double smoothing_length, const double norm_distance) {
 //! Gaussian Kernel derivative
 //! Source: Liu, 2010
 template <unsigned Tdim>
-double gaussian_derivative(const double smoothing_length,
-                           const double norm_distance) {
+double gaussian_derivative(double smoothing_length, double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
-  if (Tdim == 2)
-    multiplier = 1.0 / (M_PI * std::pow(smoothing_length, 2));
-  else if (Tdim == 3)
-    multiplier = 1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), 3);
+  if (Tdim == 2 || Tdim == 3)
+    multiplier =
+        1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), int(Tdim));
   else
     throw std::runtime_error("Tdim is invalid");
 
@@ -188,24 +186,22 @@ double gaussian_derivative(const double smoothing_length,
 //! Super Gaussian Kernel
 //! Source: Monaghan, 1992
 template <unsigned Tdim>
-double super_gaussian(const double smoothing_length,
-                      const double norm_distance) {
+double super_gaussian(double smoothing_length, double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
-  if (Tdim == 2)
-    multiplier = 1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), 2);
-  else if (Tdim == 3)
-    multiplier = 1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), 3);
+  if (Tdim == 2 || Tdim == 3)
+    multiplier =
+        1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), int(Tdim));
   else
     throw std::runtime_error("Tdim is invalid");
 
   // Compute basis function
   double basis_function = multiplier;
   const double radius = norm_distance / smoothing_length;
-  if (radius >= 0.0 && radius < 3.0)
-    basis_function *= radius * (2.0 * radius * radius - (double)Tdim - 4.0) *
-                      std::exp(-std::pow(radius, 2));
+  if (radius >= 0.0 && radius <= 3.0)
+    basis_function *= std::exp(-std::pow(radius, 2)) *
+                      (double(Tdim) / 2. + 1. - radius * radius);
   else
     basis_function = 0.0;
 
@@ -215,46 +211,46 @@ double super_gaussian(const double smoothing_length,
 //! Super Gaussian Kernel derivative
 //! Source: Monaghan, 1992
 template <unsigned Tdim>
-double super_gaussian_derivative(const double smoothing_length,
-                                 const double norm_distance) {
+double super_gaussian_derivative(double smoothing_length,
+                                 double norm_distance) {
 
   // Assign multiplier depends on dimension
   double multiplier;
-  if (Tdim == 2)
-    multiplier = 1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), 2);
-  else if (Tdim == 3)
-    multiplier = 1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), 3);
+  if (Tdim == 2 || Tdim == 3)
+    multiplier =
+        1.0 / std::pow((std::sqrt(M_PI) * smoothing_length), int(Tdim));
   else
     throw std::runtime_error("Tdim is invalid");
 
   // Compute basis function
   double dw_dr = multiplier;
   const double radius = norm_distance / smoothing_length;
-  if (radius >= 0.0 && radius < 3.0)
-    dw_dr *= std::exp(-std::pow(radius, 2)) *
-             ((double)Tdim / 2.0 + 1.0 - radius * radius);
+  if (radius >= 0.0 && radius <= 3.0)
+    dw_dr *= std::exp(-std::pow(radius, 2)) * radius *
+             (-(double)Tdim + 2. * radius * radius - 4.);
   else
     dw_dr = 0.0;
 
   return dw_dr;
 }
 
+}  // namespace
+
 //! General Radial Basis Function Kernel call
 template <unsigned Tdim>
-double kernel(const double smoothing_length, const double norm_distance,
-              const std::string type = "cubic_spline") {
+double kernel(double smoothing_length, double norm_distance,
+              const std::string& type = "cubic_spline") {
+  // Norm distance should be positive
+  assert(norm_distance >= 0.0);
+
   if (type == "cubic_spline") {
-    return mpm::RadialBasisFunction::cubic_spline<Tdim>(smoothing_length,
-                                                        norm_distance);
+    return cubic_spline<Tdim>(smoothing_length, norm_distance);
   } else if (type == "quintic_spline") {
-    return mpm::RadialBasisFunction::quintic_spline<Tdim>(smoothing_length,
-                                                          norm_distance);
+    return quintic_spline<Tdim>(smoothing_length, norm_distance);
   } else if (type == "gaussian") {
-    return mpm::RadialBasisFunction::gaussian<Tdim>(smoothing_length,
-                                                    norm_distance);
+    return gaussian<Tdim>(smoothing_length, norm_distance);
   } else if (type == "super_gaussian") {
-    return mpm::RadialBasisFunction::super_gaussian<Tdim>(smoothing_length,
-                                                          norm_distance);
+    return super_gaussian<Tdim>(smoothing_length, norm_distance);
   } else {
     throw std::runtime_error(
         "RadialBasisFunction kernel type is invalid. Available types are: "
@@ -266,25 +262,21 @@ double kernel(const double smoothing_length, const double norm_distance,
 //! General Radial Basis Function Kernel call
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> gradient(
-    const double smoothing_length,
+    double smoothing_length,
     const Eigen::Matrix<double, Tdim, 1>& relative_distance,
-    const std::string type = "cubic_spline") {
+    const std::string& type = "cubic_spline") {
 
   // Compute norm distance
   const double norm_distance = relative_distance.norm();
   double dw_dr;
   if (type == "cubic_spline") {
-    dw_dr = mpm::RadialBasisFunction::cubic_spline_derivative<Tdim>(
-        smoothing_length, norm_distance);
+    dw_dr = cubic_spline_derivative<Tdim>(smoothing_length, norm_distance);
   } else if (type == "quintic_spline") {
-    dw_dr = mpm::RadialBasisFunction::quintic_spline_derivative<Tdim>(
-        smoothing_length, norm_distance);
+    dw_dr = quintic_spline_derivative<Tdim>(smoothing_length, norm_distance);
   } else if (type == "gaussian") {
-    dw_dr = mpm::RadialBasisFunction::gaussian_derivative<Tdim>(
-        smoothing_length, norm_distance);
+    dw_dr = gaussian_derivative<Tdim>(smoothing_length, norm_distance);
   } else if (type == "super_gaussian") {
-    dw_dr = mpm::RadialBasisFunction::super_gaussian_derivative<Tdim>(
-        smoothing_length, norm_distance);
+    dw_dr = super_gaussian_derivative<Tdim>(smoothing_length, norm_distance);
   } else {
     throw std::runtime_error(
         "RadialBasisFunction gradient type is invalid. Available types are: "
@@ -294,7 +286,7 @@ Eigen::Matrix<double, Tdim, 1> gradient(
 
   // Gradient = dw_dr * r / ||r|| / h
   Eigen::Matrix<double, Tdim, 1> gradient = relative_distance;
-  if (norm_distance > 1.e-12)
+  if (norm_distance > std::numeric_limits<double>::epsilon())
     gradient *= dw_dr / (norm_distance * smoothing_length);
   else
     gradient *= 0.0;
