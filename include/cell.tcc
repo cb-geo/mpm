@@ -848,10 +848,13 @@ inline unsigned mpm::Cell<Tdim>::previous_mpirank() const {
 //! Map cell volume to nodes
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
-  // Check if cell volume is set
-  if (volume_ == std::numeric_limits<double>::lowest()) this->compute_volume();
+  if (this->status()) {
+    // Check if cell volume is set
+    if (volume_ == std::numeric_limits<double>::lowest())
+      this->compute_volume();
 
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    nodes_[i]->update_volume(true, phase, volume_ / nnodes_);
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      nodes_[i]->update_volume(true, phase, volume_ / nnodes_);
+    }
   }
 }
