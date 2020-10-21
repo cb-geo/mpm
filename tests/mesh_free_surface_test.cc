@@ -859,6 +859,11 @@ TEST_CASE("Mesh free surface 2D", "[MeshCell][2D][free_surface]") {
     REQUIRE(particle15->free_surface() == false);
   }
 
+  // Check solutions
+  std::set<mpm::Index> fsc = {6, 7, 8, 11, 13, 16, 17, 18};
+  std::set<mpm::Index> fsn = {7, 8, 9, 10, 13, 16, 19, 22, 25, 26, 27, 28};
+  std::set<mpm::Index> fsp = {0, 1, 2, 3, 4, 7, 8, 11, 12, 13, 14, 15};
+
   SECTION("Mesh free surface 2D by density") {
 
     REQUIRE(mesh->compute_free_surface_by_density(0.25) == true);
@@ -911,11 +916,6 @@ TEST_CASE("Mesh free surface 2D", "[MeshCell][2D][free_surface]") {
     REQUIRE(node27->density(0) == Approx(218.75).epsilon(Tolerance));
     REQUIRE(node28->density(0) == Approx(62.5).epsilon(Tolerance));
 
-    // Check solutions
-    std::set<mpm::Index> fsc = {6, 7, 8, 11, 13, 16, 17, 18};
-    std::set<mpm::Index> fsn = {7, 8, 9, 10, 13, 16, 19, 22, 25, 26, 27, 28};
-    std::set<mpm::Index> fsp = {0, 1, 2, 3, 4, 7, 8, 11, 12, 13, 14, 15};
-
     // Check cell, node, and particle free surface
     REQUIRE(mesh->free_surface_cells() == fsc);
     REQUIRE(mesh->free_surface_nodes() == fsn);
@@ -925,11 +925,6 @@ TEST_CASE("Mesh free surface 2D", "[MeshCell][2D][free_surface]") {
   SECTION("Mesh free surface 2D by geometry") {
 
     REQUIRE(mesh->compute_free_surface_by_geometry(0.25) == true);
-
-    // Check solutions
-    std::set<mpm::Index> fsc = {6, 7, 8, 11, 13, 16, 17, 18};
-    std::set<mpm::Index> fsn = {7, 8, 9, 10, 13, 16, 19, 22, 25, 26, 27, 28};
-    std::set<mpm::Index> fsp = {0, 1, 2, 3, 4, 7, 8, 11, 12, 13, 14, 15};
 
     // Check cell, node, and particle free surface
     REQUIRE(mesh->free_surface_cells() == fsc);
@@ -957,11 +952,6 @@ TEST_CASE("Mesh free surface 2D", "[MeshCell][2D][free_surface]") {
 
   SECTION("Mesh free surface 2D") {
 
-    // Check solutions
-    std::set<mpm::Index> fsc = {6, 7, 8, 11, 13, 16, 17, 18};
-    std::set<mpm::Index> fsn = {7, 8, 9, 10, 13, 16, 19, 22, 25, 26, 27, 28};
-    std::set<mpm::Index> fsp = {0, 1, 2, 3, 4, 7, 8, 11, 12, 13, 14, 15};
-
     std::string method = "density";
     REQUIRE(mesh->compute_free_surface(method, 0.25) == true);
 
@@ -983,3 +973,223 @@ TEST_CASE("Mesh free surface 2D", "[MeshCell][2D][free_surface]") {
   }
 }
 
+TEST_CASE("Mesh free surface 3D", "[MeshCell][3D][free_surface]") {
+  // Dimension
+  const unsigned Dim = 3;
+  // Degrees of freedom
+  const unsigned Dof = 3;
+  // Number of phases
+  const unsigned Nphases = 1;
+  // Number of nodes per cell
+  const unsigned Nnodes = 8;
+  // Tolerance
+  const double Tolerance = 1.E-7;
+
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["bulk_modulus"] = 8333333.333333333;
+  jmaterial["dynamic_viscosity"] = 8.9E-4;
+  auto material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "Newtonian3D", std::move(0), jmaterial);
+
+  auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+  // Check mesh is active
+  REQUIRE(mesh->status() == false);
+
+  // Create nodes
+  Eigen::Vector3d coords;
+  mpm::Index id = 0;
+  double mesh_size = 2.;
+  for (unsigned k = 0; k < 6; k++) {
+    for (unsigned j = 0; j < 6; j++) {
+      for (unsigned i = 0; i < 6; i++) {
+        coords << double(i * mesh_size), double(j * mesh_size),
+            double(k * mesh_size);
+        std::shared_ptr<mpm::NodeBase<Dim>> node =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+        REQUIRE(mesh->add_node(node) == true);
+        id++;
+      }
+    }
+  }
+
+  REQUIRE(mesh->nnodes() == 216);
+
+  // 8-noded hexahedral shape functions
+  std::shared_ptr<mpm::Element<Dim>> element =
+      Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
+
+  // Create cells
+  id = 0;
+  for (unsigned k = 0; k < 5; k++) {
+    for (unsigned j = 0; j < 5; j++) {
+      for (unsigned i = 0; i < 5; i++) {
+        auto node_0 = mesh->node(k * 36 + j * 6 + i);
+        auto node_1 = mesh->node(k * 36 + j * 6 + i + 1);
+        auto node_2 = mesh->node(k * 36 + (j + 1) * 6 + i + 1);
+        auto node_3 = mesh->node(k * 36 + (j + 1) * 6 + i);
+
+        auto node_4 = mesh->node((k + 1) * 36 + j * 6 + i);
+        auto node_5 = mesh->node((k + 1) * 36 + j * 6 + i + 1);
+        auto node_6 = mesh->node((k + 1) * 36 + (j + 1) * 6 + i + 1);
+        auto node_7 = mesh->node((k + 1) * 36 + (j + 1) * 6 + i);
+
+        auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+        cell->add_node(0, node_0);
+        cell->add_node(1, node_1);
+        cell->add_node(2, node_2);
+        cell->add_node(3, node_3);
+        cell->add_node(4, node_4);
+        cell->add_node(5, node_5);
+        cell->add_node(6, node_6);
+        cell->add_node(7, node_7);
+        REQUIRE(cell->nnodes() == 8);
+
+        // Initialise cell and add to mesh
+        REQUIRE(cell->initialise() == true);
+        REQUIRE(mesh->add_cell(cell) == true);
+
+        id++;
+      }
+    }
+  }
+
+  REQUIRE(mesh->ncells() == 125);
+
+  // Find cell neighbours
+  mesh->find_cell_neighbours();
+
+  // Create particles
+  id = 0;
+  double particle_size = 1.;
+  Eigen::Vector3d base_coords;
+  base_coords << 3.5, 3.5, 3.5;
+  for (unsigned k = 0; k < 4; k++) {
+    for (unsigned j = 0; j < 4; j++) {
+      for (unsigned i = 0; i < 4; i++) {
+        coords << double(i * particle_size), double(j * particle_size),
+            double(k * particle_size);
+        std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+            std::make_shared<mpm::Particle<Dim>>(id, base_coords + coords);
+        REQUIRE(mesh->add_particle(particle, false) == true);
+        id++;
+      }
+    }
+  }
+
+  REQUIRE(mesh->nparticles() == 64);
+
+  // Assign material to particles
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
+                material, 0));
+
+  // Locate particles in a mesh
+  auto particles = mesh->locate_particles_mesh();
+
+  // Should find all particles in mesh
+  REQUIRE(particles.size() == 0);
+
+  // Find particle neighbours
+  mesh->find_particle_neighbours();
+
+  // Initialise particle variables
+  // Assign particle volume
+  mesh->iterate_over_particles(std::bind(&mpm::ParticleBase<Dim>::assign_volume,
+                                         std::placeholders::_1, 1.));
+
+  // Compute mass
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
+
+  // Initialise nodes
+  mesh->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Dim>::initialise, std::placeholders::_1));
+
+  mesh->iterate_over_cells(
+      std::bind(&mpm::Cell<Dim>::activate_nodes, std::placeholders::_1));
+
+  // Iterate over each particle to compute shapefn
+  mesh->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Dim>::compute_shapefn, std::placeholders::_1));
+
+  // Assign mass and momentum to nodes
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
+                std::placeholders::_1));
+
+  // Check solutions
+  std::set<mpm::Index> fsc = {31, 32, 33, 36, 37, 38, 41, 42, 43,
+                              56, 57, 58, 61, 63, 66, 67, 68, 81,
+                              82, 83, 86, 87, 88, 91, 92, 93};
+  std::set<mpm::Index> fsn = {
+      43,  44,  45,  46,  49,  50,  51,  52,  55,  56,  57,  58,  61,  62,
+      63,  64,  79,  80,  81,  82,  85,  88,  91,  94,  97,  98,  99,  100,
+      115, 116, 117, 118, 121, 124, 127, 130, 133, 134, 135, 136, 151, 152,
+      153, 154, 157, 158, 159, 160, 163, 164, 165, 166, 169, 170, 171, 172};
+  std::set<mpm::Index> fsp = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                              12, 13, 14, 15, 16, 17, 18, 19, 20, 23, 24, 27,
+                              28, 29, 30, 31, 32, 33, 34, 35, 36, 39, 40, 43,
+                              44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55,
+                              56, 57, 58, 59, 60, 61, 62, 63};
+
+  SECTION("Mesh free surface 3D by density") {
+    // Check initial free surface
+    REQUIRE(mesh->free_surface_cells().size() == 0);
+    REQUIRE(mesh->free_surface_nodes().size() == 0);
+    REQUIRE(mesh->free_surface_particles().size() == 0);
+
+    REQUIRE(mesh->compute_free_surface_by_density(0.125) == true);
+
+    // Check cell, node, and particle free surface
+    REQUIRE(mesh->free_surface_cells() == fsc);
+    REQUIRE(mesh->free_surface_nodes() == fsn);
+    REQUIRE(mesh->free_surface_particles() == fsp);
+  }
+
+  SECTION("Mesh free surface 3D by geometry") {
+
+    REQUIRE(mesh->compute_free_surface_by_geometry(0.125) == true);
+
+    // Check cell, node, and particle free surface
+    REQUIRE(mesh->free_surface_cells() == fsc);
+    REQUIRE(mesh->free_surface_nodes() == fsn);
+    REQUIRE(mesh->free_surface_particles() == fsp);
+
+    // Check particle normal vector
+    auto particle_normal = mesh->particles_vector_data("normals");
+    for (unsigned fs_id = 0; fs_id < particle_normal.size(); fs_id++) {
+      if (fsp.find(fs_id) != fsp.end())
+        REQUIRE(particle_normal[fs_id].norm() ==
+                Approx(1.0).epsilon(Tolerance));
+      else
+        REQUIRE(particle_normal[fs_id].norm() ==
+                Approx(0.0).epsilon(Tolerance));
+    }
+  }
+
+  SECTION("Mesh free surface 3D") {
+
+    std::string method = "density";
+    REQUIRE(mesh->compute_free_surface(method, 0.125) == true);
+
+    // Check cell, node, and particle free surface
+    REQUIRE(mesh->free_surface_cells() == fsc);
+    REQUIRE(mesh->free_surface_nodes() == fsn);
+    REQUIRE(mesh->free_surface_particles() == fsp);
+
+    method = "geometry";
+    REQUIRE(mesh->compute_free_surface(method, 0.125) == true);
+
+    // Check cell, node, and particle free surface
+    REQUIRE(mesh->free_surface_cells() == fsc);
+    REQUIRE(mesh->free_surface_nodes() == fsn);
+    REQUIRE(mesh->free_surface_particles() == fsp);
+
+    method = "other";
+    REQUIRE(mesh->compute_free_surface(method, 0.125) == true);
+  }
+}
