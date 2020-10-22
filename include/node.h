@@ -284,6 +284,11 @@ class Node : public NodeBase<Tdim> {
   bool compute_nodal_correction_force(
       const VectorDim& correction_force) override;
 
+  //! Compute nodal correction force term for two phase
+  bool compute_nodal_correction_force(
+      const VectorDim& force_cor_part_solid,
+      const VectorDim& force_cor_part_water) override;
+
   //! Update correction force
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

@@ -283,6 +283,13 @@ class Cell {
   void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
                                        const Eigen::MatrixXd& grad_shapefn,
                                        double pvolume) noexcept;
+
+  //! Compute local correction matrix for two phase (Used to correct velocity)
+  void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
+                                       const Eigen::MatrixXd& grad_shapefn,
+                                       double pvolume,
+                                       double porosity) noexcept;
+
   //! Return previous mpi rank
   unsigned previous_mpirank() const;
 
@@ -371,6 +378,8 @@ class Cell {
   Eigen::MatrixXd poisson_right_matrix_m_;
   //! Local correction RHS matrix
   Eigen::MatrixXd correction_matrix_;
+  //! Local correction RHS matrix for fluid
+  Eigen::MatrixXd correction_matrix_w_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class

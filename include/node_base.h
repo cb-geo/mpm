@@ -375,6 +375,12 @@ class NodeBase {
   //! Compute nodal correction force term
   virtual bool compute_nodal_correction_force(
       const VectorDim& correction_force) = 0;
+
+  //! Compute nodal correction force term for two phase
+  virtual bool compute_nodal_correction_force(
+      const VectorDim& force_cor_part_solid,
+      const VectorDim& force_cor_part_water) = 0;
+
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name

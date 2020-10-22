@@ -241,3 +241,24 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
   }
   return status;
 }
+
+//! Compute nodal corrected force
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
+    const VectorDim& force_cor_part_solid,
+    const VectorDim& force_cor_part_water) {
+  bool status = true;
+
+  try {
+    // Compute corrected force for solid phase
+    correction_force_.col(0) =
+        mass_(0) * acceleration_inter_.col(0) + force_cor_part_solid;
+    // Compute corrected force for water phase
+    correction_force_.col(1) =
+        mass_(1) * acceleration_inter_.col(1) + force_cor_part_water;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

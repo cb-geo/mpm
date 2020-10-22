@@ -540,6 +540,11 @@ class Mesh {
       const Eigen::SparseMatrix<double>& correction_matrix,
       const Eigen::VectorXd& pressure_increment, double dt);
 
+  //! Compute correction force in the node for twophase
+  bool compute_nodal_correction_force_twophase(
+      const Eigen::SparseMatrix<double>& correction_matrix,
+      const Eigen::VectorXd& pressure_increment, double dt);
+
   // Create the nodal properties' map
   void create_nodal_properties();
 

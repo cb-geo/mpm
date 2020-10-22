@@ -883,6 +883,8 @@ bool mpm::Cell<Tdim>::initialise_element_matrix() {
       // Initialse correction RHS matrix (NxTdim)
       correction_matrix_.resize(nnodes_, nnodes_ * Tdim);
       correction_matrix_.setZero();
+      correction_matrix_w_.resize(nnodes_, nnodes_ * Tdim);
+      correction_matrix_w_.setZero();
 
     } catch (std::exception& exception) {
       console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -960,6 +962,23 @@ void mpm::Cell<Tdim>::compute_local_correction_matrix(
   for (unsigned i = 0; i < Tdim; i++) {
     correction_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
         shapefn * grad_shapefn.col(i).transpose() * pvolume;
+  }
+}
+
+//! Compute local correction matrix
+//! Used in compute corrector of nodal velocity for two phase solver
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_local_correction_matrix(
+    const Eigen::VectorXd& shapefn, const Eigen::MatrixXd& grad_shapefn,
+    double pvolume, double porosity) noexcept {
+
+  std::lock_guard<std::mutex> guard(cell_mutex_);
+  for (unsigned i = 0; i < Tdim; i++) {
+    // Compute correction_matrix_ and correction_matrix_w_
+    correction_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
+        shapefn * grad_shapefn.col(i).transpose() * (1 - porosity) * pvolume;
+    correction_matrix_w_.block(0, i * nnodes_, nnodes_, nnodes_) +=
+        shapefn * grad_shapefn.col(i).transpose() * porosity * pvolume;
   }
 }
 

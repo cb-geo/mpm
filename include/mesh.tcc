@@ -2227,6 +2227,58 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
   return status;
 };
 
+//! Compute nodal corrected force for twophase
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::compute_nodal_correction_force_twophase(
+    const Eigen::SparseMatrix<double>& correction_matrix,
+    const Eigen::VectorXd& pressure_increment, double dt) {
+  bool status = true;
+  try {
+    //! active node size
+    const auto active_dof = active_nodes_.size();
+
+    // Part of nodal corrected force of one direction
+    Eigen::MatrixXd force_cor_part;
+    force_cor_part.resize(active_dof * 2, Tdim);
+
+    // Iterate over each direction
+    for (unsigned i = 0; i < Tdim; ++i) {
+      // Solid phase
+      force_cor_part.block(0, i, active_dof, 1) =
+          -correction_matrix.block(0, active_dof * i, active_dof, active_dof) *
+          pressure_increment;
+      // Water phase
+      force_cor_part.block(active_dof, i, active_dof, 1) =
+          -correction_matrix.block(active_dof, active_dof * i, active_dof,
+                                   active_dof) *
+          pressure_increment;
+    }
+
+    // Iterate over each active node
+    VectorDim force_cor_part_solid;
+    VectorDim force_cor_part_water;
+    // Iterate over each active node
+    for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend();
+         ++nitr) {
+      //! Active id
+      unsigned active_id = (*nitr)->active_id();
+      // Solid phase
+      force_cor_part_solid = (force_cor_part.row(active_id)).transpose();
+      // Water phase
+      force_cor_part_water =
+          (force_cor_part.row(active_id + active_dof)).transpose();
+
+      // Compute corrected force for each node
+      map_nodes_[(*nitr)->id()]->compute_nodal_correction_force(
+          force_cor_part_solid, force_cor_part_water);
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+};
+
 //! Compute free surface cells, nodes, and particles
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::compute_free_surface(const std::string& method,

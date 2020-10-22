@@ -589,7 +589,7 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::compute_correction_force() {
     assembler_->assemble_corrector_right(dt_);
 
     // Assign correction force
-    mesh_->compute_nodal_correction_force(
+    mesh_->compute_nodal_correction_force_twophase(
         assembler_->correction_matrix(), assembler_->pressure_increment(), dt_);
 
   } catch (std::exception& exception) {
