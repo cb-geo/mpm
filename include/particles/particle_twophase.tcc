@@ -464,7 +464,8 @@ inline void mpm::TwoPhaseParticle<1>::map_liquid_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 1, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
+    force[0] =
+        dn_dx_(i, 0) * pressure * this->porosity_ * this->projection_param_;
 
     force *= -1. * this->volume_;
 
@@ -483,8 +484,10 @@ inline void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 2, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
-    force[1] = dn_dx_(i, 1) * pressure * this->porosity_;
+    force[0] =
+        dn_dx_(i, 0) * pressure * this->porosity_ * this->projection_param_;
+    force[1] =
+        dn_dx_(i, 1) * pressure * this->porosity_ * this->projection_param_;
 
     force *= -1. * this->volume_;
 
@@ -502,9 +505,12 @@ inline void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 3, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
-    force[1] = dn_dx_(i, 1) * pressure * this->porosity_;
-    force[2] = dn_dx_(i, 2) * pressure * this->porosity_;
+    force[0] =
+        dn_dx_(i, 0) * pressure * this->porosity_ * this->projection_param_;
+    force[1] =
+        dn_dx_(i, 1) * pressure * this->porosity_ * this->projection_param_;
+    force[2] =
+        dn_dx_(i, 2) * pressure * this->porosity_ * this->projection_param_;
 
     force *= -1. * this->volume_;
 
@@ -520,7 +526,7 @@ inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force() noexcept {
       -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
   // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) += pressure;
+  total_stress(0) += pressure * this->projection_param_;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -542,8 +548,8 @@ inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force() noexcept {
       -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
   // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) += pressure;
-  total_stress(1) += pressure;
+  total_stress(0) += pressure * this->projection_param_;
+  total_stress(1) += pressure * this->projection_param_;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -565,9 +571,9 @@ inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force() noexcept {
       -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
   // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) += pressure;
-  total_stress(1) += pressure;
-  total_stress(2) += pressure;
+  total_stress(0) += pressure * this->projection_param_;
+  total_stress(1) += pressure * this->projection_param_;
+  total_stress(2) += pressure * this->projection_param_;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {

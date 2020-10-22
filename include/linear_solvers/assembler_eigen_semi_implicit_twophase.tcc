@@ -109,6 +109,9 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_stiffness_matrix(
     }
 
     // Add stiffness matrix to map
+    if (stiffness_matrix_.find(dir) != stiffness_matrix_.end())
+      stiffness_matrix_.erase(dir);
+
     stiffness_matrix_.insert(
         std::make_pair<unsigned, Eigen::SparseMatrix<double>>(
             static_cast<unsigned>(dir),

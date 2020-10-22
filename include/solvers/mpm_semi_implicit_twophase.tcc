@@ -308,7 +308,6 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Compute poisson equation
-    // TODO
     this->compute_poisson_equation();
 
     // Assign pressure to nodes
@@ -324,7 +323,6 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
                   std::placeholders::_1));
 
     // Compute correction force
-    // TODO
     this->compute_correction_force();
 
 #ifdef USE_MPI
@@ -374,9 +372,6 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
     }
 
-    // Update stress first
-    if (this->stress_update_ == "usl") this->compute_stress_strain();
-
     // Update particle position and kinematics
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
@@ -384,6 +379,9 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
 
     // Apply particle velocity constraints
     mesh_->apply_particle_velocity_constraints();
+
+    // Update stress first
+    if (this->stress_update_ == "usl") this->compute_stress_strain();
 
     // Locate particle
     auto unlocatable_particles = mesh_->locate_particles_mesh();
