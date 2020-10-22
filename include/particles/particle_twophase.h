@@ -165,6 +165,28 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
 
+  //! ----------------------------------------------------------------
+  //! Semi-Implicit integration functions based on Chorin's Projection
+  //! ----------------------------------------------------------------
+
+  //! Assigning beta parameter to particle
+  //! \param[in] pressure parameter determining type of projection
+  void assign_projection_parameter(double parameter) override {
+    this->projection_param_ = parameter;
+  };
+
+  //! Map K inter element matrix to cell
+  bool map_K_inter_to_cell() override;
+
+  //! Update pressure after solving poisson equation
+  bool compute_updated_pressure() override;
+
+  //! Map laplacian element matrix to cell (used in poisson equation LHS)
+  bool map_laplacian_to_cell() override;
+
+  //! Map poisson rhs element matrix to cell (used in poisson equation RHS)
+  bool map_poisson_right_to_cell() override;
+
  protected:
   //! Compute pack size
   //! \retval pack size of serialized object
@@ -272,6 +294,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   Eigen::Matrix<double, Tdim, 1> liquid_traction_;
   //! Liquid velocity
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
+  //! Projection parameter for semi-implicit update
+  double projection_param_{1.0};
   //! Pore pressure constraint
   double pore_pressure_constraint_{std::numeric_limits<unsigned>::max()};
   //! Permeability parameter c1 (k = k_p * c1)

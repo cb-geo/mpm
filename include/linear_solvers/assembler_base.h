@@ -87,8 +87,71 @@ class AssemblerBase {
   //! Return the total size of global dof in all rank
   virtual unsigned global_active_dof() = 0;
 
+  //! Return number of total active_dof
+  virtual unsigned active_dof() { return active_dof_; };
+
   //! Return a vector to map local (rank) index to global index
   virtual std::vector<int> rank_global_mapper() = 0;
+
+  //! TwoPhase functions--------------------------------------------------------
+  //! Assemble stiffness matrix (semi-implicit)
+  virtual bool assemble_stiffness_matrix(unsigned dir, double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_stiffness_matrix) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assemble force vector (semi-implicit)
+  virtual bool assemble_force_vector(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_force_vector) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Apply velocity constraints for matrix and vector
+  virtual bool apply_velocity_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function (apply_velocity_constraints) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign nodal intermediate acceleration
+  virtual void assign_intermediate_acceleration(
+      unsigned dim, Eigen::VectorXd acceleration_inter) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_intermediate_acceleration) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Return stiffness matrix
+  virtual Eigen::SparseMatrix<double> stiffness_matrix(unsigned dir) {
+    Eigen::SparseMatrix<double> error;
+    throw std::runtime_error(
+        "Calling the base class function (stiffness_matrix) in "
+        "AssemblerBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return intermediate force
+  virtual Eigen::MatrixXd intermediate_force() {
+    Eigen::MatrixXd error;
+    throw std::runtime_error(
+        "Calling the base class function (intermediate_force) in "
+        "AssemblerBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return intermediate acceleration
+  virtual Eigen::MatrixXd intermediate_acceleration() {
+    Eigen::MatrixXd error;
+    throw std::runtime_error(
+        "Calling the base class function (intermediate_acceleration) in "
+        "AssemblerBase:: illegal operation!");
+    return error;
+  };
 
  protected:
   //! Number of total active_dof

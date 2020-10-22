@@ -141,15 +141,18 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
-  //! Update internal force (body force / traction force)
+  //! Update drag force coefficient
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
-  //! \retval status Update status
   virtual void update_drag_force_coefficient(bool update,
                                              const VectorDim& drag_force) = 0;
 
   //! Return drag force at a given node
   virtual VectorDim drag_force_coefficient() const = 0;
+
+  //! Update drag force
+  //! \param[in] drag_force Drag force vector
+  virtual void update_drag_force(const VectorDim& drag_force) = 0;
 
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
@@ -326,6 +329,36 @@ class NodeBase {
   //! \retval status Computation status
   virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
       unsigned phase, double dt) = 0;
+
+  //! Compute semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_twophase_semi_implicit(
+      unsigned phase, double dt) = 0;
+
+  //! Compute semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_twophase_semi_implicit_cundall(
+      unsigned phase, double dt, double damping_factor) = 0;
+
+  //! Compute intermediate force
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_intermediate_force(const double dt) = 0;
+
+  //! Return total intermediate force
+  virtual VectorDim force_total_inter() = 0;
+
+  //! Return fluid intermediate force
+  virtual VectorDim force_fluid_inter() = 0;
+
+  //! Update intermediate velocity at the node
+  virtual void update_intermediate_velocity(
+      const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
+      double dt) = 0;
 
   //! Return pressure constraint
   virtual double pressure_constraint(const unsigned phase,

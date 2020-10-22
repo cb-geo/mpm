@@ -491,6 +491,15 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
     return 0;
   };
+
+  //! TwoPhase functions specific for semi-implicit
+  //! Map K inter element matrix to cell
+  virtual bool map_K_inter_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function (map_K_inter_to_cell) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
   //----------------------------------------------------------------------------
 
  protected:

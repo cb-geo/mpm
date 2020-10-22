@@ -1240,3 +1240,89 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   }
 #endif
 }
+
+//! Compute local matrix of K_inter
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_K_inter_to_cell() {
+  bool status = true;
+  try {
+    // Initialise drag force multiplier
+    VectorDim multiplier;
+    multiplier.setZero();
+    // Compute drag force multiplier
+    for (unsigned i = 0; i < Tdim; ++i)
+      multiplier(i) = this->porosity_ * this->porosity_ * 9.81 *
+                      this->material(mpm::ParticlePhase::Liquid)
+                          ->template property<double>(std::string("density")) /
+                      this->permeability_(i);
+    // Compute local matrix of K_inter
+    cell_->compute_K_inter_element(shapefn_, volume_, multiplier);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated pressure of the particle based on nodal pressure
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::compute_updated_pressure() {
+  bool status = true;
+  try {
+    double pressure_increment = 0;
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      pressure_increment += shapefn_(i) * nodes_[i]->pressure_increment();
+    }
+
+    // Get interpolated nodal pressure
+    state_variables_[mpm::ParticlePhase::Liquid].at("pressure") =
+        state_variables_[mpm::ParticlePhase::Liquid].at("pressure") *
+            projection_param_ +
+        pressure_increment;
+
+    // Overwrite pressure if free surface
+    if (this->free_surface())
+      state_variables_[mpm::ParticlePhase::Liquid].at("pressure") = 0.0;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map laplacian element matrix to cell (used in poisson equation LHS)
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_laplacian_to_cell() {
+  bool status = true;
+  try {
+    // Compute multiplier
+    const double multiplier =
+        (1 - this->porosity_) /
+            this->material(mpm::ParticlePhase::Solid)
+                ->template property<double>(std::string("density")) +
+        this->porosity_ /
+            this->material(mpm::ParticlePhase::Liquid)
+                ->template property<double>(std::string("density"));
+    // Compute local matrix of Laplacian
+    cell_->compute_local_laplacian(dn_dx_, volume_, multiplier);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map poisson rhs element matrix to cell (used in poisson equation RHS)
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_poisson_right_to_cell() {
+  bool status = true;
+  try {
+    // Compute local poisson rhs matrix
+    cell_->compute_local_poisson_right_twophase(shapefn_, dn_dx_, volume_,
+                                                porosity_);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

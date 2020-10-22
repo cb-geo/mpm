@@ -39,7 +39,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   solving_status_ = false;
   material_ids_.clear();
   // Specific variables for two phase
+  // TODO
   drag_force_coefficient_.setZero();
+  drag_force_.setZero();
+  force_total_inter_.setZero();
+  force_fluid_inter_.setZero();
+  velocity_inter_.setZero();
+  acceleration_inter_.setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool

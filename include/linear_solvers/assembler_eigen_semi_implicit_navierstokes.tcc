@@ -99,6 +99,7 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<
   return status;
 }
 
+// Assemble poisson right vector
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_poisson_right(
     double dt) {

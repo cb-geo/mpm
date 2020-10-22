@@ -1,5 +1,5 @@
-#ifndef MPM_MPM_SEMI_IMPLICIT_NAVIER_STOKES_H_
-#define MPM_MPM_SEMI_IMPLICIT_NAVIER_STOKES_H_
+#ifndef MPM_MPM_SEMI_IMPLICIT_TWOPHASE_H_
+#define MPM_MPM_SEMI_IMPLICIT_TWOPHASE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -13,19 +13,22 @@
 
 namespace mpm {
 
-//! MPMSemiImplicit Navier Stokes class
-//! \brief A class that implements the fractional step navier-stokes mpm
+//! MPMSemiImplicit Two Phase class
+//! \brief A class that implements the fractional step two-phase mpm
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
+class MPMSemiImplicitTwoPhase : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  MPMSemiImplicitNavierStokes(const std::shared_ptr<IO>& io);
+  MPMSemiImplicitTwoPhase(const std::shared_ptr<IO>& io);
 
   //! Return matrix assembler pointer
   std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler() {
     return assembler_;
   }
+
+  //! Compute stress strain
+  void compute_stress_strain();
 
   //! Solve
   bool solve() override;
@@ -37,6 +40,9 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
 
   //! Initialise matrix
   bool reinitialise_matrix();
+
+  //! Compute intermediate velocity
+  bool compute_intermediate_velocity(std::string solver_type = "lscg");
 
   //! Compute poisson equation
   bool compute_poisson_equation(std::string solver_type = "cg");
@@ -66,6 +72,10 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
+  //! Damping type
+  using mpm::MPMBase<Tdim>::damping_type_;
+  //! Damping factor
+  using mpm::MPMBase<Tdim>::damping_factor_;
   //! Stress update
   using mpm::MPMBase<Tdim>::stress_update_;
   //! velocity update
@@ -94,6 +104,6 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
 };  // MPMSemiImplicit class
 }  // namespace mpm
 
-#include "mpm_semi_implicit_navierstokes.tcc"
+#include "mpm_semi_implicit_twophase.tcc"
 
-#endif  // MPM_MPM_SEMI_IMPLICIT_NAVIER_STOKES_H_
+#endif  // MPM_MPM_SEMI_IMPLICIT_TWOPHASE_H_

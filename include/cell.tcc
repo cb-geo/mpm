@@ -877,6 +877,8 @@ bool mpm::Cell<Tdim>::initialise_element_matrix() {
       // Initialse poisson RHS matrix (Nx(N*Tdim))
       poisson_right_matrix_.resize(nnodes_, nnodes_ * Tdim);
       poisson_right_matrix_.setZero();
+      poisson_right_matrix_m_.resize(nnodes_, nnodes_ * Tdim);
+      poisson_right_matrix_m_.setZero();
 
       // Initialse correction RHS matrix (NxTdim)
       correction_matrix_.resize(nnodes_, nnodes_ * Tdim);
@@ -888,6 +890,18 @@ bool mpm::Cell<Tdim>::initialise_element_matrix() {
     }
   }
   return status;
+}
+
+//! Compute local matrix of K_inter
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_K_inter_element(
+    const Eigen::VectorXd& shapefn, double pvolume,
+    const VectorDim& multiplier) noexcept {
+  // Lock the storage
+  std::lock_guard<std::mutex> guard(cell_mutex_);
+  // TODO: Notice that the multiplier pass is a vector of xyz direction
+  // (currently only using x) Compute local matrix of K_inter
+  K_inter_element_ += multiplier(0) * pvolume * shapefn * (shapefn.transpose());
 }
 
 //! Compute local matrix of laplacian
@@ -912,6 +926,26 @@ void mpm::Cell<Tdim>::compute_local_poisson_right(
   for (unsigned i = 0; i < Tdim; i++) {
     poisson_right_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
         shapefn * grad_shapefn.col(i).transpose() * multiplier * pvolume;
+  }
+}
+
+//! Compute local poisson RHS matrix
+//! Used in poisson equation RHS for two phase solver
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_local_poisson_right_twophase(
+    const Eigen::VectorXd& shapefn, const Eigen::MatrixXd& grad_shapefn,
+    double pvolume, double porosity) noexcept {
+
+  // Lock the storage
+  std::lock_guard<std::mutex> guard(cell_mutex_);
+  // Compute components at nodes
+  for (unsigned i = 0; i < Tdim; i++) {
+    // F_s_element
+    poisson_right_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
+        shapefn * grad_shapefn.col(i).transpose() * pvolume;
+    // F_m_element
+    poisson_right_matrix_m_.block(0, i * nnodes_, nnodes_, nnodes_) +=
+        grad_shapefn.col(i) * shapefn.transpose() * pvolume * porosity;
   }
 }
 

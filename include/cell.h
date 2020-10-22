@@ -226,8 +226,18 @@ class Cell {
   //! Return local node indices
   Eigen::VectorXi local_node_indices();
 
+  //! Return stiffness matrix
+  const Eigen::MatrixXd& K_inter_element() { return K_inter_element_; };
+
   //! Return local laplacian
   const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
+
+  //! Compute local matrix of K_inter
+  //! \param[in] shapefn Shape function
+  //! \param[in] pvolume Volume weight
+  //! \param[in] multiplier Drag force multiplier
+  void compute_K_inter_element(const Eigen::VectorXd& shapefn, double pvolume,
+                               const VectorDim& multiplier) noexcept;
 
   //! Compute local laplacian matrix (Used in poisson equation)
   //! \param[in] grad_shapefn shape function gradient
@@ -242,6 +252,11 @@ class Cell {
     return poisson_right_matrix_;
   };
 
+  //! Return local laplacian RHS matrix for mixture
+  const Eigen::MatrixXd& poisson_right_matrix_m() {
+    return poisson_right_matrix_m_;
+  };
+
   //! Compute local poisson RHS matrix (Used in poisson equation)
   //! \param[in] shapefn shape function
   //! \param[in] grad_shapefn shape function gradient
@@ -250,6 +265,16 @@ class Cell {
                                    const Eigen::MatrixXd& grad_shapefn,
                                    double pvolume,
                                    double multiplier = 1.0) noexcept;
+
+  //! Compute local poisson RHS matrix for two phase(Used in poisson equation)
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  //! \param[in] porosity Porosity
+  void compute_local_poisson_right_twophase(const Eigen::VectorXd& shapefn,
+                                            const Eigen::MatrixXd& grad_shapefn,
+                                            double pvolume,
+                                            double porosity) noexcept;
 
   //! Return local correction matrix
   const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
@@ -336,10 +361,14 @@ class Cell {
   bool free_surface_{false};
   //! Volume fraction
   double volume_fraction_{0.0};
+  //! Drag force coefficient
+  Eigen::MatrixXd K_inter_element_;
   //! Local laplacian matrix
   Eigen::MatrixXd laplacian_matrix_;
-  //! Local poisson RHS matrix
+  //! Local poisson RHS matrix (Solid in twophase)
   Eigen::MatrixXd poisson_right_matrix_;
+  //! Local poisson RHS matrix (Mixture in twophase)
+  Eigen::MatrixXd poisson_right_matrix_m_;
   //! Local correction RHS matrix
   Eigen::MatrixXd correction_matrix_;
   //! Logger

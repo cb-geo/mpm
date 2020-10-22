@@ -384,6 +384,12 @@ class Node : public NodeBase<Tdim> {
   void update_drag_force_coefficient(bool update,
                                      const VectorDim& drag_force) override;
 
+  //! Update drag force
+  //! \param[in] drag_force Drag force vector
+  void update_drag_force(const VectorDim& drag_force) override {
+    drag_force_ += drag_force;
+  };
+
   //! Compute acceleration and velocity for two phase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity_twophase_explicit(
@@ -398,6 +404,44 @@ class Node : public NodeBase<Tdim> {
   //! Return drag force at a given node
   VectorDim drag_force_coefficient() const override {
     return drag_force_coefficient_;
+  }
+
+  //! Compute intermediate force
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  bool compute_intermediate_force(const double dt) override;
+
+  //! Return total intermediate force
+  VectorDim force_total_inter() override { return force_total_inter_; }
+
+  //! Return fluid intermediate force
+  VectorDim force_fluid_inter() override { return force_fluid_inter_; }
+
+  //! Compute semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_twophase_semi_implicit(unsigned phase,
+                                                            double dt);
+
+  //! Compute semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_twophase_semi_implicit_cundall(
+      unsigned phase, double dt, double damping_factor);
+
+  //! Update nodal intermediate vlocity
+  void update_intermediate_velocity(const unsigned phase,
+                                    const Eigen::MatrixXd& acceleration_inter,
+                                    double dt) {
+    // Update nodal intermediate acceleration
+    acceleration_inter_.col(phase) =
+        acceleration_inter.row(active_id_).transpose();
+    // Update nodal intermediate vlocity
+    velocity_inter_.col(phase) =
+        velocity_.col(phase) +
+        dt * acceleration_inter.row(active_id_).transpose();
   }
   //----------------------------------------------------------------------------
 
@@ -426,12 +470,22 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Drag_force
+  VectorDim drag_force_;
   //! Drag force
-  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
+  VectorDim drag_force_coefficient_;
+  //! Intermediate total force
+  VectorDim force_total_inter_;
+  //! Intermediate fluid force
+  VectorDim force_fluid_inter_;
+  //! Intermediate velocity
+  Eigen::Matrix<double, Tdim, Tnphases> velocity_inter_;
+  //! Intermediate acceleration
+  Eigen::Matrix<double, Tdim, Tnphases> acceleration_inter_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
-  Eigen::Matrix<double, Tdim, 1> contact_displacement_;
+  VectorDim contact_displacement_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
