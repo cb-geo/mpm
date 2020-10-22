@@ -870,6 +870,10 @@ bool mpm::Cell<Tdim>::initialise_element_matrix() {
   bool status = true;
   if (this->status()) {
     try {
+      // Initialse Stiffness matrix
+      K_inter_element_.resize(nnodes_, nnodes_);
+      K_inter_element_.setZero();
+
       // Initialse Laplacian matrix (NxN)
       laplacian_matrix_.resize(nnodes_, nnodes_);
       laplacian_matrix_.setZero();

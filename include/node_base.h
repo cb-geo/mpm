@@ -355,6 +355,9 @@ class NodeBase {
   //! Return fluid intermediate force
   virtual VectorDim force_fluid_inter() = 0;
 
+  //! Reture map of velocity constraints
+  virtual std::map<unsigned, double>& velocity_constraints() = 0;
+
   //! Update intermediate velocity at the node
   virtual void update_intermediate_velocity(
       const unsigned phase, const Eigen::MatrixXd& acceleration_inter,

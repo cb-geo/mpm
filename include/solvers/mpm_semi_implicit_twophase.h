@@ -86,6 +86,8 @@ class MPMSemiImplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::mesh_;
   //! Materials
   using mpm::MPMBase<Tdim>::materials_;
+  //! Node concentrated force
+  using mpm::MPMBase<Tdim>::set_node_concentrated_force_;
   //! Pressure smoothing
   bool pressure_smoothing_{false};
   //! Pore pressure smoothing

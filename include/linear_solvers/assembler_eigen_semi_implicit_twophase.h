@@ -28,9 +28,6 @@ class AssemblerEigenSemiImplicitTwoPhase : public AssemblerBase<Tdim> {
   //! Assemble RHS force vector
   bool assemble_force_vector(double dt) override;
 
-  //! Apply velocity constraints for matrix and vector
-  bool apply_velocity_constraints() override;
-
   //! Assign intermediate acceleration
   void assign_intermediate_acceleration(
       unsigned dir, Eigen::VectorXd acceleration_inter) override {
@@ -69,6 +66,12 @@ class AssemblerEigenSemiImplicitTwoPhase : public AssemblerBase<Tdim> {
       const std::set<mpm::Index>& free_surface_id) override {
     free_surface_ = free_surface_id;
   }
+
+  //! Assign velocity constraints
+  bool assign_velocity_constraints() override;
+
+  //! Apply velocity constraints for matrix and vector
+  bool apply_velocity_constraints() override;
 
   //! Assign pressure constraints
   bool assign_pressure_constraints(double beta, double current_time) override;

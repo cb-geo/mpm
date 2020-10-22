@@ -458,6 +458,11 @@ class Node : public NodeBase<Tdim> {
   VectorDim intermediate_acceleration(const unsigned phase) {
     return acceleration_inter_.col(phase);
   }
+
+  //! Reture map of velocity constraints
+  std::map<unsigned, double>& velocity_constraints() override {
+    return velocity_constraints_;
+  }
   //----------------------------------------------------------------------------
 
  private:

@@ -90,6 +90,14 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
     throw std::runtime_error("Initialisation of matrix failed");
   }
 
+  // Assign porosity
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::assign_porosity, std::placeholders::_1));
+
+  // Assign permeability
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::assign_permeability, std::placeholders::_1));
+
   // Compute mass for two phase
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
@@ -216,6 +224,14 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
 
         // Apply particle traction and map to nodes
         mesh_->apply_traction_on_particles(this->step_ * this->dt_);
+
+        // Iterate over each node to add concentrated node force to external
+        // force
+        if (set_node_concentrated_force_)
+          mesh_->iterate_over_nodes(
+              std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
+                        std::placeholders::_1, mpm::ParticlePhase::Solid,
+                        (this->step_ * this->dt_)));
       }
 
 #pragma omp section
@@ -471,6 +487,9 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::reinitialise_matrix() {
     // Assign pressure constraints
     assembler_->assign_pressure_constraints(this->beta_,
                                             this->step_ * this->dt_);
+
+    // Assign velocity constraints
+    assembler_->assign_velocity_constraints();
 
     // Initialise element matrix
     mesh_->iterate_over_cells(std::bind(

@@ -187,43 +187,6 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_force_vector(
   return status;
 }
 
-//! Apply velocity constraints to force vector
-template <unsigned Tdim>
-bool mpm::AssemblerEigenSemiImplicitTwoPhase<
-    Tdim>::apply_velocity_constraints() {
-  bool status = false;
-  try {
-    // Modify the force vector(b = b - A * bc)
-    for (unsigned i = 0; i < Tdim; i++) {
-      force_inter_.col(i) -=
-          stiffness_matrix_.at(i) * velocity_constraints_.col(i);
-
-      // Iterate over velocity constraints (non-zero elements)
-      for (unsigned j = 0; j < velocity_constraints_.outerSize(); ++j) {
-        for (Eigen::SparseMatrix<double>::InnerIterator itr(
-                 velocity_constraints_, j);
-             itr; ++itr) {
-          // Check direction
-          if (itr.col() == i) {
-            // Assign 0 to specified column
-            stiffness_matrix_.at(i).col(itr.row()) *= 0;
-            // Assign 0 to specified row
-            stiffness_matrix_.at(i).row(itr.row()) *= 0;
-            // Assign 1 to diagnal element
-            stiffness_matrix_.at(i).coeffRef(itr.row(), itr.row()) = 1;
-            // Assign 0 to specified component
-            force_inter_(itr.row(), itr.col()) = 0;
-          }
-        }
-      }
-    }
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return status;
-}
-
 //! Assemble Laplacian matrix
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_laplacian_matrix(
@@ -529,6 +492,79 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_corrector_right(
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
+  }
+  return status;
+}
+
+//! Assign velocity constraints
+template <unsigned Tdim>
+bool mpm::AssemblerEigenSemiImplicitTwoPhase<
+    Tdim>::assign_velocity_constraints() {
+  bool status = false;
+  try {
+    // Initialise constraints matrix from triplet
+    std::vector<Eigen::Triplet<double>> triplet_list;
+    // Nodes container
+    const auto& nodes = mesh_->active_nodes();
+    // Iterate over nodes
+    for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
+      // Get velocity constraints
+      const auto& velocity_constraints = (*node)->velocity_constraints();
+      // Assign constraints matrix
+      for (const auto constraint : velocity_constraints) {
+        // Insert constraint to the matrix
+        triplet_list.push_back(Eigen::Triplet<double>(
+            (constraint).first / Tdim * active_dof_ + (*node)->active_id(),
+            (constraint).first % Tdim, (constraint).second));
+      }
+    }
+    // Reserve the storage for the velocity constraints matrix
+    velocity_constraints_.resize(active_dof_ * 2, Tdim);
+    velocity_constraints_.reserve(
+        Eigen::VectorXi::Constant(Tdim, triplet_list.size() + 10));
+    // Assemble the velocity constraints matrix
+    velocity_constraints_.setFromTriplets(triplet_list.begin(),
+                                          triplet_list.end());
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+}
+
+//! Apply velocity constraints to force vector
+template <unsigned Tdim>
+bool mpm::AssemblerEigenSemiImplicitTwoPhase<
+    Tdim>::apply_velocity_constraints() {
+  bool status = false;
+  try {
+    // Modify the force vector(b = b - A * bc)
+    for (unsigned i = 0; i < Tdim; i++) {
+      force_inter_.col(i) -=
+          stiffness_matrix_.at(i) * velocity_constraints_.col(i);
+
+      // Iterate over velocity constraints (non-zero elements)
+      for (unsigned j = 0; j < velocity_constraints_.outerSize(); ++j) {
+        for (Eigen::SparseMatrix<double>::InnerIterator itr(
+                 velocity_constraints_, j);
+             itr; ++itr) {
+          // Check direction
+          if (itr.col() == i) {
+            // Assign 0 to specified column
+            stiffness_matrix_.at(i).col(itr.row()) *= 0;
+            // Assign 0 to specified row
+            stiffness_matrix_.at(i).row(itr.row()) *= 0;
+            // Assign 1  to diagnal element
+            stiffness_matrix_.at(i).coeffRef(itr.row(), itr.row()) = 1;
+
+            force_inter_(itr.row(), itr.col()) = 0;
+          }
+        }
+      }
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
 }

@@ -110,6 +110,14 @@ class AssemblerBase {
     return 0;
   };
 
+  //! Assign velocity constraints for matrix and vector
+  virtual bool assign_velocity_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function (assign_velocity_constraints) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
   //! Apply velocity constraints for matrix and vector
   virtual bool apply_velocity_constraints() {
     throw std::runtime_error(
