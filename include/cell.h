@@ -276,8 +276,11 @@ class Cell {
                                             double pvolume,
                                             double porosity) noexcept;
 
-  //! Return local correction matrix
+  //! Return local correction matrix (Solid for twophase)
   const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
+
+  //! Return local correction matrix (Liquid for twophase)
+  const Eigen::MatrixXd& correction_matrix_w() { return correction_matrix_w_; };
 
   //! Compute local correction matrix (Used to correct velocity)
   void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,

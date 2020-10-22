@@ -448,6 +448,16 @@ class Node : public NodeBase<Tdim> {
         velocity_.col(phase) +
         dt * acceleration_inter.row(active_id_).transpose();
   }
+
+  //! Return the nodal intermediate velocity
+  VectorDim intermediate_velocity(const unsigned phase) {
+    return velocity_inter_.col(phase);
+  }
+
+  //! Return the nodal intermediate acceleration
+  VectorDim intermediate_acceleration(const unsigned phase) {
+    return acceleration_inter_.col(phase);
+  }
   //----------------------------------------------------------------------------
 
  private:

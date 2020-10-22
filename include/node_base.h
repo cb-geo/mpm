@@ -372,6 +372,12 @@ class NodeBase {
   //! Return nodal pressure increment
   virtual double pressure_increment() const = 0;
 
+  //! Return the nodal intermediate velocity
+  virtual VectorDim intermediate_velocity(const unsigned phase) = 0;
+
+  //! Return the nodal intermediate acceleration
+  virtual VectorDim intermediate_acceleration(const unsigned phase) = 0;
+
   //! Compute nodal correction force term
   virtual bool compute_nodal_correction_force(
       const VectorDim& correction_force) = 0;

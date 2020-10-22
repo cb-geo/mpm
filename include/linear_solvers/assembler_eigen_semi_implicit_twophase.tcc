@@ -435,3 +435,100 @@ void mpm::AssemblerEigenSemiImplicitTwoPhase<
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 }
+
+//! Assign pressure constraints
+template <unsigned Tdim>
+bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assign_pressure_constraints(
+    double beta, double current_time) {
+  bool status = false;
+  try {
+    // Resize pressure constraints vector
+    pressure_constraints_.resize(active_dof_);
+    pressure_constraints_.reserve(int(0.5 * active_dof_));
+
+    // Nodes container
+    const auto& nodes = mesh_->active_nodes();
+    // Iterate over nodes to get pressure constraints
+    for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
+      // Assign total pressure constraint
+      const double pressure_constraint =
+          (*node)->pressure_constraint(mpm::NodePhase::nLiquid, current_time);
+
+      // Check if there is a pressure constraint
+      if (pressure_constraint != std::numeric_limits<double>::max()) {
+        // Insert the pressure constraints
+        pressure_constraints_.insert((*node)->active_id()) =
+            (1 - beta) * pressure_constraint;
+      }
+    }
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+}
+
+//! Assemble corrector right matrix
+template <unsigned Tdim>
+bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_corrector_right(
+    double dt) {
+  bool status = true;
+  try {
+    // Resize correction matrix
+    correction_matrix_.resize(2 * active_dof_, active_dof_ * Tdim);
+    correction_matrix_.setZero();
+
+    // Reserve storage for sparse matrix
+    switch (Tdim) {
+      // For 2d: 10 entries /column
+      case (2): {
+        correction_matrix_.reserve(
+            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
+        break;
+      }
+      // For 3d: 30 entries /column
+      case (3): {
+        correction_matrix_.reserve(
+            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
+        break;
+      }
+    }
+
+    // Cell pointer
+    const auto& cells = mesh_->cells();
+
+    // Iterate over cells
+    unsigned cid = 0;
+    for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend(); ++cell_itr) {
+      if ((*cell_itr)->status()) {
+        // Number of nodes in cell
+        unsigned nnodes_per_cell = global_node_indices_.at(cid).size();
+        // Local correction matrix for solid
+        auto correction_matrix_solid = (*cell_itr)->correction_matrix();
+        // Local correction matrix for liquid
+        auto correction_matrix_water = (*cell_itr)->correction_matrix_w();
+        for (unsigned k = 0; k < Tdim; k++) {
+          for (unsigned i = 0; i < nnodes_per_cell; i++) {
+            for (unsigned j = 0; j < nnodes_per_cell; j++) {
+              // Solid phase
+              correction_matrix_.coeffRef(
+                  global_node_indices_.at(cid)(i),
+                  k * active_dof_ + global_node_indices_.at(cid)(j)) +=
+                  correction_matrix_solid(i, j + k * nnodes_per_cell);
+              // Liquid phase
+              correction_matrix_.coeffRef(
+                  global_node_indices_.at(cid)(i) + active_dof_,
+                  k * active_dof_ + global_node_indices_.at(cid)(j)) +=
+                  correction_matrix_water(i, j + k * nnodes_per_cell);
+            }
+          }
+        }
+        cid++;
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

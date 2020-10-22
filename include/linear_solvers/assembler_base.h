@@ -127,30 +127,24 @@ class AssemblerBase {
   };
 
   //! Return stiffness matrix
-  virtual Eigen::SparseMatrix<double> stiffness_matrix(unsigned dir) {
-    Eigen::SparseMatrix<double> error;
+  virtual Eigen::SparseMatrix<double>& stiffness_matrix(unsigned dir) {
     throw std::runtime_error(
         "Calling the base class function (stiffness_matrix) in "
         "AssemblerBase:: illegal operation!");
-    return error;
   };
 
   //! Return intermediate force
-  virtual Eigen::MatrixXd intermediate_force() {
-    Eigen::MatrixXd error;
+  virtual Eigen::MatrixXd& intermediate_force() {
     throw std::runtime_error(
         "Calling the base class function (intermediate_force) in "
         "AssemblerBase:: illegal operation!");
-    return error;
   };
 
   //! Return intermediate acceleration
-  virtual Eigen::MatrixXd intermediate_acceleration() {
-    Eigen::MatrixXd error;
+  virtual Eigen::MatrixXd& intermediate_acceleration() {
     throw std::runtime_error(
         "Calling the base class function (intermediate_acceleration) in "
         "AssemblerBase:: illegal operation!");
-    return error;
   };
 
  protected:
