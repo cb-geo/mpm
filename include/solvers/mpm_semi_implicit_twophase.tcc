@@ -16,19 +16,14 @@ void mpm::MPMSemiImplicitTwoPhase<Tdim>::compute_stress_strain() {
   // Iterate over each particle to update particle volume
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
+  // Iterate over each particle to update porosity
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::update_porosity, std::placeholders::_1, dt_));
   // Iterate over each particle to compute stress of soil skeleton
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(mpm::ParticlePhase::Solid);
-
-  // Iterate over each particle to update porosity
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::update_porosity, std::placeholders::_1, dt_));
-  // Iterate over each particle to compute pore pressure
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_pore_pressure,
-                std::placeholders::_1, dt_));
   // Pore pressure smoothing
   if (pore_pressure_smoothing_) {
     this->pressure_smoothing(mpm::ParticlePhase::Liquid);
@@ -402,7 +397,7 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs
-      this->write_hdf5(this->step_, this->nsteps_);
+      this->write_hdf5_twophase(this->step_, this->nsteps_);
 #ifdef USE_VTK
       // VTK outputs
       this->write_vtk(this->step_, this->nsteps_);
@@ -456,6 +451,10 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::initialise_matrix() {
     // Get volume tolerance for free surface
     volume_tolerance_ = analysis_["free_surface_detection"]["volume_tolerance"]
                             .template get<double>();
+
+    // Initialise element matrix
+    mesh_->iterate_over_cells(std::bind(
+        &mpm::Cell<Tdim>::initialise_element_matrix, std::placeholders::_1));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

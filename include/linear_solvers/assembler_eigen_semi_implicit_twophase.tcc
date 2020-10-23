@@ -409,6 +409,8 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assign_pressure_constraints(
   bool status = false;
   try {
     // Resize pressure constraints vector
+    pressure_constraints_.setZero();
+    pressure_constraints_.data().squeeze();
     pressure_constraints_.resize(active_dof_);
     pressure_constraints_.reserve(int(0.5 * active_dof_));
 
@@ -522,6 +524,8 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<
       }
     }
     // Reserve the storage for the velocity constraints matrix
+    velocity_constraints_.setZero();
+    velocity_constraints_.data().squeeze();
     velocity_constraints_.resize(active_dof_ * 2, Tdim);
     velocity_constraints_.reserve(
         Eigen::VectorXi::Constant(Tdim, triplet_list.size() + 10));

@@ -1255,12 +1255,15 @@ bool mpm::TwoPhaseParticle<Tdim>::map_K_inter_to_cell() {
     // Initialise drag force multiplier
     VectorDim multiplier;
     multiplier.setZero();
+    // Porosity parameter
+    const double k_p =
+        std::pow(this->porosity_, 3) / std::pow((1. - this->porosity_), 2);
     // Compute drag force multiplier
     for (unsigned i = 0; i < Tdim; ++i)
       multiplier(i) = this->porosity_ * this->porosity_ * 9.81 *
                       this->material(mpm::ParticlePhase::Liquid)
                           ->template property<double>(std::string("density")) /
-                      this->permeability_(i);
+                      (this->permeability_(i) * k_p);
     // Compute local matrix of K_inter
     cell_->compute_K_inter_element(shapefn_, volume_, multiplier);
   } catch (std::exception& exception) {
