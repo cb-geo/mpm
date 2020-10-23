@@ -308,6 +308,59 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
     }
   }
 
+  // Check nodal pressure constraints file
+  SECTION("Check pressure constraints file") {
+    // Vector of friction constraints
+    std::vector<std::tuple<mpm::Index, double>> pressure_constraints;
+
+    // Pressure constraint
+    pressure_constraints.emplace_back(std::make_tuple(0, 300.5));
+    pressure_constraints.emplace_back(std::make_tuple(1, 500.5));
+    pressure_constraints.emplace_back(std::make_tuple(2, 250.5));
+    pressure_constraints.emplace_back(std::make_tuple(3, 0.0));
+
+    // Dump pressure constraints as an input file to be read
+    std::ofstream file;
+    file.open("pressure-constraints-2d.txt");
+    // Write particle coordinates
+    for (const auto& pressure_constraint : pressure_constraints) {
+      file << std::get<0>(pressure_constraint) << "\t";
+      file << std::get<1>(pressure_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read pressure constraints
+    SECTION("Check pressure constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read pressure constraints from a non-existant file
+      auto constraints = read_mesh->read_pressure_constraints(
+          "pressure-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints =
+          read_mesh->read_pressure_constraints("pressure-constraints-2d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == pressure_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < pressure_constraints.size(); ++i) {
+        REQUIRE(
+            std::get<0>(constraints.at(i)) ==
+            Approx(std::get<0>(pressure_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(constraints.at(i)) ==
+            Approx(std::get<1>(pressure_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
   SECTION("Check forces file") {
     // Vector of particle forces
     std::vector<std::tuple<mpm::Index, unsigned, double>> nodal_forces;
@@ -869,6 +922,59 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         REQUIRE(
             std::get<3>(constraints.at(i)) ==
             Approx(std::get<3>(friction_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  // Check nodal pressure constraints file
+  SECTION("Check pressure constraints file") {
+    // Vector of friction constraints
+    std::vector<std::tuple<mpm::Index, double>> pressure_constraints;
+
+    // Pressure constraint
+    pressure_constraints.emplace_back(std::make_tuple(0, 300.5));
+    pressure_constraints.emplace_back(std::make_tuple(1, 500.5));
+    pressure_constraints.emplace_back(std::make_tuple(2, 250.5));
+    pressure_constraints.emplace_back(std::make_tuple(3, 0.0));
+
+    // Dump pressure constraints as an input file to be read
+    std::ofstream file;
+    file.open("pressure-constraints-3d.txt");
+    // Write particle coordinates
+    for (const auto& pressure_constraint : pressure_constraints) {
+      file << std::get<0>(pressure_constraint) << "\t";
+      file << std::get<1>(pressure_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read pressure constraints
+    SECTION("Check pressure constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read pressure constraints from a non-existant file
+      auto constraints = read_mesh->read_pressure_constraints(
+          "pressure-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints =
+          read_mesh->read_pressure_constraints("pressure-constraints-3d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == pressure_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < pressure_constraints.size(); ++i) {
+        REQUIRE(
+            std::get<0>(constraints.at(i)) ==
+            Approx(std::get<0>(pressure_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(constraints.at(i)) ==
+            Approx(std::get<1>(pressure_constraints.at(i))).epsilon(Tolerance));
       }
     }
   }
