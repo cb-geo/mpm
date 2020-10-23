@@ -26,6 +26,7 @@ class Material;
 
 //! Particle phases
 enum ParticlePhase : unsigned int {
+  SinglePhase = 0,
   Solid = 0,
   Liquid = 1,
   Gas = 2,

@@ -83,6 +83,12 @@ class Cell {
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 
+  //! Assign solving status
+  void assign_solving_status(bool status) { solving_status_ = status; }
+
+  //! Return solving status
+  bool solving_status() const { return solving_status_; }
+
   //! Return particles_
   std::vector<Index> particles() const { return particles_; }
 
@@ -286,6 +292,8 @@ class Cell {
   //! Normal of face
   //! first-> face_id, second->vector of the normal
   std::map<unsigned, Eigen::VectorXd> face_normals_;
+  //! Solving status
+  bool solving_status_{false};
   //! Free surface bool
   bool free_surface_{false};
   //! Volume fraction
