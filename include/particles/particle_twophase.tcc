@@ -785,7 +785,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient() {
 //! Initial pore pressure
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
-    const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
+    const unsigned dir_v, const unsigned dir_h, const VectorDim& gravity,
     std::map<double, double>& reference_points) {
   bool status = true;
   try {

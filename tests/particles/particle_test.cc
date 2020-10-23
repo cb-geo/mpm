@@ -3047,4 +3047,34 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(*mitr == material_ids.at(i));
     }
   }
+
+  //! Check derived particle functions (expecting throws)
+  SECTION("Particle illegal derived functions access") {
+    mpm::Index id = 0;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim>>(id, coords, status);
+
+    // Input variables
+    const double dt = 0.1;
+    Eigen::VectorXd vectordim;
+    vectordim.resize(Dim);
+    std::map<double, double> reference_points;
+
+    // Specific functions for TwoPhaseParticle.
+    // Expecting throws if called from Particle.
+    REQUIRE_THROWS(particle->update_porosity(dt));
+    REQUIRE_THROWS(particle->assign_saturation_degree());
+    REQUIRE_THROWS(particle->assign_liquid_velocity(vectordim));
+    REQUIRE_THROWS(particle->compute_pore_pressure(dt));
+    REQUIRE_THROWS(particle->map_drag_force_coefficient());
+    REQUIRE_THROWS(particle->compute_pore_pressure(dt));
+    REQUIRE_THROWS(particle->initialise_pore_pressure_watertable(
+        1, 0, vectordim, reference_points));
+    REQUIRE_THROWS(particle->assign_porosity());
+    REQUIRE_THROWS(particle->assign_permeability());
+    REQUIRE_THROWS(particle->liquid_mass());
+    REQUIRE_THROWS(particle->liquid_velocity());
+    REQUIRE_THROWS(particle->porosity());
+  }
 }
