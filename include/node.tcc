@@ -630,9 +630,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
 
       // Check to see if value is below threshold
       if (std::abs(density_(phase)) < 1.E-15) density_(phase) = 0.;
-
-    } else
-      throw std::runtime_error("Nodal mass is zero or below threshold");
+    }
   }
 }
 
