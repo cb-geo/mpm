@@ -322,7 +322,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] density_ratio_tolerance Tolerance of density ratio comparison
   //! \retval status Status of compute_free_surface
   bool compute_free_surface_by_density(
-      double density_ratio_tolerance = 0.70) override;
+      double density_ratio_tolerance = 0.65) override;
 
   //! Assign normal vector
   void assign_normal(const VectorDim& normal) override { normal_ = normal; };

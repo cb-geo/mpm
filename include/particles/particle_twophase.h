@@ -107,7 +107,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] reference_points
   //! (Horizontal coordinate of borehole + height of 0 pore pressure)
   bool initialise_pore_pressure_watertable(
-      const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
+      const unsigned dir_v, const unsigned dir_h, const VectorDim& gravity,
       std::map<double, double>& reference_points);
 
   //! Update porosity

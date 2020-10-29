@@ -315,7 +315,7 @@ class ParticleBase {
 
   //! Compute free surface in particle level by density ratio comparison
   virtual bool compute_free_surface_by_density(
-      double density_ratio_tolerance = 0.70) = 0;
+      double density_ratio_tolerance = 0.65) = 0;
 
   //! Assign normal vector
   virtual void assign_normal(const VectorDim& normal) = 0;
@@ -437,7 +437,7 @@ class ParticleBase {
 
   //! Initialise particle pore pressure by watertable
   virtual bool initialise_pore_pressure_watertable(
-      const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
+      const unsigned dir_v, const unsigned dir_h, const VectorDim& gravity,
       std::map<double, double>& reference_points) {
     throw std::runtime_error(
         "Calling the base class function "
