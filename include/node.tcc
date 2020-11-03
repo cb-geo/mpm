@@ -595,7 +595,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
         density_(phase) = mass_(phase) / volume_(phase);
 
       // Check to see if value is below threshold
-      if (std::abs(density_(phase)) < 1.E-15) density_(phase) = 0.;
+      if (std::abs(density_(phase)) < tolerance) density_(phase) = 0.;
     }
   }
 }
