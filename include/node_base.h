@@ -21,7 +21,7 @@ namespace mpm {
 enum NodePhase : unsigned int {
   NSolid = 0,
   NLiquid = 1,
-  nGas = 2,
+  NGas = 2,
   NMixture = 0
 };
 

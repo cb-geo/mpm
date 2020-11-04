@@ -481,7 +481,19 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
+  // Create the nodal properties' map
+  void create_nodal_properties();
+
+  // Initialise the nodal properties' map
+  void initialise_nodal_properties();
+
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
   //! Compute free surface
+  //! \ingroup MultiPhase
   //! \param[in] method Type of method to use
   //! \param[in] volume_tolerance for volume_fraction approach
   //! \retval status Status of compute_free_surface
@@ -490,6 +502,7 @@ class Mesh {
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Compute free surface by density method
+  //! \ingroup MultiPhase
   //! \details Using simple approach of volume fraction approach as (Kularathna
   //! & Soga, 2017) and density ratio comparison (Hamad, 2015). This method is
   //! fast, but less accurate.
@@ -499,6 +512,7 @@ class Mesh {
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Compute free surface by geometry method
+  //! \ingroup MultiPhase
   //! \details Using a more expensive approach using neighbouring particles and
   //! current geometry. This method combine multiple checks in order to simplify
   //! and fasten the process: (1) Volume fraction approach as (Kularathna & Soga
@@ -510,29 +524,29 @@ class Mesh {
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Get free surface node set
+  //! \ingroup MultiPhase
   //! \retval id_set Set of free surface node ids
   std::set<mpm::Index> free_surface_nodes();
 
   //! Get free surface cell set
+  //! \ingroup MultiPhase
   //! \retval id_set Set of free surface cell ids
   std::set<mpm::Index> free_surface_cells();
 
   //! Get free surface particle set
+  //! \ingroup MultiPhase
   //! \retval status Status of compute_free_surface
   //! \retval id_set Set of free surface particle ids
   std::set<mpm::Index> free_surface_particles();
 
-  // Create the nodal properties' map
-  void create_nodal_properties();
-
-  // Initialise the nodal properties' map
-  void initialise_nodal_properties();
-
   //! Assign particles pore pressures
+  //! \ingroup MultiPhase
   //! \param[in] particle_pore_pressure Initial pore pressure of particle
   bool assign_particles_pore_pressures(
       const std::vector<std::tuple<mpm::Index, double>>&
           particle_pore_pressures);
+
+  /**@}*/
 
  private:
   // Read particles from file
@@ -606,5 +620,6 @@ class Mesh {
 }  // namespace mpm
 
 #include "mesh.tcc"
+#include "mesh_multiphase.tcc"
 
 #endif  // MPM_MESH_H_

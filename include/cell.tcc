@@ -850,7 +850,7 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
   if (this->status()) {
     // Check if cell volume is set
-    if (volume_ == std::numeric_limits<double>::lowest())
+    if (volume_ <= std::numeric_limits<double>::lowest())
       this->compute_volume();
 
     for (unsigned i = 0; i < nodes_.size(); ++i) {
