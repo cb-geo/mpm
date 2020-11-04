@@ -913,12 +913,12 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Check nodal mass
     for (unsigned i = 0; i < nodes.size(); ++i) {
       // Solid phase
-      REQUIRE(nodes.at(i)->mass(mpm::NodePhase::nSolid) ==
+      REQUIRE(nodes.at(i)->mass(mpm::NodePhase::NSolid) ==
               Approx(nodal_mass.at(i) * (1 - particle->porosity()))
                   .epsilon(Tolerance));
       // Liquid phase
       REQUIRE(
-          nodes.at(i)->mass(mpm::NodePhase::nLiquid) ==
+          nodes.at(i)->mass(mpm::NodePhase::NLiquid) ==
           Approx(nodal_mass.at(i) * particle->porosity()).epsilon(Tolerance));
     }
 
@@ -937,11 +937,11 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     for (unsigned i = 0; i < nodal_momentum.rows(); ++i)
       for (unsigned j = 0; j < nodal_momentum.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::nSolid)(j) ==
+        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::NSolid)(j) ==
                 Approx(nodal_momentum(i, j) * (1 - particle->porosity()))
                     .epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::nLiquid)(j) ==
+        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::NLiquid)(j) ==
                 Approx(nodal_momentum(i, j) * particle->porosity())
                     .epsilon(Tolerance));
       }
@@ -957,10 +957,10 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nSolid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NSolid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nLiquid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NLiquid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
       }
 
@@ -974,11 +974,11 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     for (unsigned i = 0; i < nodes.size(); ++i) {
       // Solid phase
       REQUIRE_NOTHROW(nodes.at(i)->update_momentum(
-          false, mpm::NodePhase::nSolid,
+          false, mpm::NodePhase::NSolid,
           nodal_momentum.row(i) * (1 - particle->porosity())));
       // Liquid phase
       REQUIRE_NOTHROW(nodes.at(i)->update_momentum(
-          false, mpm::NodePhase::nLiquid,
+          false, mpm::NodePhase::NLiquid,
           nodal_momentum.row(i) * particle->porosity()));
     }
 
@@ -995,10 +995,10 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nSolid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NSolid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nLiquid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NLiquid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
       }
 
@@ -1069,7 +1069,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Check nodal body force
     for (unsigned i = 0; i < body_force.rows(); ++i)
       for (unsigned j = 0; j < body_force.cols(); ++j)
-        REQUIRE(nodes[i]->external_force(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->external_force(mpm::NodePhase::NSolid)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
 
     // Check traction force
@@ -1101,7 +1101,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Check nodal traction force
     for (unsigned i = 0; i < traction_force.rows(); ++i)
       for (unsigned j = 0; j < traction_force.cols(); ++j)
-        REQUIRE(nodes[i]->external_force(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->external_force(mpm::NodePhase::NSolid)[j] ==
                 Approx(traction_force(i, j)).epsilon(Tolerance));
     // Reset traction
     particle->assign_traction(direction,
@@ -1111,7 +1111,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Check nodal external force
     for (unsigned i = 0; i < traction_force.rows(); ++i)
       for (unsigned j = 0; j < traction_force.cols(); ++j)
-        REQUIRE(nodes[i]->external_force(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->external_force(mpm::NodePhase::NSolid)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
 
     // Internal force
@@ -1130,7 +1130,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Check nodal internal force
     for (unsigned i = 0; i < internal_force.rows(); ++i)
       for (unsigned j = 0; j < internal_force.cols(); ++j)
-        REQUIRE(nodes[i]->internal_force(mpm::NodePhase::nMixture)[j] ==
+        REQUIRE(nodes[i]->internal_force(mpm::NodePhase::NMixture)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
 
     // Internal force
@@ -1170,10 +1170,10 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes[i]->velocity(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->velocity(mpm::NodePhase::NSolid)[j] ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes[i]->velocity(mpm::NodePhase::nLiquid)[j] ==
+        REQUIRE(nodes[i]->velocity(mpm::NodePhase::NLiquid)[j] ==
                 Approx(nodal_liquid_velocity(i, j)).epsilon(Tolerance));
       }
 
@@ -1194,10 +1194,10 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     for (unsigned i = 0; i < nodal_acceleration.rows(); ++i)
       for (unsigned j = 0; j < nodal_acceleration.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes[i]->acceleration(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->acceleration(mpm::NodePhase::NSolid)[j] ==
                 Approx(nodal_acceleration(i, j)).epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes[i]->acceleration(mpm::NodePhase::nLiquid)[j] ==
+        REQUIRE(nodes[i]->acceleration(mpm::NodePhase::NLiquid)[j] ==
                 Approx(nodal_liquid_acceleration(i, j)).epsilon(Tolerance));
       }
     // Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
@@ -2350,11 +2350,11 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal mass
     for (unsigned i = 0; i < nodes.size(); ++i) {
       // Solid phase
-      REQUIRE(nodes.at(i)->mass(mpm::NodePhase::nSolid) ==
+      REQUIRE(nodes.at(i)->mass(mpm::NodePhase::NSolid) ==
               Approx(nodal_mass.at(i) * (1 - particle->porosity())));
       // Liquid phase
       REQUIRE(
-          nodes.at(i)->mass(mpm::NodePhase::nLiquid) ==
+          nodes.at(i)->mass(mpm::NodePhase::NLiquid) ==
           Approx(nodal_mass.at(i) * particle->porosity()).epsilon(Tolerance));
     }
 
@@ -2378,11 +2378,11 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     for (unsigned i = 0; i < nodal_momentum.rows(); ++i)
       for (unsigned j = 0; j < nodal_momentum.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::nSolid)(j) ==
+        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::NSolid)(j) ==
                 Approx(nodal_momentum(i, j) * (1 - particle->porosity()))
                     .epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::nLiquid)(j) ==
+        REQUIRE(nodes.at(i)->momentum(mpm::NodePhase::NLiquid)(j) ==
                 Approx(nodal_momentum(i, j) * particle->porosity())
                     .epsilon(Tolerance));
       }
@@ -2403,10 +2403,10 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nSolid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NSolid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nLiquid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NLiquid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
       }
 
@@ -2424,11 +2424,11 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     for (unsigned i = 0; i < nodes.size(); ++i) {
       // Solid phase
       REQUIRE_NOTHROW(nodes.at(i)->update_momentum(
-          false, mpm::NodePhase::nSolid,
+          false, mpm::NodePhase::NSolid,
           nodal_momentum.row(i) * (1 - particle->porosity())));
       // Liquid phase
       REQUIRE_NOTHROW(nodes.at(i)->update_momentum(
-          false, mpm::NodePhase::nLiquid,
+          false, mpm::NodePhase::NLiquid,
           nodal_momentum.row(i) * particle->porosity()));
     }
 
@@ -2449,10 +2449,10 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j) {
         // Solid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nSolid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NSolid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
         // Liquid phase
-        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::nLiquid)(j) ==
+        REQUIRE(nodes.at(i)->velocity(mpm::NodePhase::NLiquid)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
       }
 
@@ -2527,7 +2527,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal body force
     for (unsigned i = 0; i < body_force.rows(); ++i)
       for (unsigned j = 0; j < body_force.cols(); ++j)
-        REQUIRE(nodes[i]->external_force(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->external_force(mpm::NodePhase::NSolid)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
 
     // Check traction force
@@ -2562,7 +2562,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal traction force
     for (unsigned i = 0; i < traction_force.rows(); ++i)
       for (unsigned j = 0; j < traction_force.cols(); ++j)
-        REQUIRE(nodes[i]->external_force(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->external_force(mpm::NodePhase::NSolid)[j] ==
                 Approx(traction_force(i, j)).epsilon(Tolerance));
     // Reset traction
     particle->assign_traction(direction,
@@ -2572,7 +2572,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal external force
     for (unsigned i = 0; i < traction_force.rows(); ++i)
       for (unsigned j = 0; j < traction_force.cols(); ++j)
-        REQUIRE(nodes[i]->external_force(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->external_force(mpm::NodePhase::NSolid)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
 
     // Internal force
@@ -2595,12 +2595,12 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal internal force
     for (unsigned i = 0; i < internal_force.rows(); ++i)
       for (unsigned j = 0; j < internal_force.cols(); ++j)
-        REQUIRE(nodes[i]->internal_force(mpm::NodePhase::nMixture)[j] ==
+        REQUIRE(nodes[i]->internal_force(mpm::NodePhase::NMixture)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
 
     // Calculate nodal acceleration and velocity
     for (const auto& node : nodes)
-      node->compute_acceleration_velocity(mpm::NodePhase::nSolid, dt);
+      node->compute_acceleration_velocity(mpm::NodePhase::NSolid, dt);
 
     // Check nodal velocity
     // clang-format off
@@ -2616,7 +2616,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal velocity
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
-        REQUIRE(nodes[i]->velocity(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->velocity(mpm::NodePhase::NSolid)[j] ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Check nodal acceleration
@@ -2634,7 +2634,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check nodal acceleration
     for (unsigned i = 0; i < nodal_acceleration.rows(); ++i)
       for (unsigned j = 0; j < nodal_acceleration.cols(); ++j)
-        REQUIRE(nodes[i]->acceleration(mpm::NodePhase::nSolid)[j] ==
+        REQUIRE(nodes[i]->acceleration(mpm::NodePhase::NSolid)[j] ==
                 Approx(nodal_acceleration(i, j)).epsilon(Tolerance));
 
     // Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
