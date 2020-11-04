@@ -1236,13 +1236,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       0, pressure_constraints) == true);
           REQUIRE(constraints->assign_nodal_pressure_constraints(
                       1, pressure_constraints) == true);
-          // When constraints fail
-          REQUIRE(constraints->assign_nodal_pressure_constraints(
-                      4, pressure_constraints) == false);
-
-          pressure_constraints.emplace_back(std::make_tuple(100, 0.0));
-          REQUIRE(constraints->assign_nodal_pressure_constraints(
-                      0, pressure_constraints) == false);
         }
 
         // Test assign nodes concentrated_forces
