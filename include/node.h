@@ -294,8 +294,13 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
-  //! TwoPhase functions--------------------------------------------------------
+  /**
+   * \defgroup TwoPhase Functions dealing with two-phase MPM
+   */
+  /**@{*/
+
   //! Update internal force (body force / traction force)
+  //! \ingroup TwoPhase
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
   //! \retval status Update status
@@ -303,21 +308,25 @@ class Node : public NodeBase<Tdim> {
                                      const VectorDim& drag_force) override;
 
   //! Compute acceleration and velocity for two phase
+  //! \ingroup TwoPhase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity_twophase_explicit(
       double dt) noexcept override;
 
   //! Compute acceleration and velocity for two phase with cundall damping
+  //! \ingroup TwoPhase
   //! \param[in] dt Timestep in analysis \param[in] damping_factor
   //! Damping factor
   bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept override;
 
   //! Return drag force at a given node
+  //! \ingroup TwoPhase
   VectorDim drag_force_coefficient() const override {
     return drag_force_coefficient_;
   }
-  //----------------------------------------------------------------------------
+
+  /**@}*/
 
  private:
   //! Mutex

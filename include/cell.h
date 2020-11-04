@@ -83,12 +83,6 @@ class Cell {
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 
-  //! Assign solving status
-  void assign_solving_status(bool status) { solving_status_ = status; }
-
-  //! Return solving status
-  bool solving_status() const { return solving_status_; }
-
   //! Return particles_
   std::vector<Index> particles() const { return particles_; }
 
@@ -223,27 +217,49 @@ class Cell {
   //! Return previous mpi rank
   unsigned previous_mpirank() const;
 
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Assign solving status
+  //! \ingroup MultiPhase
+  //! \param[in] status Cell solving status for parallel free-surface detection
+  void assign_solving_status(bool status) { solving_status_ = status; }
+
+  //! Return solving status of a cell: active (if a particle is present in all
+  //! MPI rank)
+  //! \ingroup MultiPhase
+  bool solving_status() const { return solving_status_; }
+
   //! Assign free surface
+  //! \ingroup MultiPhase
   //! \param[in] free_surface boolean indicating free surface cell
   void assign_free_surface(bool free_surface) { free_surface_ = free_surface; };
 
   //! Return free surface bool
+  //! \ingroup MultiPhase
   //! \retval free_surface_ indicating free surface cell
   bool free_surface() const { return free_surface_; };
 
   //! Assign volume traction to node
+  //! \ingroup MultiPhase
   //! \param[in] volume_fraction cell volume fraction
   void assign_volume_fraction(double volume_fraction) {
     volume_fraction_ = volume_fraction;
   };
 
   //! Return cell volume fraction
+  //! \ingroup MultiPhase
   //! \retval volume_fraction_ cell volume fraction
   double volume_fraction() const { return volume_fraction_; };
 
   //! Map cell volume to the nodes
+  //! \ingroup MultiPhase
   //! \param[in] phase to map volume
   void map_cell_volume_to_nodes(unsigned phase);
+
+  /**@}*/
 
  private:
   //! Approximately check if a point is in a cell
