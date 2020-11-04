@@ -19,10 +19,10 @@ namespace mpm {
 
 //! Particle phases
 enum NodePhase : unsigned int {
-  nSolid = 0,
-  nLiquid = 1,
+  NSolid = 0,
+  NLiquid = 1,
   nGas = 2,
-  nMixture = 0
+  NMixture = 0
 };
 
 //! NodeBase base class for nodes

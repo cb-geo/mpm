@@ -626,7 +626,7 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-        velocity_.col(mpm::NodePhase::nSolid) * mass - momentum;
+        velocity_.col(mpm::NodePhase::NSolid) * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }

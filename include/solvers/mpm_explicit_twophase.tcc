@@ -161,29 +161,29 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // MPI all reduce nodal mass for solid phase
       mesh_->template nodal_halo_exchange<double, 1>(
           std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1,
-                    mpm::NodePhase::nSolid),
+                    mpm::NodePhase::NSolid),
           std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                    false, mpm::NodePhase::nSolid, std::placeholders::_2));
+                    false, mpm::NodePhase::NSolid, std::placeholders::_2));
       // MPI all reduce nodal momentum for solid phase
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                    mpm::NodePhase::nSolid),
+                    mpm::NodePhase::NSolid),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, mpm::NodePhase::nSolid,
+                    std::placeholders::_1, false, mpm::NodePhase::NSolid,
                     std::placeholders::_2));
 
       // MPI all reduce nodal mass for liquid phase
       mesh_->template nodal_halo_exchange<double, 1>(
           std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1,
-                    mpm::NodePhase::nLiquid),
+                    mpm::NodePhase::NLiquid),
           std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                    false, mpm::NodePhase::nLiquid, std::placeholders::_2));
+                    false, mpm::NodePhase::NLiquid, std::placeholders::_2));
       // MPI all reduce nodal momentum for liquid phase
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                    mpm::NodePhase::nLiquid),
+                    mpm::NodePhase::NLiquid),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, mpm::NodePhase::nLiquid,
+                    std::placeholders::_1, false, mpm::NodePhase::NLiquid,
                     std::placeholders::_2));
     }
 #endif
@@ -263,31 +263,31 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // MPI all reduce external force of mixture
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                    mpm::NodePhase::nMixture),
+                    mpm::NodePhase::NMixture),
           std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                    std::placeholders::_1, false, mpm::NodePhase::nMixture,
+                    std::placeholders::_1, false, mpm::NodePhase::NMixture,
                     std::placeholders::_2));
       // MPI all reduce external force of pore fluid
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                    mpm::NodePhase::nLiquid),
+                    mpm::NodePhase::NLiquid),
           std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                    std::placeholders::_1, false, mpm::NodePhase::nLiquid,
+                    std::placeholders::_1, false, mpm::NodePhase::NLiquid,
                     std::placeholders::_2));
 
       // MPI all reduce internal force of mixture
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    mpm::NodePhase::nMixture),
+                    mpm::NodePhase::NMixture),
           std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, mpm::NodePhase::nMixture,
+                    std::placeholders::_1, false, mpm::NodePhase::NMixture,
                     std::placeholders::_2));
       // MPI all reduce internal force of pore liquid
       mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    mpm::NodePhase::nLiquid),
+                    mpm::NodePhase::NLiquid),
           std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, mpm::NodePhase::nLiquid,
+                    std::placeholders::_1, false, mpm::NodePhase::NLiquid,
                     std::placeholders::_2));
 
       // MPI all reduce drag force
