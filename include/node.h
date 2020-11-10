@@ -209,6 +209,9 @@ class Node : public NodeBase<Tdim> {
   bool assign_friction_constraint(unsigned dir, int sign,
                                   double friction) override;
 
+  bool assign_absorbing_constraint(unsigned dir, int sign,
+                                  double friction) override;
+
   //! Apply friction constraints
   //! \param[in] dt Time-step
   void apply_friction_constraints(double dt) override;
