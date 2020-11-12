@@ -16,6 +16,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 
   // Clear any velocity constraints
   velocity_constraints_.clear();
+  absorbing_constraints_.clear();
   concentrated_force_.setZero();
   this->initialise();
 }
@@ -234,6 +235,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
     // Apply friction constraints
     this->apply_friction_constraints(dt);
 
+    // Apply absorbing constraints
+    this->apply_nodal_absorbing_constraint(dt);
+
     // Velocity += acceleration * dt
     this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
     // Apply velocity constraints, which also sets acceleration to 0,
@@ -269,6 +273,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
 
     // Apply friction constraints
     this->apply_friction_constraints(dt);
+
+    // Apply absorbing constraints
+    this->apply_nodal_absorbing_constraint(dt);
 
     // Velocity += acceleration * dt
     this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
@@ -346,6 +353,57 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
   }
 }
 
+//My Idea for what to input
+
+// bool assign_nodal_absorbing_constraints(double pwave_v, double swave_v);
+// !Assign absorbing constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_nodal_absorbing_constraint(
+    double pwave_v, double swave_v) {
+  bool status = true;
+  // Assign shear velocity constraint
+  try{
+  	unsigned dir0= 0;
+    const auto s_phase = static_cast<unsigned>(dir0/Tdim);
+    double s_mass_density = mass_(s_phase)/volume_(s_phase);
+    double s_velocity = velocity_(dir0,s_phase);
+    double s_traction = -s_velocity*s_mass_density*swave_v;
+
+  	unsigned dir1 = 1;
+  	const auto c_phase = static_cast<unsigned>(dir1/Tdim);
+  	double n_mass_density = mass_(c_phase)/volume_(c_phase);
+  	double n_velocity = velocity_(dir1,c_phase);
+    double n_traction = -n_velocity*n_mass_density*pwave_v;
+
+  	this->absorbing_constraints_.insert(std::make_pair<unsigned,double>(
+  		static_cast<unsigned>(dir0), static_cast<double>(s_traction)));
+  		
+
+    this->absorbing_constraints_.insert(std::make_pair<unsigned,double>(
+  		static_cast<unsigned>(dir1), static_cast<double>(n_traction)));
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// !Apply absorbing constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_nodal_absorbing_constraint(double dt) {
+  // Set absorbing constraint
+  for (const auto& constraint : this->absorbing_constraints_) {
+   // Apply Traction constraints
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+
+    this->acceleration_(direction,phase) = constraint.second / mass_(phase);
+  }
+}
 //! Assign friction constraint
 //! Constrain directions can take values between 0 and Dim * Nphases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
