@@ -316,7 +316,10 @@ class Particle : public ParticleBase<Tdim> {
   bool free_surface() const override { return free_surface_; };
 
   //! Compute free surface in particle level by density ratio comparison
-  //! \param[in] density_ratio_tolerance Tolerance of density ratio comparison
+  //! \param[in] density_ratio_tolerance Tolerance of density ratio comparison.
+  //! Default value is set to be 0.65, which is derived from a 3D case where at
+  //! one side the cell is fully occupied by particles and the other side the
+  //! cell is empty. See (Hamad, 2015).
   //! \retval status Status of compute_free_surface
   bool compute_free_surface_by_density(
       double density_ratio_tolerance = 0.65) override;
