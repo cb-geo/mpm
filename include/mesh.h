@@ -492,6 +492,12 @@ class Mesh {
    */
   /**@{*/
 
+  //! Compute cell volume fraction
+  //! \ingroup MultiPhase
+  //! \details Compute cell volume fraction based on the number of particle
+  //! see (Kularathna & Soga 2017).
+  void compute_cell_vol_fraction();
+
   //! Compute free surface
   //! \ingroup MultiPhase
   //! \param[in] method Type of method to use

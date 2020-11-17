@@ -42,17 +42,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
                                      std::placeholders::_1, 0.0));
 
   // Compute and assign volume fraction to each cell
-  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
-    if ((*citr)->status()) {
-      // Compute volume fraction
-      double cell_volume_fraction = 0.0;
-      for (const auto p_id : (*citr)->particles())
-        cell_volume_fraction += map_particles_[p_id]->volume();
-
-      cell_volume_fraction = cell_volume_fraction / (*citr)->volume();
-      (*citr)->assign_volume_fraction(cell_volume_fraction);
-    }
-  }
+  this->compute_cell_vol_fraction();
 
   // First, we detect the cell with possible free surfaces
   // Compute boundary cells and nodes based on geometry
@@ -250,10 +240,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-  // // Reset solving status
-  // this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_solving_status,
-  //                                    std::placeholders::_1, false));
-
   // Initialize pointer of booleans for send and receive
   bool* send_cell_solving_status = new bool[ncells()];
   memset(send_cell_solving_status, 0, ncells() * sizeof(bool));
@@ -292,17 +278,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
                 std::placeholders::_1, false));
 
   // Compute and assign volume fraction to each cell
-  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
-    if ((*citr)->status()) {
-      // Compute volume fraction
-      double cell_volume_fraction = 0.0;
-      for (const auto p_id : (*citr)->particles())
-        cell_volume_fraction += map_particles_[p_id]->volume();
-
-      cell_volume_fraction = cell_volume_fraction / (*citr)->volume();
-      (*citr)->assign_volume_fraction(cell_volume_fraction);
-    }
-  }
+  this->compute_cell_vol_fraction();
 
 #ifdef USE_MPI
   // Initialize vector of double for send and receive
@@ -414,13 +390,13 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
   // Evaluate free surface particles
-  for (auto pitr = this->particles_.cbegin(); pitr != this->particles_.cend();
-       ++pitr) {
-    status = (*pitr)->compute_free_surface_by_density();
-    if (status) {
-      (*pitr)->assign_free_surface(status);
-    }
-  }
+  this->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        bool status = ptr->compute_free_surface_by_density();
+        if (status) {
+          return ptr->assign_free_surface(status);
+        }
+      });
 
   return status;
 }
@@ -451,6 +427,23 @@ std::set<mpm::Index> mpm::Mesh<Tdim>::free_surface_particles() {
        ++pitr)
     if ((*pitr)->free_surface()) id_set.insert((*pitr)->id());
   return id_set;
+}
+
+//! Compute cell volume fraction
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_cell_vol_fraction() {
+  this->iterate_over_cells([&map_particles = map_particles_](
+                               std::shared_ptr<mpm::Cell<Tdim>> c_ptr) {
+    if (c_ptr->status()) {
+      // Compute volume fraction
+      double cell_volume_fraction = 0.0;
+      for (const auto p_id : c_ptr->particles())
+        cell_volume_fraction += map_particles[p_id]->volume();
+
+      cell_volume_fraction = cell_volume_fraction / c_ptr->volume();
+      return c_ptr->assign_volume_fraction(cell_volume_fraction);
+    }
+  });
 }
 
 //! Assign particle pore pressures
