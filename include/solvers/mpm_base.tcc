@@ -452,7 +452,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 
     // Input particle h5 file for resume
     for (const auto ptype : particle_types_) {
-      std::string attribute = mpm::ParticleHDF5TypeName.at(ptype);
+      std::string attribute = mpm::ParticlePODTypeName.at(ptype);
       std::string extension = ".h5";
 
       auto particles_file =

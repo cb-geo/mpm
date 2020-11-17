@@ -139,7 +139,7 @@ bool mpm::Particle<Tdim>::initialise_particle(
 //! Return particle data as POD
 template <unsigned Tdim>
 // cppcheck-suppress *
-std::shared_ptr<void> mpm::Particle<Tdim>::pod() {
+std::shared_ptr<void> mpm::Particle<Tdim>::pod() const {
   // Initialise particle data
   auto particle_data = std::make_shared<mpm::PODParticle>();
 
@@ -513,6 +513,15 @@ void mpm::Particle<Tdim>::update_volume() noexcept {
   // Strain rate for reduced integration
   this->volume_ *= (1. + dvolumetric_strain_);
   this->mass_density_ = this->mass_density_ / (1. + dvolumetric_strain_);
+}
+
+//! Return the approximate particle diameter
+template <unsigned Tdim>
+double mpm::Particle<Tdim>::diameter() const {
+  double diameter = 0.;
+  if (Tdim == 2) diameter = 2.0 * std::sqrt(volume_ / M_PI);
+  if (Tdim == 3) diameter = 2.0 * std::pow(volume_ * 0.75 / M_PI, (1 / 3));
+  return diameter;
 }
 
 // Compute mass of particle

@@ -260,9 +260,9 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
-  //! Return real density at a given node for a given phase
+  //! Return interpolated density at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double density(unsigned phase) override { return density_(phase); }
+  double density(unsigned phase) const override { return density_(phase); }
 
   //! Compute nodal density
   void compute_density() override;
@@ -273,7 +273,7 @@ class Node : public NodeBase<Tdim> {
   }
 
   //! Return free surface bool
-  bool free_surface() override { return free_surface_; }
+  bool free_surface() const override { return free_surface_; }
 
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)

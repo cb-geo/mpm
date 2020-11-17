@@ -61,7 +61,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Return particle data as POD
   //! \retval particle POD of the particle
-  std::shared_ptr<void> pod() override;
+  std::shared_ptr<void> pod() const override;
 
   //! Assign saturation degree
   bool assign_saturation_degree() override;

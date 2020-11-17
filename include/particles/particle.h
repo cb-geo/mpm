@@ -62,7 +62,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return particle data as POD
   //! \retval particle POD of the particle
-  std::shared_ptr<void> pod() override;
+  std::shared_ptr<void> pod() const override;
 
   //! Initialise properties
   void initialise() override;
@@ -113,12 +113,7 @@ class Particle : public ParticleBase<Tdim> {
   double volume() const override { return volume_; }
 
   //! Return the approximate particle diameter
-  double diameter() const override {
-    double diameter = 0.;
-    if (Tdim == 2) diameter = 2.0 * std::sqrt(volume_ / M_PI);
-    if (Tdim == 3) diameter = 2.0 * std::pow(volume_ * 0.75 / M_PI, (1 / 3));
-    return diameter;
-  }
+  double diameter() const override;
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
@@ -318,7 +313,7 @@ class Particle : public ParticleBase<Tdim> {
   };
 
   //! Return free surface bool
-  bool free_surface() override { return free_surface_; };
+  bool free_surface() const override { return free_surface_; };
 
   //! Compute free surface in particle level by density ratio comparison
   //! \param[in] density_ratio_tolerance Tolerance of density ratio comparison
@@ -330,7 +325,7 @@ class Particle : public ParticleBase<Tdim> {
   void assign_normal(const VectorDim& normal) override { normal_ = normal; };
 
   //! Return normal vector
-  VectorDim normal() override { return normal_; };
+  VectorDim normal() const override { return normal_; };
 
   //! Return the number of neighbour particles
   unsigned nneighbours() const override { return neighbours_.size(); };
