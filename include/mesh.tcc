@@ -425,7 +425,8 @@ template <unsigned Tdim>
 mpm::Index mpm::Mesh<Tdim>::nparticles(const std::string& particle_type) const {
   return std::count_if(
       particles_.cbegin(), particles_.cend(),
-      [&ptype = particle_type](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+      [&ptype =
+           particle_type](const std::shared_ptr<mpm::ParticleBase<Tdim>>& ptr) {
         return (ptr)->type() == ptype;
       });
 }

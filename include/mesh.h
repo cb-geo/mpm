@@ -498,7 +498,7 @@ class Mesh {
   //! \param[in] volume_tolerance for volume_fraction approach
   //! \retval status Status of compute_free_surface
   bool compute_free_surface(
-      const std::string& method,
+      const std::string& method = "density",
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Compute free surface by density method
