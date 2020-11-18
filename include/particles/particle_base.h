@@ -36,7 +36,7 @@ enum ParticlePhase : unsigned int {
 //! Particle type
 extern std::map<std::string, int> ParticleType;
 extern std::map<int, std::string> ParticleTypeName;
-extern std::map<std::string, std::string> ParticleHDF5TypeName;
+extern std::map<std::string, std::string> ParticlePODTypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -84,7 +84,7 @@ class ParticleBase {
 
   //! Return particle data as POD
   //! \retval particle POD of the particle
-  virtual std::shared_ptr<void> pod() = 0;
+  virtual std::shared_ptr<void> pod() const = 0;
 
   //! Return id of the particleBase
   Index id() const { return id_; }
@@ -311,7 +311,7 @@ class ParticleBase {
   virtual void assign_free_surface(bool free_surface) = 0;
 
   //! Assign particle free surface
-  virtual bool free_surface() = 0;
+  virtual bool free_surface() const = 0;
 
   //! Compute free surface in particle level by density ratio comparison
   virtual bool compute_free_surface_by_density(
@@ -321,7 +321,7 @@ class ParticleBase {
   virtual void assign_normal(const VectorDim& normal) = 0;
 
   //! Return normal vector
-  virtual VectorDim normal() = 0;
+  virtual VectorDim normal() const = 0;
 
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;

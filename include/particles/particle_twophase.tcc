@@ -34,7 +34,7 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord,
 //! Return particle data as POD
 template <unsigned Tdim>
 // cppcheck-suppress *
-std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::pod() {
+std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::pod() const {
   // Initialise particle_data
   auto particle_data = std::make_shared<mpm::PODParticleTwoPhase>();
 

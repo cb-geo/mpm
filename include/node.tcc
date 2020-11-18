@@ -203,17 +203,16 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure_constraint(
   bool status = true;
   try {
     // Constrain directions can take values between 0 and Tnphases
-    if (phase < Tnphases * 2) {
-      this->pressure_constraints_.insert(std::make_pair<unsigned, double>(
-          static_cast<unsigned>(phase), static_cast<double>(pressure)));
-      // Assign pressure function
-      if (function != nullptr)
-        this->pressure_function_.insert(
-            std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
-                static_cast<unsigned>(phase),
-                static_cast<std::shared_ptr<FunctionBase>>(function)));
-    } else
-      throw std::runtime_error("Pressure constraint phase is out of bounds");
+    assert(phase < Tnphases * 2);
+
+    this->pressure_constraints_.insert(std::make_pair<unsigned, double>(
+        static_cast<unsigned>(phase), static_cast<double>(pressure)));
+    // Assign pressure function
+    if (function != nullptr)
+      this->pressure_function_.insert(
+          std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
+              static_cast<unsigned>(phase),
+              static_cast<std::shared_ptr<FunctionBase>>(function)));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -629,7 +628,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
         density_(phase) = mass_(phase) / volume_(phase);
 
       // Check to see if value is below threshold
-      if (std::abs(density_(phase)) < 1.E-15) density_(phase) = 0.;
+      if (std::abs(density_(phase)) < tolerance) density_(phase) = 0.;
     }
   }
 }
@@ -729,7 +728,7 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-        velocity_.col(mpm::NodePhase::nSolid) * mass - momentum;
+        velocity_.col(mpm::NodePhase::NSolid) * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }

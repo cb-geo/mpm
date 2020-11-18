@@ -485,15 +485,34 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
+  // Create the nodal properties' map
+  void create_nodal_properties();
+
+  // Initialise the nodal properties' map
+  void initialise_nodal_properties();
+
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Compute cell volume fraction
+  //! \ingroup MultiPhase
+  //! \details Compute cell volume fraction based on the number of particle
+  //! see (Kularathna & Soga 2017).
+  void compute_cell_vol_fraction();
+
   //! Compute free surface
+  //! \ingroup MultiPhase
   //! \param[in] method Type of method to use
   //! \param[in] volume_tolerance for volume_fraction approach
   //! \retval status Status of compute_free_surface
   bool compute_free_surface(
-      const std::string& method,
+      const std::string& method = "density",
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Compute free surface by density method
+  //! \ingroup MultiPhase
   //! \details Using simple approach of volume fraction approach as (Kularathna
   //! & Soga, 2017) and density ratio comparison (Hamad, 2015). This method is
   //! fast, but less accurate.
@@ -503,6 +522,7 @@ class Mesh {
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Compute free surface by geometry method
+  //! \ingroup MultiPhase
   //! \details Using a more expensive approach using neighbouring particles and
   //! current geometry. This method combine multiple checks in order to simplify
   //! and fasten the process: (1) Volume fraction approach as (Kularathna & Soga
@@ -513,44 +533,52 @@ class Mesh {
   bool compute_free_surface_by_geometry(
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
-  //! Get free surface node set
+  //! \ingroup MultiPhase
+  //! \retval id_set Set of free surface node ids
   std::set<mpm::Index> free_surface_nodes();
 
   //! Get free surface cell set
+  //! \ingroup MultiPhase
+  //! \retval id_set Set of free surface cell ids
   std::set<mpm::Index> free_surface_cells();
 
   //! Get free surface particle set
+  //! \ingroup MultiPhase
+  //! \retval status Status of compute_free_surface
+  //! \retval id_set Set of free surface particle ids
   std::set<mpm::Index> free_surface_particles();
 
-  //! Create a list of active nodes in mesh and assign active node id
-  //! (rank-wise)
-  unsigned assign_active_nodes_id();
-
-  //! Assign active node id (globally in All MPI ranks)
-  unsigned assign_global_active_nodes_id();
-
-  //! Return container of active nodes
-  mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }
-
-  //! Return global node indices
-  std::vector<Eigen::VectorXi> global_node_indices() const;
-
-  //! Compute correction force in the node
-  bool compute_nodal_correction_force(
-      const Eigen::SparseMatrix<double>& correction_matrix,
-      const Eigen::VectorXd& pressure_increment, double dt);
-
-  // Create the nodal properties' map
-  void create_nodal_properties();
-
-  // Initialise the nodal properties' map
-  void initialise_nodal_properties();
-
   //! Assign particles pore pressures
+  //! \ingroup MultiPhase
   //! \param[in] particle_pore_pressure Initial pore pressure of particle
   bool assign_particles_pore_pressures(
       const std::vector<std::tuple<mpm::Index, double>>&
           particle_pore_pressures);
+
+  //! Create a list of active nodes in mesh and assign active node id
+  //! (rank-wise)
+  //! \ingroup MultiPhase
+  unsigned assign_active_nodes_id();
+
+  //! Assign active node id (globally in All MPI ranks)
+  //! \ingroup MultiPhase
+  unsigned assign_global_active_nodes_id();
+
+  //! Return container of active nodes
+  //! \ingroup MultiPhase
+  mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }
+
+  //! Return global node indices
+  //! \ingroup MultiPhase
+  std::vector<Eigen::VectorXi> global_node_indices() const;
+
+  //! Compute correction force in the node
+  //! \ingroup MultiPhase
+  bool compute_nodal_correction_force(
+      const Eigen::SparseMatrix<double>& correction_matrix,
+      const Eigen::VectorXd& pressure_increment, double dt);
+
+  /**@}*/
 
  private:
   // Read particles from file
@@ -624,5 +652,6 @@ class Mesh {
 }  // namespace mpm
 
 #include "mesh.tcc"
+#include "mesh_multiphase.tcc"
 
 #endif  // MPM_MESH_H_

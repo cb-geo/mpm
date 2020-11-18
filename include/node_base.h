@@ -19,10 +19,10 @@ namespace mpm {
 
 //! Particle phases
 enum NodePhase : unsigned int {
-  nSolid = 0,
-  nLiquid = 1,
-  nGas = 2,
-  nMixture = 0
+  NSolid = 0,
+  NLiquid = 1,
+  NGas = 2,
+  NMixture = 0
 };
 
 //! NodeBase base class for nodes
@@ -283,9 +283,9 @@ class NodeBase {
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
 
-  //! Return real density at a given node for a given phase
+  //! Return interpolated density at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  virtual double density(unsigned phase) = 0;
+  virtual double density(unsigned phase) const = 0;
 
   //! Update density at the nodes
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -300,7 +300,7 @@ class NodeBase {
   virtual void assign_free_surface(bool free_surface) = 0;
 
   //! Return free surface bool
-  virtual bool free_surface() = 0;
+  virtual bool free_surface() const = 0;
 
   //! Assign signed distance
   virtual void assign_signed_distance(double signed_distance) = 0;

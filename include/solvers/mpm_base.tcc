@@ -453,7 +453,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 
     // Input particle h5 file for resume
     for (const auto ptype : particle_types_) {
-      std::string attribute = mpm::ParticleHDF5TypeName.at(ptype);
+      std::string attribute = mpm::ParticlePODTypeName.at(ptype);
       std::string extension = ".h5";
 
       auto particles_file =
@@ -493,7 +493,7 @@ template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
   // Write hdf5 file for single phase particle
   for (const auto ptype : particle_types_) {
-    std::string attribute = mpm::ParticleHDF5TypeName.at(ptype);
+    std::string attribute = mpm::ParticlePODTypeName.at(ptype);
     std::string extension = ".h5";
 
     auto particles_file =
@@ -969,8 +969,6 @@ template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
     const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
   try {
-    // TODO: Get the total phases
-    const unsigned Tnphases = 2;
     // Read and assign pressure constraints
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
         mesh_props["boundary_conditions"].find("pressure_constraints") !=
@@ -981,10 +979,6 @@ void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
            mesh_props["boundary_conditions"]["pressure_constraints"]) {
         // Pore pressure constraint phase indice
         unsigned constraint_phase = constraints["phase_id"];
-
-        if (constraint_phase >= Tnphases)
-          throw std::runtime_error(
-              "Phase for nodal pressure constraints is not properly assigned");
 
         // Pore pressure constraints are specified in a file
         if (constraints.find("file") != constraints.end()) {

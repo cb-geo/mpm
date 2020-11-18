@@ -12,7 +12,7 @@ std::map<std::string, int> ParticleType = {{"P2D", 0},       {"P3D", 1},
 std::map<int, std::string> ParticleTypeName = {
     {0, "P2D"},      {1, "P3D"},       {2, "P2DFLUID"},
     {3, "P3DFLUID"}, {4, "P2D2PHASE"}, {5, "P3D2PHASE"}};
-std::map<std::string, std::string> ParticleHDF5TypeName = {
+std::map<std::string, std::string> ParticlePODTypeName = {
     {"P2D", "particles"},
     {"P3D", "particles"},
     {"P2DFLUID", "fluid_particles"},

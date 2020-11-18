@@ -159,13 +159,13 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check pressure constraints
       SECTION("Check nodal pressure constraints") {
         // Check assign pressure constraint
-        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nSolid, 8000,
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NSolid, 8000,
                                                  nullptr) == true);
         // Check apply pressure constraint
         REQUIRE_NOTHROW(
-            node->apply_pressure_constraint(mpm::NodePhase::nSolid));
+            node->apply_pressure_constraint(mpm::NodePhase::NSolid));
         // Check pressure
-        REQUIRE(node->pressure(mpm::NodePhase::nSolid) ==
+        REQUIRE(node->pressure(mpm::NodePhase::NSolid) ==
                 Approx(8000).epsilon(Tolerance));
       }
     }
@@ -636,13 +636,13 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Check pressure constraints
       SECTION("Check nodal pressure constraints") {
         // Check assign pressure constraint
-        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nSolid, 8000,
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NSolid, 8000,
                                                  nullptr) == true);
         // Check apply pressure constraint
         REQUIRE_NOTHROW(
-            node->apply_pressure_constraint(mpm::NodePhase::nSolid));
+            node->apply_pressure_constraint(mpm::NodePhase::NSolid));
         // Check pressure
-        REQUIRE(node->pressure(mpm::NodePhase::nSolid) ==
+        REQUIRE(node->pressure(mpm::NodePhase::NSolid) ==
                 Approx(8000).epsilon(Tolerance));
       }
     }
@@ -1250,13 +1250,13 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Check pressure constraints
       SECTION("Check nodal pressure constraints") {
         // Check assign pressure constraint
-        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nSolid, 8000,
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NSolid, 8000,
                                                  nullptr) == true);
         // Check apply pressure constraint
         REQUIRE_NOTHROW(
-            node->apply_pressure_constraint(mpm::NodePhase::nSolid));
+            node->apply_pressure_constraint(mpm::NodePhase::NSolid));
         // Check pressure
-        REQUIRE(node->pressure(mpm::NodePhase::nSolid) ==
+        REQUIRE(node->pressure(mpm::NodePhase::NSolid) ==
                 Approx(8000).epsilon(Tolerance));
       }
     }
