@@ -1,8 +1,10 @@
 //! Constructor of contact with mesh
 template <unsigned Tdim>
 mpm::ContactFriction<Tdim>::ContactFriction(
-    const std::shared_ptr<mpm::Mesh<Tdim>>& mesh)
-    : mpm::Contact<Tdim>(mesh) {}
+  const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double friction)
+    : mpm::Contact<Tdim>(mesh) {
+  friction_ = friction;
+}
 
 //! Initialize nodal properties
 template <unsigned Tdim>
@@ -32,25 +34,10 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
       std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_velocity,
                 std::placeholders::_1));
 
-  // Map multimaterial displacements from particles to nodes
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::map_multimaterial_displacements_to_nodes,
-      std::placeholders::_1));
-
   // Map multimaterial domain gradients from particles to nodes
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::map_multimaterial_domain_gradients_to_nodes,
       std::placeholders::_1));
-
-  // Compute multimaterial change in momentum
-  mesh_->iterate_over_nodes(
-      std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_change_in_momentum,
-                std::placeholders::_1));
-
-  // Compute multimaterial separation vector
-  mesh_->iterate_over_nodes(
-      std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_separation_vector,
-                std::placeholders::_1));
 
   // Compute multimaterial normal unit vector
   mesh_->iterate_over_nodes(
@@ -102,6 +89,9 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
 //! Update particle position
 template <unsigned Tdim>
 inline void mpm::ContactFriction<Tdim>::update_particles_contact(double dt) {
+
+  // Apply particle velocity constraints
+  mesh_->apply_particle_velocity_constraints();
 
   // Iterate over all particles and compute updated position
   mesh_->iterate_over_particles(
