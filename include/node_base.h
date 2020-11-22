@@ -193,6 +193,15 @@ class NodeBase {
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 
+  //! Assign absorbing constraint
+  //! \param[in] pwave_v p-wave velocity
+  //! \param[in] swave_v s-wave velocity
+  virtual bool assign_absorbing_constraint(unsigned dir, double pwave_v,
+                                           double swave_v) = 0;
+
+  //! Apply absorbing constraint
+  virtual void apply_absorbing_constraint(double dt) = 0;
+
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of friction constraint

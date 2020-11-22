@@ -202,12 +202,13 @@ class Node : public NodeBase<Tdim> {
   void apply_velocity_constraints() override;
 
   //! Assign absorbing constraint
-  //! \param[in] pwave_v p wave velocity
-  //! \param[in] swave_v s wave velocity
-  bool assign_nodal_absorbing_constraint(double pwave_v,double swave_v);
+  //! \param[in] pwave_v P-wave velocity
+  //! \param[in] swave_v S-wave velocity
+  bool assign_absorbing_constraint(unsigned dir, double pwave_v,
+                                   double swave_v) override;
 
   //! Apply absorbing constraint
-  void apply_nodal_absorbing_constraint(double dt);
+  void apply_absorbing_constraint(double dt) override;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
