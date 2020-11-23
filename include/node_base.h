@@ -135,16 +135,6 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
-  //! Update internal force (body force / traction force)
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] drag_force Drag force from the particles in a cell
-  //! \retval status Update status
-  virtual void update_drag_force_coefficient(bool update,
-                                             const VectorDim& drag_force) = 0;
-
-  //! Return drag force at a given node
-  virtual VectorDim drag_force_coefficient() const = 0;
-
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
@@ -209,16 +199,6 @@ class NodeBase {
   virtual bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept = 0;
 
-  //! Compute acceleration and velocity for two phase
-  //! \param[in] dt Timestep in analysis
-  virtual bool compute_acceleration_velocity_twophase_explicit(
-      double dt) noexcept = 0;
-
-  //! Compute acceleration and velocity for two phase with cundall damping
-  //! \param[in] dt Timestep in analysis
-  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
-      double dt, double damping_factor) noexcept = 0;
-
   //! Assign pressure constraint
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] pressure Applied pressure constraint
@@ -277,19 +257,6 @@ class NodeBase {
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
 
-  //! Return interpolated density at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  virtual double density(unsigned phase) const = 0;
-
-  //! Compute nodal density
-  virtual void compute_density() = 0;
-
-  //! Assign free surface
-  virtual void assign_free_surface(bool free_surface) = 0;
-
-  //! Return free surface bool
-  virtual bool free_surface() const = 0;
-
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name
@@ -308,6 +275,57 @@ class NodeBase {
 
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
+
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Return interpolated density at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double density(unsigned phase) const = 0;
+
+  //! Compute nodal density
+  //! \ingroup MultiPhase
+  virtual void compute_density() = 0;
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  virtual void assign_free_surface(bool free_surface) = 0;
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  virtual bool free_surface() const = 0;
+
+  //! Initialise two-phase nodal properties
+  virtual void initialise_twophase() noexcept = 0;
+
+  //! Update internal force (body force / traction force)
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual void update_drag_force_coefficient(bool update,
+                                             const VectorDim& drag_force) = 0;
+
+  //! Return drag force at a given node
+  //! \ingroup MultiPhase
+  virtual VectorDim drag_force_coefficient() const = 0;
+
+  //! Compute acceleration and velocity for two phase
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept = 0;
+
+  /**@}*/
 
 };  // NodeBase class
 }  // namespace mpm

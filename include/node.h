@@ -260,21 +260,6 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
-  //! Return interpolated density at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  double density(unsigned phase) const override { return density_(phase); }
-
-  //! Compute nodal density
-  void compute_density() override;
-
-  //! Assign free surface
-  void assign_free_surface(bool free_surface) override {
-    free_surface_ = free_surface;
-  }
-
-  //! Return free surface bool
-  bool free_surface() const override { return free_surface_; }
-
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name
@@ -295,36 +280,58 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   /**
-   * \defgroup TwoPhase Functions dealing with two-phase MPM
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/
 
+  //! Return interpolated density at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  double density(unsigned phase) const override { return density_(phase); }
+
+  //! Compute nodal density
+  //! \ingroup MultiPhase
+  void compute_density() override;
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  void assign_free_surface(bool free_surface) override {
+    free_surface_ = free_surface;
+  }
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  bool free_surface() const override { return free_surface_; }
+
+  //! Initialise two-phase nodal properties
+  void initialise_twophase() noexcept override;
+
   //! Update internal force (body force / traction force)
-  //! \ingroup TwoPhase
+  //! \ingroup MultiPhase
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
   //! \retval status Update status
   void update_drag_force_coefficient(bool update,
                                      const VectorDim& drag_force) override;
 
+  //! Return drag force at a given node
+  //! \ingroup MultiPhase
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+
   //! Compute acceleration and velocity for two phase
-  //! \ingroup TwoPhase
+  //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity_twophase_explicit(
       double dt) noexcept override;
 
   //! Compute acceleration and velocity for two phase with cundall damping
-  //! \ingroup TwoPhase
+  //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis \param[in] damping_factor
   //! Damping factor
   bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept override;
-
-  //! Return drag force at a given node
-  //! \ingroup TwoPhase
-  VectorDim drag_force_coefficient() const override {
-    return drag_force_coefficient_;
-  }
 
   /**@}*/
 
@@ -397,6 +404,6 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
-#include "node_twophase.tcc"
+#include "node_multiphase.tcc"
 
 #endif  // MPM_NODE_H_

@@ -35,8 +35,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   free_surface_ = false;
   status_ = false;
   material_ids_.clear();
-  // Specific variables for two phase
-  drag_force_coefficient_.setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -580,23 +578,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
   auto status = this->mpi_ranks_.insert(rank);
   node_mutex_.unlock();
   return status.second;
-}
-
-//! Compute mass density (Z. Wiezckowski, 2004)
-//! density = mass / lumped volume
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
-  const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
-
-  for (unsigned phase = 0; phase < Tnphases; ++phase) {
-    if (mass_(phase) > tolerance) {
-      if (volume_(phase) > tolerance)
-        density_(phase) = mass_(phase) / volume_(phase);
-
-      // Check to see if value is below threshold
-      if (std::abs(density_(phase)) < tolerance) density_(phase) = 0.;
-    }
-  }
 }
 
 //! Update nodal property at the nodes from particle
