@@ -328,6 +328,7 @@ class Node : public NodeBase<Tdim> {
   double signed_distance() override { return signed_distance_; }
 
   //! Initialise two-phase nodal properties
+  //! \ingroup MultiPhase
   void initialise_twophase() noexcept override;
 
   //! Update internal force (body force / traction force)
