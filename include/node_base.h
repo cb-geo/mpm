@@ -141,16 +141,6 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
-  //! Update internal force (body force / traction force)
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] drag_force Drag force from the particles in a cell
-  //! \retval status Update status
-  virtual void update_drag_force_coefficient(bool update,
-                                             const VectorDim& drag_force) = 0;
-
-  //! Return drag force at a given node
-  virtual VectorDim drag_force_coefficient() const = 0;
-
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
@@ -215,16 +205,6 @@ class NodeBase {
   virtual bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept = 0;
 
-  //! Compute acceleration and velocity for two phase
-  //! \param[in] dt Timestep in analysis
-  virtual bool compute_acceleration_velocity_twophase_explicit(
-      double dt) noexcept = 0;
-
-  //! Compute acceleration and velocity for two phase with cundall damping
-  //! \param[in] dt Timestep in analysis
-  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
-      double dt, double damping_factor) noexcept = 0;
-
   //! Assign pressure constraint
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] pressure Applied pressure constraint
@@ -283,65 +263,6 @@ class NodeBase {
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
 
-  //! Return interpolated density at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  virtual double density(unsigned phase) const = 0;
-
-  //! Update density at the nodes
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] density Density from the particles in a cell
-  virtual void update_density(bool update, unsigned phase, double density) = 0;
-
-  //! Compute nodal density
-  virtual void compute_density() = 0;
-
-  //! Assign free surface
-  virtual void assign_free_surface(bool free_surface) = 0;
-
-  //! Return free surface bool
-  virtual bool free_surface() const = 0;
-
-  //! Assign signed distance
-  virtual void assign_signed_distance(double signed_distance) = 0;
-
-  //! Return signed distance
-  virtual double signed_distance() = 0;
-
-  //! Assign active id
-  virtual void assign_active_id(Index id) = 0;
-
-  //! Return active id
-  virtual mpm::Index active_id() = 0;
-
-  //! Assign global active id
-  virtual void assign_global_active_id(Index id) = 0;
-
-  //! Return global active id
-  virtual mpm::Index global_active_id() = 0;
-
-  //! Compute navier-stokes semi-implicit acceleration and velocity
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
-      unsigned phase, double dt) = 0;
-
-  //! Return pressure constraint
-  virtual double pressure_constraint(const unsigned phase,
-                                     const double current_time) = 0;
-
-  //! Update pressure increment at the node
-  virtual void update_pressure_increment(
-      const Eigen::VectorXd& pressure_increment, unsigned phase,
-      double current_time = 0.) = 0;
-
-  //! Return nodal pressure increment
-  virtual double pressure_increment() const = 0;
-
-  //! Compute nodal correction force term
-  virtual bool compute_nodal_correction_force(
-      const VectorDim& correction_force) = 0;
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name
@@ -355,7 +276,118 @@ class NodeBase {
   //! Compute multimaterial change in momentum
   virtual void compute_multimaterial_change_in_momentum() = 0;
 
+  //! Compute multimaterial separation vector
+  virtual void compute_multimaterial_separation_vector() = 0;
+
+  //! Compute multimaterial normal unit vector
+  virtual void compute_multimaterial_normal_unit_vector() = 0;
+
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Return interpolated density at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double density(unsigned phase) const = 0;
+
+  //! Update density at the nodes
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] density Density from the particles in a cell
+  virtual void update_density(bool update, unsigned phase, double density) = 0;
+
+  //! Compute nodal density
+  //! \ingroup MultiPhase
+  virtual void compute_density() = 0;
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  virtual void assign_free_surface(bool free_surface) = 0;
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  virtual bool free_surface() const = 0;
+
+  //! Assign signed distance
+  //! \ingroup MultiPhase
+  virtual void assign_signed_distance(double signed_distance) = 0;
+
+  //! Return signed distance
+  //! \ingroup MultiPhase
+  virtual double signed_distance() = 0;
+
+  //! Initialise two-phase nodal properties
+  //! \ingroup MultiPhase
+  virtual void initialise_twophase() noexcept = 0;
+
+  //! Update internal force (body force / traction force)
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual void update_drag_force_coefficient(bool update,
+                                             const VectorDim& drag_force) = 0;
+
+  //! Return drag force at a given node
+  //! \ingroup MultiPhase
+  virtual VectorDim drag_force_coefficient() const = 0;
+
+  //! Compute acceleration and velocity for two phase
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept = 0;
+
+  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
+      unsigned phase, double dt) = 0;
+
+  //! Assign active id
+  //! \ingroup MultiPhase
+  virtual void assign_active_id(Index id) = 0;
+
+  //! Return active id
+  //! \ingroup MultiPhase
+  virtual mpm::Index active_id() = 0;
+
+  //! Assign global active id
+  //! \ingroup MultiPhase
+  virtual void assign_global_active_id(Index id) = 0;
+
+  //! Return global active id
+  //! \ingroup MultiPhase
+  virtual mpm::Index global_active_id() = 0;
+
+  //! Return pressure constraint
+  //! \ingroup MultiPhase
+  virtual double pressure_constraint(const unsigned phase,
+                                     const double current_time) = 0;
+
+  //! Update pressure increment at the node
+  //! \ingroup MultiPhase
+  virtual void update_pressure_increment(
+      const Eigen::VectorXd& pressure_increment, unsigned phase,
+      double current_time = 0.) = 0;
+
+  //! Return nodal pressure increment
+  //! \ingroup MultiPhase
+  virtual double pressure_increment() const = 0;
+
   //! Update correction force
+  //! \ingroup MultiPhase
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Correction force from the particles in a cell
@@ -363,14 +395,16 @@ class NodeBase {
                                        const VectorDim& force) noexcept = 0;
 
   //! Return correction force
+  //! \ingroup MultiPhase
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim correction_force(unsigned phase) const = 0;
 
-  //! Compute multimaterial separation vector
-  virtual void compute_multimaterial_separation_vector() = 0;
+  //! Compute nodal correction force term
+  //! \ingroup MultiPhase
+  virtual bool compute_nodal_correction_force(
+      const VectorDim& correction_force) = 0;
 
-  //! Compute multimaterial normal unit vector
-  virtual void compute_multimaterial_normal_unit_vector() = 0;
+  /**@}*/
 
 };  // NodeBase class
 }  // namespace mpm

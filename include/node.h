@@ -266,97 +266,6 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
-  //! Return interpolated density at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  double density(unsigned phase) const override { return density_(phase); }
-
-  //! Update density at the nodes
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] density Density from the particles in a cell
-  void update_density(bool update, unsigned phase,
-                      double density) noexcept override;
-
-  //! Compute nodal density
-  void compute_density() override;
-
-  //! Compute nodal correction force term
-  bool compute_nodal_correction_force(
-      const VectorDim& correction_force) override;
-
-  //! Update correction force
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] force Correction force from the particles in a cell
-  void update_correction_force(bool update, unsigned phase,
-                               const VectorDim& force) noexcept override;
-
-  //! Return correction force at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  VectorDim correction_force(unsigned phase) const override {
-    return correction_force_.col(phase);
-  }
-
-  //! Assign free surface
-  void assign_free_surface(bool free_surface) override {
-    free_surface_ = free_surface;
-  }
-
-  //! Return free surface bool
-  bool free_surface() const override { return free_surface_; }
-
-  //! Assign signed distance
-  void assign_signed_distance(double signed_distance) override {
-    signed_distance_ = signed_distance;
-  }
-
-  //! Return signed distance
-  double signed_distance() override { return signed_distance_; }
-
-  //! Assign active id
-  void assign_active_id(Index id) override { active_id_ = id; }
-
-  //! Return active id
-  mpm::Index active_id() override { return active_id_; }
-
-  //! Assign global active id
-  void assign_global_active_id(Index id) override { global_active_id_ = id; }
-
-  //! Return global active id
-  mpm::Index global_active_id() override { return global_active_id_; }
-
-  //! Return nodal pressure constraint
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] current_time current time of the analysis
-  //! \retval pressure constraint at proper time for given phase
-  double pressure_constraint(const unsigned phase,
-                             const double current_time) override {
-    if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
-      const double scalar =
-          (pressure_function_.find(phase) != pressure_function_.end())
-              ? pressure_function_[phase]->value(current_time)
-              : 1.0;
-
-      return scalar * pressure_constraints_[phase];
-    } else
-      return std::numeric_limits<double>::max();
-  }
-
-  //! Update pressure increment at the node
-  void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
-                                 unsigned phase,
-                                 double current_time = 0.) override;
-
-  //! Return nodal pressure increment
-  double pressure_increment() const override { return pressure_increment_; }
-
-  //! Compute navier-stokes semi-implicit acceleration and velocity
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  bool compute_acceleration_velocity_navierstokes_semi_implicit(
-      unsigned phase, double dt) override;
-
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name
@@ -377,36 +286,148 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   /**
-   * \defgroup TwoPhase Functions dealing with two-phase MPM
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/
 
+  //! Return interpolated density at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  double density(unsigned phase) const override { return density_(phase); }
+
+  //! Update density at the nodes
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] density Density from the particles in a cell
+  void update_density(bool update, unsigned phase,
+                      double density) noexcept override;
+
+  //! Compute nodal density
+  //! \ingroup MultiPhase
+  void compute_density() override;
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  void assign_free_surface(bool free_surface) override {
+    free_surface_ = free_surface;
+  }
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  bool free_surface() const override { return free_surface_; }
+
+  //! Assign signed distance
+  //! \ingroup MultiPhase
+  void assign_signed_distance(double signed_distance) override {
+    signed_distance_ = signed_distance;
+  }
+
+  //! Return signed distance
+  //! \ingroup MultiPhase
+  double signed_distance() override { return signed_distance_; }
+
+  //! Initialise two-phase nodal properties
+  void initialise_twophase() noexcept override;
+
   //! Update internal force (body force / traction force)
-  //! \ingroup TwoPhase
+  //! \ingroup MultiPhase
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
   //! \retval status Update status
   void update_drag_force_coefficient(bool update,
                                      const VectorDim& drag_force) override;
 
+  //! Return drag force at a given node
+  //! \ingroup MultiPhase
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+
   //! Compute acceleration and velocity for two phase
-  //! \ingroup TwoPhase
+  //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity_twophase_explicit(
       double dt) noexcept override;
 
   //! Compute acceleration and velocity for two phase with cundall damping
-  //! \ingroup TwoPhase
+  //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis \param[in] damping_factor
   //! Damping factor
   bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept override;
 
-  //! Return drag force at a given node
-  //! \ingroup TwoPhase
-  VectorDim drag_force_coefficient() const override {
-    return drag_force_coefficient_;
+  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_navierstokes_semi_implicit(
+      unsigned phase, double dt) override;
+
+  //! Assign active id
+  //! \ingroup MultiPhase
+  void assign_active_id(Index id) override { active_id_ = id; }
+
+  //! Return active id
+  //! \ingroup MultiPhase
+  mpm::Index active_id() override { return active_id_; }
+
+  //! Assign global active id
+  //! \ingroup MultiPhase
+  void assign_global_active_id(Index id) override { global_active_id_ = id; }
+
+  //! Return global active id
+  //! \ingroup MultiPhase
+  mpm::Index global_active_id() override { return global_active_id_; }
+
+  //! Return nodal pressure constraint
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current_time current time of the analysis
+  //! \retval pressure constraint at proper time for given phase
+  double pressure_constraint(const unsigned phase,
+                             const double current_time) override {
+    if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
+      const double scalar =
+          (pressure_function_.find(phase) != pressure_function_.end())
+              ? pressure_function_[phase]->value(current_time)
+              : 1.0;
+
+      return scalar * pressure_constraints_[phase];
+    } else
+      return std::numeric_limits<double>::max();
   }
+
+  //! Update pressure increment at the node
+  //! \ingroup MultiPhase
+  void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
+                                 unsigned phase,
+                                 double current_time = 0.) override;
+
+  //! Return nodal pressure increment
+  //! \ingroup MultiPhase
+  double pressure_increment() const override { return pressure_increment_; }
+
+  //! Update correction force
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] force Correction force from the particles in a cell
+  void update_correction_force(bool update, unsigned phase,
+                               const VectorDim& force) noexcept override;
+
+  //! Return correction force at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim correction_force(unsigned phase) const override {
+    return correction_force_.col(phase);
+  }
+
+  //! Compute nodal correction force term
+  //! \ingroup MultiPhase
+  bool compute_nodal_correction_force(
+      const VectorDim& correction_force) override;
 
   /**@}*/
 
@@ -435,8 +456,6 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
-  //! Drag force
-  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
@@ -477,20 +496,28 @@ class Node : public NodeBase<Tdim> {
   Index active_id_{std::numeric_limits<Index>::max()};
   //! Global index for active node (globally)
   Index global_active_id_{std::numeric_limits<Index>::max()};
+
+  /**
+   * \defgroup MultiPhaseVariables Variables for multi-phase MPM
+   * @{
+   */
+  //! Free surface
+  bool free_surface_{false};
+  //! Signed distance
+  double signed_distance_;
   //! Interpolated density
   Eigen::Matrix<double, 1, Tnphases> density_;
   //! p^(t+1) - beta * p^(t)
   double pressure_increment_;
   //! Correction force
   Eigen::Matrix<double, Tdim, Tnphases> correction_force_;
-  //! Free surface
-  bool free_surface_{false};
-  //! Signed distance
-  double signed_distance_;
+  //! Drag force
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
+  /**@}*/
 };  // Node class
 }  // namespace mpm
 
 #include "node.tcc"
-#include "node_twophase.tcc"
+#include "node_multiphase.tcc"
 
 #endif  // MPM_NODE_H_

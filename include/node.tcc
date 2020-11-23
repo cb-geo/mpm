@@ -38,8 +38,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   status_ = false;
   solving_status_ = false;
   material_ids_.clear();
-  // Specific variables for two phase
-  drag_force_coefficient_.setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -142,23 +140,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
   // Update/assign internal force
   node_mutex_.lock();
   internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
-  node_mutex_.unlock();
-}
-
-//! Update correction force
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_correction_force(
-    bool update, unsigned phase,
-    const Eigen::Matrix<double, Tdim, 1>& force) noexcept {
-  // Assert
-  assert(phase < Tnphases);
-
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Update/assign correction force
-  node_mutex_.lock();
-  correction_force_.col(phase) = correction_force_.col(phase) * factor + force;
   node_mutex_.unlock();
 }
 
@@ -600,106 +581,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
   auto status = this->mpi_ranks_.insert(rank);
   node_mutex_.unlock();
   return status.second;
-}
-
-//! Update density at the nodes from particle
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_density(bool update,
-                                                     unsigned phase,
-                                                     double density) noexcept {
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Update/assign mass
-  node_mutex_.lock();
-  density_(phase) = (density_(phase) * factor) + density;
-  node_mutex_.unlock();
-}
-
-//! Compute mass density (Z. Wiezckowski, 2004)
-//! density = mass / lumped volume
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
-  const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
-
-  for (unsigned phase = 0; phase < Tnphases; ++phase) {
-    if (mass_(phase) > tolerance) {
-      if (volume_(phase) > tolerance)
-        density_(phase) = mass_(phase) / volume_(phase);
-
-      // Check to see if value is below threshold
-      if (std::abs(density_(phase)) < tolerance) density_(phase) = 0.;
-    }
-  }
-}
-
-//! Update pressure increment at the node
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
-    const Eigen::VectorXd& pressure_increment, unsigned phase,
-    double current_time) {
-  this->pressure_increment_ = pressure_increment(active_id_);
-
-  // If pressure boundary, increment is zero
-  if (pressure_constraints_.find(phase) != pressure_constraints_.end() ||
-      this->free_surface())
-    this->pressure_increment_ = 0;
-}
-
-//! Compute nodal correction force
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
-    const VectorDim& correction_force) {
-  bool status = true;
-
-  try {
-    // Compute correction force for water phase
-    correction_force_.col(0) = correction_force;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-//! Compute semi-implicit acceleration and velocity
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::
-    compute_acceleration_velocity_navierstokes_semi_implicit(unsigned phase,
-                                                             double dt) {
-  bool status = true;
-  const double tolerance = std::numeric_limits<double>::min();
-  try {
-
-    Eigen::Matrix<double, Tdim, 1> acceleration_corrected =
-        correction_force_.col(phase) / mass_(phase);
-
-    // Acceleration
-    this->acceleration_.col(phase) += acceleration_corrected;
-
-    // Update velocity
-    velocity_.col(phase) += acceleration_corrected * dt;
-
-    // Apply friction constraints
-    this->apply_friction_constraints(dt);
-
-    // Apply velocity constraints, which also sets acceleration to 0,
-    // when velocity is set.
-    this->apply_velocity_constraints();
-
-    // Set a threshold
-    for (unsigned i = 0; i < Tdim; ++i) {
-      if (std::abs(velocity_.col(phase)(i)) < tolerance)
-        velocity_.col(phase)(i) = 0.;
-      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
-        acceleration_.col(phase)(i) = 0.;
-    }
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
 }
 
 //! Update nodal property at the nodes from particle
