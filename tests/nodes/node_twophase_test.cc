@@ -120,6 +120,9 @@ TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2Phase]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
+    // Initialise two-phase node
+    REQUIRE_NOTHROW(node->initialise_twophase());
+
     // Check mass
     REQUIRE(node->mass(mpm::NodePhase::NSolid) ==
             Approx(0.0).epsilon(Tolerance));
@@ -864,6 +867,9 @@ TEST_CASE("Twophase Node is checked for 2D case", "[node][2D][2Phase]") {
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::NodeBase<Dim>> node =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+
+    // Initialise two-phase node
+    REQUIRE_NOTHROW(node->initialise_twophase());
 
     // Check mass
     REQUIRE(node->mass(mpm::NodePhase::NSolid) ==
@@ -1777,6 +1783,9 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2Phase]") {
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::NodeBase<Dim>> node =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+
+    // Initialise two-phase node
+    REQUIRE_NOTHROW(node->initialise_twophase());
 
     // Check mass
     REQUIRE(node->mass(mpm::NodePhase::NSolid) ==

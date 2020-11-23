@@ -856,6 +856,10 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Test compute stress before material assignment
     // TODO Assert: REQUIRE(particle->compute_stress() == false);
 
+    // Initialise nodal variables
+    for (unsigned i = 0; i < nodes.size(); ++i)
+      REQUIRE_NOTHROW(nodes.at(i)->initialise_twophase());
+
     // Assign material properties
     REQUIRE(particle->assign_material(material) == true);
     REQUIRE(particle->assign_material(liquid_material,
@@ -2671,7 +2675,8 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
 
       // Map particle mass to nodes
       particle->assign_mass(std::numeric_limits<double>::max());
-      // TODO Assert: REQUIRE(particle->map_mass_momentum_to_nodes() == false);
+      // TODO Assert: REQUIRE(particle->map_mass_momentum_to_nodes() ==
+      // false);
 
       // Map particle pressure to nodes
       // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);

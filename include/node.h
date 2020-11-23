@@ -304,6 +304,7 @@ class Node : public NodeBase<Tdim> {
   bool free_surface() const override { return free_surface_; }
 
   //! Initialise two-phase nodal properties
+  //! \ingroup MultiPhase
   void initialise_twophase() noexcept override;
 
   //! Update internal force (body force / traction force)
