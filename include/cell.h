@@ -214,44 +214,6 @@ class Cell {
   //! Return rank
   unsigned rank() const;
 
-  //! Initialize local elemental matrices
-  bool initialise_element_matrix();
-
-  //! Return local node indices
-  Eigen::VectorXi local_node_indices();
-
-  //! Return local laplacian
-  const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
-
-  //! Compute local laplacian matrix (Used in poisson equation)
-  //! \param[in] grad_shapefn shape function gradient
-  //! \param[in] pvolume volume weight
-  //! \param[in] multiplier multiplier
-  void compute_local_laplacian(const Eigen::MatrixXd& grad_shapefn,
-                               double pvolume,
-                               double multiplier = 1.0) noexcept;
-
-  //! Return local laplacian RHS matrix
-  const Eigen::MatrixXd& poisson_right_matrix() {
-    return poisson_right_matrix_;
-  };
-
-  //! Compute local poisson RHS matrix (Used in poisson equation)
-  //! \param[in] shapefn shape function
-  //! \param[in] grad_shapefn shape function gradient
-  //! \param[in] pvolume volume weight
-  void compute_local_poisson_right(const Eigen::VectorXd& shapefn,
-                                   const Eigen::MatrixXd& grad_shapefn,
-                                   double pvolume,
-                                   double multiplier = 1.0) noexcept;
-
-  //! Return local correction matrix
-  const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
-
-  //! Compute local correction matrix (Used to correct velocity)
-  void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
-                                       const Eigen::MatrixXd& grad_shapefn,
-                                       double pvolume) noexcept;
   //! Return previous mpi rank
   unsigned previous_mpirank() const;
 
@@ -296,6 +258,53 @@ class Cell {
   //! \ingroup MultiPhase
   //! \param[in] phase to map volume
   void map_cell_volume_to_nodes(unsigned phase);
+
+  //! Initialize local elemental matrices
+  //! \ingroup MultiPhase
+  bool initialise_element_matrix();
+
+  //! Return local node indices
+  //! \ingroup MultiPhase
+  Eigen::VectorXi local_node_indices();
+
+  //! Return local laplacian
+  //! \ingroup MultiPhase
+  const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
+
+  //! Compute local laplacian matrix (Used in poisson equation)
+  //! \ingroup MultiPhase
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  //! \param[in] multiplier multiplier
+  void compute_local_laplacian(const Eigen::MatrixXd& grad_shapefn,
+                               double pvolume,
+                               double multiplier = 1.0) noexcept;
+
+  //! Return local laplacian RHS matrix
+  //! \ingroup MultiPhase
+  const Eigen::MatrixXd& poisson_right_matrix() {
+    return poisson_right_matrix_;
+  };
+
+  //! Compute local poisson RHS matrix (Used in poisson equation)
+  //! \ingroup MultiPhase
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_poisson_right(const Eigen::VectorXd& shapefn,
+                                   const Eigen::MatrixXd& grad_shapefn,
+                                   double pvolume,
+                                   double multiplier = 1.0) noexcept;
+
+  //! Return local correction matrix
+  //! \ingroup MultiPhase
+  const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
+
+  //! Compute local correction matrix (Used to correct velocity)
+  //! \ingroup MultiPhase
+  void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
+                                       const Eigen::MatrixXd& grad_shapefn,
+                                       double pvolume) noexcept;
 
   /**@}*/
 
@@ -346,6 +355,11 @@ class Cell {
   //! Normal of face
   //! first-> face_id, second->vector of the normal
   std::map<unsigned, Eigen::VectorXd> face_normals_;
+
+  /**
+   * \defgroup MultiPhaseVariables Variables for multi-phase MPM
+   * @{
+   */
   //! Solving status
   bool solving_status_{false};
   //! Free surface bool
@@ -358,11 +372,14 @@ class Cell {
   Eigen::MatrixXd poisson_right_matrix_;
   //! Local correction RHS matrix
   Eigen::MatrixXd correction_matrix_;
+  /**@}*/
+
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
 }  // namespace mpm
 
 #include "cell.tcc"
+#include "cell_multiphase.tcc"
 
 #endif  // MPM_CELL_H_
