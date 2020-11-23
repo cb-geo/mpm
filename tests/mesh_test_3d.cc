@@ -198,11 +198,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->status() == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
+    REQUIRE(mesh->nparticles("P3D") == 2);
 
     // Remove particle 2 and check
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+    REQUIRE(mesh->nparticles("P3D") == 1);
 
     int mpi_size;
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -225,6 +227,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+    REQUIRE(mesh->nparticles("P3D") == 0);
 
     // Add and use remove all particles
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -1001,7 +1004,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             }
             // Test HDF5
             SECTION("Write particles HDF5") {
-              REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+              REQUIRE(mesh->write_particles_hdf5("particles-3d.h5") == true);
 
               auto phdf5 = mesh->particles_hdf5();
               REQUIRE(phdf5.size() == mesh->nparticles());
@@ -1216,6 +1219,31 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                       set_id, velocity_constraint) == false);
         }
 
+        SECTION("Check assign pressure constraints to nodes") {
+          tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+          node_sets[0] = std::vector<mpm::Index>{0, 2};
+          node_sets[1] = std::vector<mpm::Index>{1, 3};
+
+          REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
+          int set_id = 0;
+          double pressure = 500.2;
+          // Add pressure constraint to mesh
+          REQUIRE(constraints->assign_nodal_pressure_constraint(
+                      mfunction, set_id, 0, pressure) == true);
+          REQUIRE(constraints->assign_nodal_pressure_constraint(
+                      mfunction, set_id, 1, pressure) == true);
+
+          // Add pressure constraint to all nodes in mesh
+          REQUIRE(constraints->assign_nodal_pressure_constraint(
+                      mfunction, -1, 0, pressure) == true);
+          REQUIRE(constraints->assign_nodal_pressure_constraint(
+                      mfunction, -1, 1, pressure) == true);
+        }
+
         SECTION("Check assign friction constraints to nodes") {
           tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
           node_sets[0] = std::vector<mpm::Index>{0, 2};
@@ -1301,6 +1329,24 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           friction_constraints.emplace_back(std::make_tuple(3, 3, -1, 0.0));
           REQUIRE(constraints->assign_nodal_friction_constraints(
                       friction_constraints) == false);
+        }
+
+        // Test assign pressure constraints to nodes
+        SECTION("Check assign pressure constraints to nodes") {
+          // Vector of pressure constraints
+          std::vector<std::tuple<mpm::Index, double>> pressure_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+          // Constraint
+          pressure_constraints.emplace_back(std::make_tuple(0, 500.5));
+          pressure_constraints.emplace_back(std::make_tuple(1, 210.5));
+          pressure_constraints.emplace_back(std::make_tuple(2, 320.2));
+          pressure_constraints.emplace_back(std::make_tuple(3, 0.0));
+
+          REQUIRE(constraints->assign_nodal_pressure_constraints(
+                      0, pressure_constraints) == true);
+          REQUIRE(constraints->assign_nodal_pressure_constraints(
+                      1, pressure_constraints) == true);
         }
 
         // Test assign nodes concentrated_forces

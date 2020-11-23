@@ -134,6 +134,21 @@ class Node : public NodeBase<Tdim> {
   void update_mass_pressure(unsigned phase,
                             double mass_pressure) noexcept override;
 
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_pressure_constraint(
+      const unsigned phase, const double pressure,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Apply pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] step Step in analysis
+  void apply_pressure_constraint(unsigned phase, double dt = 0,
+                                 Index step = 0) noexcept override;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -264,6 +279,63 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Return interpolated density at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  double density(unsigned phase) const override { return density_(phase); }
+
+  //! Compute nodal density
+  //! \ingroup MultiPhase
+  void compute_density() override;
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  void assign_free_surface(bool free_surface) override {
+    free_surface_ = free_surface;
+  }
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  bool free_surface() const override { return free_surface_; }
+
+  //! Initialise two-phase nodal properties
+  //! \ingroup MultiPhase
+  void initialise_twophase() noexcept override;
+
+  //! Update internal force (body force / traction force)
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  void update_drag_force_coefficient(bool update,
+                                     const VectorDim& drag_force) override;
+
+  //! Return drag force at a given node
+  //! \ingroup MultiPhase
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+
+  //! Compute acceleration and velocity for two phase
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept override;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis \param[in] damping_factor
+  //! Damping factor
+  bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept override;
+
+  /**@}*/
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
@@ -287,6 +359,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Drag force
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
@@ -309,6 +383,10 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Pressure constraint
+  std::map<unsigned, double> pressure_constraints_;
+  //! Mathematical function for pressure
+  std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Concentrated force
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
   //! Mathematical function for force
@@ -319,9 +397,14 @@ class Node : public NodeBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
+  //! Interpolated density
+  Eigen::Matrix<double, 1, Tnphases> density_;
+  //! Free surface
+  bool free_surface_{false};
 };  // Node class
 }  // namespace mpm
 
 #include "node.tcc"
+#include "node_multiphase.tcc"
 
 #endif  // MPM_NODE_H_

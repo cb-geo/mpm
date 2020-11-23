@@ -105,3 +105,53 @@ bool mpm::Constraints<Tdim>::assign_nodal_friction_constraints(
   }
   return status;
 }
+
+//! Assign nodal pressure constraints
+template <unsigned Tdim>
+bool mpm::Constraints<Tdim>::assign_nodal_pressure_constraint(
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id,
+    const unsigned phase, const double pconstraint) {
+  bool status = true;
+  try {
+    auto nset = mesh_->nodes(set_id);
+    if (nset.size() == 0)
+      throw std::runtime_error(
+          "Node set is empty for assignment of pressure constraints");
+
+#pragma omp parallel for schedule(runtime)
+    for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+      if (!(*nitr)->assign_pressure_constraint(phase, pconstraint, mfunction))
+        throw std::runtime_error("Setting pressure constraint failed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign nodal pressure constraints to nodes
+template <unsigned Tdim>
+bool mpm::Constraints<Tdim>::assign_nodal_pressure_constraints(
+    const unsigned phase,
+    const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints) {
+  bool status = true;
+  try {
+    for (const auto& pressure_constraint : pressure_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(pressure_constraint);
+      // Pressure
+      double pressure = std::get<1>(pressure_constraint);
+
+      // Apply constraint
+      if (!mesh_->node(nid)->assign_pressure_constraint(phase, pressure,
+                                                        nullptr))
+        throw std::runtime_error(
+            "Nodal pressure constraints assignment failed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

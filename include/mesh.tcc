@@ -420,6 +420,17 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 #endif
 }
 
+//! Number of particles in the mesh with specific type
+template <unsigned Tdim>
+mpm::Index mpm::Mesh<Tdim>::nparticles(const std::string& particle_type) const {
+  return std::count_if(
+      particles_.cbegin(), particles_.cend(),
+      [&ptype =
+           particle_type](const std::shared_ptr<mpm::ParticleBase<Tdim>>& ptr) {
+        return (ptr)->type() == ptype;
+      });
+}
+
 //! Find ncells in rank
 template <unsigned Tdim>
 mpm::Index mpm::Mesh<Tdim>::ncells_rank(bool active_cells) {
@@ -1068,6 +1079,16 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
     oper(*pitr);
 }
 
+//! Iterate over particles
+template <unsigned Tdim>
+template <typename Toper, typename Tpred>
+void mpm::Mesh<Tdim>::iterate_over_particles_predicate(Toper oper, Tpred pred) {
+#pragma omp parallel for schedule(runtime)
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    if (pred(*pitr)) oper(*pitr);
+  }
+}
+
 //! Iterate over particle set
 template <unsigned Tdim>
 template <typename Toper>
@@ -1427,20 +1448,20 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::particles_cells()
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
-                                           const std::string& filename) {
+bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename) {
   const unsigned nparticles = this->nparticles();
 
-  std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
+  std::vector<PODParticle> particle_data;
   particle_data.reserve(nparticles);
 
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particle_data.emplace_back((*pitr)->hdf5());
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+    particle_data.emplace_back(*pod);
+  }
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
-
-  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+  const hsize_t NFIELDS = mpm::pod::particle::NFIELDS;
 
   hid_t file_id;
   hsize_t chunk_size = 10000;
@@ -1452,20 +1473,70 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   // make a table
-  H5TBmake_table(
-      "Table Title", file_id, "table", NFIELDS, NRECORDS,
-      mpm::hdf5::particle::dst_size, mpm::hdf5::particle::field_names,
-      mpm::hdf5::particle::dst_offset, mpm::hdf5::particle::field_type,
-      chunk_size, fill_data, compress, particle_data.data());
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                 mpm::pod::particle::dst_size, mpm::pod::particle::field_names,
+                 mpm::pod::particle::dst_offset, mpm::pod::particle::field_type,
+                 chunk_size, fill_data, compress, particle_data.data());
 
   H5Fclose(file_id);
   return true;
 }
 
+//! Write particles to HDF5 for two-phase particle
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::write_particles_hdf5_twophase(
+    const std::string& filename) {
+  const unsigned nparticles = this->nparticles();
+
+  std::vector<PODParticleTwoPhase> particle_data;
+  particle_data.reserve(nparticles);
+
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod =
+        std::static_pointer_cast<mpm::PODParticleTwoPhase>((*pitr)->pod());
+    particle_data.emplace_back(*pod);
+  }
+
+  // Calculate the size and the offsets of our struct members in memory
+  const hsize_t NRECORDS = nparticles;
+  const hsize_t NFIELDS = mpm::pod::particletwophase::NFIELDS;
+
+  hid_t file_id;
+  hsize_t chunk_size = 10000;
+  int* fill_data = NULL;
+  int compress = 0;
+
+  // Create a new file using default properties.
+  file_id =
+      H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  // make a table
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                 mpm::pod::particletwophase::dst_size,
+                 mpm::pod::particletwophase::field_names,
+                 mpm::pod::particletwophase::dst_offset,
+                 mpm::pod::particletwophase::field_type, chunk_size, fill_data,
+                 compress, particle_data.data());
+
+  H5Fclose(file_id);
+  return true;
+}
+
+//! Write particles to HDF5 with type name
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename,
+                                          const std::string& type_name) {
+  bool status = false;
+  if (type_name == "particles")
+    status = this->read_particles_hdf5(filename);
+  else if (type_name == "twophase_particles")
+    status = this->read_particles_hdf5_twophase(filename);
+  return status;
+}
+
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
-                                          const std::string& filename) {
+bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
 
   // Create a new file using default properties.
   hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1477,15 +1548,15 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   hsize_t nfields = 0;
   H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  if (nfields != mpm::hdf5::particle::NFIELDS)
+  if (nfields != mpm::pod::particle::NFIELDS)
     throw std::runtime_error("HDF5 table has incorrect number of fields");
 
-  std::vector<HDF5Particle> dst_buf;
+  std::vector<PODParticle> dst_buf;
   dst_buf.reserve(nrecords);
   // Read the table
-  H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
-                 mpm::hdf5::particle::dst_offset,
-                 mpm::hdf5::particle::dst_sizes, dst_buf.data());
+  H5TBread_table(file_id, "table", mpm::pod::particle::dst_size,
+                 mpm::pod::particle::dst_offset, mpm::pod::particle::dst_sizes,
+                 dst_buf.data());
 
   // Vector of particles
   Vector<ParticleBase<Tdim>> particles;
@@ -1496,11 +1567,74 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if (i < nrecords) {
-      HDF5Particle particle = dst_buf[i];
+      PODParticle particle = dst_buf[i];
       // Get particle's material from list of materials
-      auto material = materials_.at(particle.material_id);
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      materials.emplace_back(materials_.at(particle.material_id));
+
       // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, material);
+      (*pitr)->initialise_particle(particle, materials);
+      // Add particle to map
+      map_particles_.insert(particle.id, *pitr);
+      particles.add(*pitr);
+      ++i;
+    }
+  }
+  // close the file
+  H5Fclose(file_id);
+
+  // Overwrite particles container
+  this->particles_ = particles;
+
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->clear_particle_ids();
+
+  return true;
+}
+
+//! Write particles to HDF5 for twophase particles
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
+    const std::string& filename) {
+
+  // Create a new file using default properties.
+  hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  // Throw an error if file can't be found
+  if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
+
+  // Calculate the size and the offsets of our struct members in memory
+  hsize_t nrecords = 0;
+  hsize_t nfields = 0;
+  H5TBget_table_info(file_id, "table", &nfields, &nrecords);
+
+  if (nfields != mpm::pod::particletwophase::NFIELDS)
+    throw std::runtime_error("HDF5 table has incorrect number of fields");
+
+  std::vector<PODParticleTwoPhase> dst_buf;
+  dst_buf.reserve(nrecords);
+  // Read the table
+  H5TBread_table(file_id, "table", mpm::pod::particletwophase::dst_size,
+                 mpm::pod::particletwophase::dst_offset,
+                 mpm::pod::particletwophase::dst_sizes, dst_buf.data());
+
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
+
+  unsigned i = 0;
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    if (i < nrecords) {
+      PODParticleTwoPhase particle = dst_buf[i];
+      // Get particle's material from list of materials
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      materials.emplace_back(materials_.at(particle.material_id));
+      materials.emplace_back(materials_.at(particle.liquid_material_id));
+
+      // Initialise particle with HDF5 data
+      (*pitr)->initialise_particle(particle, materials);
       // Add particle to map
       map_particles_.insert(particle.id, *pitr);
       particles.add(*pitr);
@@ -1522,14 +1656,16 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-std::vector<mpm::HDF5Particle> mpm::Mesh<Tdim>::particles_hdf5() const {
+std::vector<mpm::PODParticle> mpm::Mesh<Tdim>::particles_hdf5() const {
   const unsigned nparticles = this->nparticles();
 
-  std::vector<mpm::HDF5Particle> particles_hdf5;
+  std::vector<mpm::PODParticle> particles_hdf5;
   particles_hdf5.reserve(nparticles);
 
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particles_hdf5.emplace_back((*pitr)->hdf5());
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+    particles_hdf5.emplace_back(*pod);
+  }
 
   return particles_hdf5;
 }
@@ -1927,7 +2063,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
   // Initialise the shared pointer to nodal properties
   nodal_properties_ = std::make_shared<mpm::NodalProperties>();
 
-  // Check if nodes_ and materials_is empty and throw runtime error if they are
+  // Check if nodes_ and materials_is empty and throw runtime error if they
+  // are
   if (nodes_.size() != 0 && materials_.size() != 0) {
     // Compute number of rows in nodal properties for vector entities
     const unsigned nrows = nodes_.size() * Tdim;

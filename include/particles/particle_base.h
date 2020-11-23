@@ -14,8 +14,9 @@
 #include "cell.h"
 #include "data_types.h"
 #include "function_base.h"
-#include "hdf5_particle.h"
 #include "material.h"
+#include "pod_particle.h"
+#include "pod_particle_twophase.h"
 
 namespace mpm {
 
@@ -24,11 +25,18 @@ template <unsigned Tdim>
 class Material;
 
 //! Particle phases
-enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
+enum ParticlePhase : unsigned int {
+  SinglePhase = 0,
+  Solid = 0,
+  Liquid = 1,
+  Gas = 2,
+  Mixture = 0
+};
 
 //! Particle type
 extern std::map<std::string, int> ParticleType;
 extern std::map<int, std::string> ParticleTypeName;
+extern std::map<std::string, std::string> ParticlePODTypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -60,32 +68,23 @@ class ParticleBase {
   //! Delete assignement operator
   ParticleBase& operator=(const ParticleBase<Tdim>&) = delete;
 
-  //! Initialise particle HDF5 data
-  //! \param[in] particle HDF5 data of particle
-  //! \retval status Status of reading HDF5 particle
-  virtual bool initialise_particle(const HDF5Particle& particle) = 0;
+  //! Initialise particle POD data
+  //! \param[in] particle POD data of particle
+  //! \retval status Status of reading POD particle
+  virtual bool initialise_particle(PODParticle& particle) = 0;
 
-  //! Initialise particle HDF5 data and material
-  //! \param[in] particle HDF5 data of particle
-  //! \param[in] material Material associated with the particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle POD data and material
+  //! \param[in] particle POD data of particle
+  //! \param[in] materials Material associated with the particle arranged in a
+  //! vector
+  //! \retval status Status of reading POD particle
   virtual bool initialise_particle(
-      const HDF5Particle& particle,
-      const std::shared_ptr<Material<Tdim>>& material) = 0;
+      PODParticle& particle,
+      const std::vector<std::shared_ptr<Material<Tdim>>>& materials) = 0;
 
-  //! Assign material history variables
-  //! \param[in] state_vars State variables
-  //! \param[in] material Material associated with the particle
-  //! \param[in] phase Index to indicate material phase
-  //! \retval status Status of cloning HDF5 particle
-  virtual bool assign_material_state_vars(
-      const mpm::dense_map& state_vars,
-      const std::shared_ptr<mpm::Material<Tdim>>& material,
-      unsigned phase = mpm::ParticlePhase::Solid) = 0;
-
-  //! Retrun particle data as HDF5
-  //! \retval particle HDF5 data of the particle
-  virtual HDF5Particle hdf5() const = 0;
+  //! Return particle data as POD
+  //! \retval particle POD of the particle
+  virtual std::shared_ptr<void> pod() const = 0;
 
   //! Return id of the particleBase
   Index id() const { return id_; }
@@ -132,6 +131,9 @@ class ParticleBase {
   //! Return volume
   virtual double volume() const = 0;
 
+  //! Return the approximate particle diameter
+  virtual double diameter() const = 0;
+
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
@@ -176,12 +178,28 @@ class ParticleBase {
     return material_id_[phase];
   }
 
+  //! Assign material state variables
+  virtual bool assign_material_state_vars(
+      const mpm::dense_map& state_vars,
+      const std::shared_ptr<mpm::Material<Tdim>>& material,
+      unsigned phase = mpm::ParticlePhase::Solid) = 0;
+
   //! Return state variables
   //! \param[in] phase Index to indicate material phase
   mpm::dense_map state_variables(
       unsigned phase = mpm::ParticlePhase::Solid) const {
     return state_variables_[phase];
   }
+
+  //! Assign a state variable
+  virtual void assign_state_variable(
+      const std::string& var, double value,
+      unsigned phase = mpm::ParticlePhase::Solid) = 0;
+
+  //! Return a state variable
+  virtual double state_variable(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -197,6 +215,10 @@ class ParticleBase {
 
   //! Return mass
   virtual double mass() const = 0;
+
+  //! Assign pressure
+  virtual void assign_pressure(double pressure,
+                               unsigned phase = mpm::ParticlePhase::Solid) = 0;
 
   //! Return pressure
   virtual double pressure(unsigned phase = mpm::ParticlePhase::Solid) const = 0;
@@ -261,11 +283,6 @@ class ParticleBase {
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
 
-  //! Return a state variable
-  virtual double state_variable(
-      const std::string& var,
-      unsigned phase = mpm::ParticlePhase::Solid) const = 0;
-
   //! Return scalar data of particles
   //! \param[in] property Property string
   //! \retval data Scalar data of particle property
@@ -289,6 +306,22 @@ class ParticleBase {
 
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
+
+  //! Assign particle free surface
+  virtual void assign_free_surface(bool free_surface) = 0;
+
+  //! Assign particle free surface
+  virtual bool free_surface() const = 0;
+
+  //! Compute free surface in particle level by density ratio comparison
+  virtual bool compute_free_surface_by_density(
+      double density_ratio_tolerance = 0.65) = 0;
+
+  //! Assign normal vector
+  virtual void assign_normal(const VectorDim& normal) = 0;
+
+  //! Return normal vector
+  virtual VectorDim normal() const = 0;
 
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;
@@ -314,6 +347,107 @@ class ParticleBase {
   virtual void deserialize(
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
+
+  //! TwoPhase functions--------------------------------------------------------
+  //! Update porosity
+  //! \param[in] dt Analysis time step
+  virtual void update_porosity(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (update_porosity) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Assign saturation degree
+  virtual bool assign_saturation_degree() {
+    throw std::runtime_error(
+        "Calling the base class function (assign_saturation_degree) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign velocity to the particle liquid phase
+  //! \param[in] velocity A vector of particle liquid phase velocity
+  //! \retval status Assignment status
+  virtual bool assign_liquid_velocity(const VectorDim& velocity) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Compute pore pressure
+  //! \param[in] dt Time step size
+  virtual void compute_pore_pressure(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (compute_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Map drag force coefficient
+  virtual bool map_drag_force_coefficient() {
+    throw std::runtime_error(
+        "Calling the base class function (map_drag_force_coefficient) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool initialise_pore_pressure_watertable(
+      const unsigned dir_v, const unsigned dir_h, const VectorDim& gravity,
+      std::map<double, double>& reference_points) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(initial_pore_pressure_watertable) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool assign_porosity() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_porosity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool assign_permeability() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_permeability) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
+  virtual double liquid_mass() const {
+    throw std::runtime_error(
+        "Calling the base class function (liquid_mass) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  virtual VectorDim liquid_velocity() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return porosity
+  //! \retval porosity Porosity
+  virtual double porosity() const {
+    throw std::runtime_error(
+        "Calling the base class function (porosity) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+  //----------------------------------------------------------------------------
 
  protected:
   //! particleBase id

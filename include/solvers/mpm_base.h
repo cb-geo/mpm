@@ -84,6 +84,9 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
+  //! Write HDF5 files for twophase particles
+  void write_hdf5_twophase(mpm::Index step, mpm::Index max_steps) override;
+
   //! Domain decomposition
   //! \param[in] initial_step Start of simulation or later steps
   void mpi_domain_decompose(bool initial_step = false) override;
@@ -120,6 +123,12 @@ class MPMBase : public MPM {
   void nodal_frictional_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
 
+  //! Nodal pressure constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_pressure_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
   //! Cell entity sets
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] check Check duplicates
@@ -148,6 +157,13 @@ class MPMBase : public MPM {
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] particle_io Particle IO handle
   void particles_stresses(
+      const Json& mesh_prop,
+      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  // Particles pore pressures
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_pore_pressures(
       const Json& mesh_prop,
       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
@@ -196,6 +212,8 @@ class MPMBase : public MPM {
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Constraints object
   std::shared_ptr<mpm::Constraints<Tdim>> constraints_;
+  //! Particle types
+  std::set<std::string> particle_types_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions
