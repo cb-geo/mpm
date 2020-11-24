@@ -87,8 +87,73 @@ class AssemblerBase {
   //! Return the total size of global dof in all rank
   virtual unsigned global_active_dof() = 0;
 
+  //! Return number of total active_dof
+  virtual unsigned active_dof() { return active_dof_; };
+
   //! Return a vector to map local (rank) index to global index
   virtual std::vector<int> rank_global_mapper() = 0;
+
+  //! TwoPhase functions--------------------------------------------------------
+  //! Assemble coefficient matrix for two-phase predictor
+  virtual bool assemble_predictor_left(unsigned dir, double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_predictor_left) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return predictor coefficient LHS matrix
+  virtual Eigen::SparseMatrix<double>& predictor_lhs_matrix(unsigned dir) {
+    throw std::runtime_error(
+        "Calling the base class function (predictor_lhs_matrix) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Assemble RHS force vector for two-phase predictor
+  virtual bool assemble_predictor_right(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_predictor_right) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return predictor RHS force vector
+  virtual Eigen::MatrixXd& predictor_rhs_vector() {
+    throw std::runtime_error(
+        "Calling the base class function (predictor_rhs_vector) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Assign velocity constraints for matrix and vector
+  virtual bool assign_velocity_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function (assign_velocity_constraints) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Apply velocity constraints for matrix and vector
+  virtual bool apply_velocity_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function (apply_velocity_constraints) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign nodal intermediate acceleration
+  virtual void assign_intermediate_acceleration(
+      unsigned dim, Eigen::VectorXd acceleration_inter) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_intermediate_acceleration) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Return intermediate acceleration
+  virtual Eigen::MatrixXd& intermediate_acceleration() {
+    throw std::runtime_error(
+        "Calling the base class function (intermediate_acceleration) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
  protected:
   //! Number of total active_dof

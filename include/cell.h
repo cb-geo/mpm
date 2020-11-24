@@ -263,9 +263,29 @@ class Cell {
   //! \ingroup MultiPhase
   bool initialise_element_matrix();
 
+  //! Initialize local elemental matrices for two-phase one-point solver
+  //! \ingroup MultiPhase
+  bool initialise_element_matrix_twophase();
+
   //! Return local node indices
   //! \ingroup MultiPhase
   Eigen::VectorXi local_node_indices();
+
+  //! Return drag matrix for two-phase one-point solver
+  //! \ingroup MultiPhase
+  //! \param[in] dir Desired direction
+  const Eigen::MatrixXd& drag_matrix(unsigned dir) {
+    return drag_matrix_[dir];
+  };
+
+  //! Compute local matrix for drag force coupling for two-phase one-point
+  //! solver
+  //! \ingroup MultiPhase
+  //! \param[in] shapefn Shape function
+  //! \param[in] pvolume Volume weight
+  //! \param[in] multiplier Drag force multiplier
+  void compute_local_drag_matrix(const Eigen::VectorXd& shapefn, double pvolume,
+                                 const VectorDim& multiplier) noexcept;
 
   //! Return local laplacian
   //! \ingroup MultiPhase
@@ -286,6 +306,13 @@ class Cell {
     return poisson_right_matrix_;
   };
 
+  //! Return local laplacian RHS matrix for twophase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Phase identifier
+  const Eigen::MatrixXd& poisson_right_matrix(unsigned phase) {
+    return poisson_right_matrix_twophase_[phase];
+  };
+
   //! Compute local poisson RHS matrix (Used in poisson equation)
   //! \ingroup MultiPhase
   //! \param[in] shapefn shape function
@@ -296,15 +323,47 @@ class Cell {
                                    double pvolume,
                                    double multiplier = 1.0) noexcept;
 
+  //! Compute local poisson RHS matrix (Used in poisson equation)
+  //! \ingroup MultiPhase
+  //! \param[in] phase Phase identifier
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_poisson_right_twophase(unsigned phase,
+                                            const Eigen::VectorXd& shapefn,
+                                            const Eigen::MatrixXd& grad_shapefn,
+                                            double pvolume,
+                                            double multiplier = 1.0) noexcept;
+
   //! Return local correction matrix
   //! \ingroup MultiPhase
   const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
 
+  //! Return local correction matrix for two phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Phase identifier
+  const Eigen::MatrixXd& correction_matrix(unsigned phase) {
+    return correction_matrix_twophase_[phase];
+  };
+
   //! Compute local correction matrix (Used to correct velocity)
   //! \ingroup MultiPhase
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
   void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
                                        const Eigen::MatrixXd& grad_shapefn,
                                        double pvolume) noexcept;
+
+  //! Compute local correction matrix for two phase (Used to correct velocity)
+  //! \param[in] phase Phase identifier
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_correction_matrix_twophase(
+      unsigned phase, const Eigen::VectorXd& shapefn,
+      const Eigen::MatrixXd& grad_shapefn, double pvolume,
+      double multiplier = 1.0) noexcept;
 
   /**@}*/
 
@@ -372,6 +431,12 @@ class Cell {
   Eigen::MatrixXd poisson_right_matrix_;
   //! Local correction RHS matrix
   Eigen::MatrixXd correction_matrix_;
+  //! Drag force coefficient
+  std::vector<Eigen::MatrixXd> drag_matrix_;
+  //! Local poisson RHS matrix for twophase
+  std::vector<Eigen::MatrixXd> poisson_right_matrix_twophase_;
+  //! Local poisson RHS matrix for twophase
+  std::vector<Eigen::MatrixXd> correction_matrix_twophase_;
   /**@}*/
 
   //! Logger

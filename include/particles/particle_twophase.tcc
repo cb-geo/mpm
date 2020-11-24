@@ -464,7 +464,8 @@ inline void mpm::TwoPhaseParticle<1>::map_liquid_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 1, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
+    force[0] =
+        dn_dx_(i, 0) * pressure * this->porosity_ * this->projection_param_;
 
     force *= -1. * this->volume_;
 
@@ -483,8 +484,10 @@ inline void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 2, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
-    force[1] = dn_dx_(i, 1) * pressure * this->porosity_;
+    force[0] =
+        dn_dx_(i, 0) * pressure * this->porosity_ * this->projection_param_;
+    force[1] =
+        dn_dx_(i, 1) * pressure * this->porosity_ * this->projection_param_;
 
     force *= -1. * this->volume_;
 
@@ -502,9 +505,12 @@ inline void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 3, 1> force;
-    force[0] = dn_dx_(i, 0) * pressure * this->porosity_;
-    force[1] = dn_dx_(i, 1) * pressure * this->porosity_;
-    force[2] = dn_dx_(i, 2) * pressure * this->porosity_;
+    force[0] =
+        dn_dx_(i, 0) * pressure * this->porosity_ * this->projection_param_;
+    force[1] =
+        dn_dx_(i, 1) * pressure * this->porosity_ * this->projection_param_;
+    force[2] =
+        dn_dx_(i, 2) * pressure * this->porosity_ * this->projection_param_;
 
     force *= -1. * this->volume_;
 
@@ -520,7 +526,7 @@ inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force() noexcept {
       -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
   // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) += pressure;
+  total_stress(0) += pressure * this->projection_param_;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -542,8 +548,8 @@ inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force() noexcept {
       -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
   // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) += pressure;
-  total_stress(1) += pressure;
+  total_stress(0) += pressure * this->projection_param_;
+  total_stress(1) += pressure * this->projection_param_;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -565,9 +571,9 @@ inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force() noexcept {
       -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
   // total stress
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) += pressure;
-  total_stress(1) += pressure;
-  total_stress(2) += pressure;
+  total_stress(0) += pressure * this->projection_param_;
+  total_stress(1) += pressure * this->projection_param_;
+  total_stress(2) += pressure * this->projection_param_;
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -1239,4 +1245,113 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
     }
   }
 #endif
+}
+
+//! Map drag matrix to cell assuming linear-darcy drag force
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_drag_matrix_to_cell() {
+  bool status = true;
+  try {
+    // Initialise drag force multiplier
+    VectorDim multiplier;
+    multiplier.setZero();
+    // Porosity parameter
+    const double k_p =
+        std::pow(this->porosity_, 3) / std::pow((1. - this->porosity_), 2);
+    // Compute drag force multiplier
+    for (unsigned i = 0; i < Tdim; ++i)
+      multiplier(i) = this->porosity_ * this->porosity_ * 9.81 *
+                      this->material(mpm::ParticlePhase::Liquid)
+                          ->template property<double>(std::string("density")) /
+                      (this->permeability_(i) * k_p);
+    // Compute local drag matrix
+    cell_->compute_local_drag_matrix(shapefn_, volume_, multiplier);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map laplacian element matrix to cell (used in poisson equation LHS)
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_laplacian_to_cell() {
+  bool status = true;
+  try {
+    // Compute multiplier
+    const double multiplier =
+        (1 - this->porosity_) /
+            this->material(mpm::ParticlePhase::Solid)
+                ->template property<double>(std::string("density")) +
+        this->porosity_ /
+            this->material(mpm::ParticlePhase::Liquid)
+                ->template property<double>(std::string("density"));
+    // Compute local matrix of Laplacian
+    cell_->compute_local_laplacian(dn_dx_, volume_, multiplier);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map poisson rhs element matrix to cell (used in poisson equation RHS)
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_poisson_right_to_cell() {
+  bool status = true;
+  try {
+    // Compute local poisson rhs matrix for solid part
+    cell_->compute_local_poisson_right_twophase(mpm::ParticlePhase::Solid,
+                                                shapefn_, dn_dx_, volume_,
+                                                1.0 - this->porosity_);
+    // Compute local poisson rhs matrix for liquid part
+    cell_->compute_local_poisson_right_twophase(
+        mpm::ParticlePhase::Liquid, shapefn_, dn_dx_, volume_, this->porosity_);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated pressure of the particle based on nodal pressure
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::compute_updated_pressure() {
+  bool status = true;
+  try {
+    double pressure_increment = 0;
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      pressure_increment += shapefn_(i) * nodes_[i]->pressure_increment();
+    }
+
+    // Get interpolated nodal pressure
+    state_variables_[mpm::ParticlePhase::Liquid].at("pressure") =
+        state_variables_[mpm::ParticlePhase::Liquid].at("pressure") *
+            projection_param_ +
+        pressure_increment;
+
+    // Overwrite pressure if free surface
+    if (this->free_surface())
+      state_variables_[mpm::ParticlePhase::Liquid].at("pressure") = 0.0;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map correction matrix element matrix to cell (used to correct velocity)
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_correction_matrix_to_cell() {
+  bool status = true;
+  try {
+    cell_->compute_local_correction_matrix_twophase(mpm::ParticlePhase::Solid,
+                                                    shapefn_, dn_dx_, volume_,
+                                                    1.0 - this->porosity_);
+    cell_->compute_local_correction_matrix_twophase(
+        mpm::ParticlePhase::Liquid, shapefn_, dn_dx_, volume_, this->porosity_);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
 }

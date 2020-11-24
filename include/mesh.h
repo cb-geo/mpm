@@ -578,6 +578,12 @@ class Mesh {
       const Eigen::SparseMatrix<double>& correction_matrix,
       const Eigen::VectorXd& pressure_increment, double dt);
 
+  //! Compute correction force in the node for twophase
+  //! \ingroup MultiPhase
+  bool compute_nodal_correction_force_twophase(
+      const Eigen::SparseMatrix<double>& correction_matrix,
+      const Eigen::VectorXd& pressure_increment, double dt);
+
   /**@}*/
 
  private:

@@ -320,6 +320,11 @@ class NodeBase {
   //! \ingroup MultiPhase
   virtual VectorDim drag_force_coefficient() const = 0;
 
+  //! Update drag force
+  //! \ingroup MultiPhase
+  //! \param[in] drag_force Drag force vector
+  virtual void update_drag_force(const VectorDim& drag_force) = 0;
+
   //! Compute acceleration and velocity for two phase
   //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis
@@ -339,6 +344,22 @@ class NodeBase {
   //! \retval status Computation status
   virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
       unsigned phase, double dt) = 0;
+
+  //! Compute two-phase semi-implicit acceleration and velocity
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_twophase_semi_implicit(
+      unsigned phase, double dt) = 0;
+
+  //! Compute two-phase semi-implicit semi-implicit acceleration and velocity
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_twophase_semi_implicit_cundall(
+      unsigned phase, double dt, double damping_factor) = 0;
 
   //! Assign active id
   //! \ingroup MultiPhase
@@ -371,6 +392,38 @@ class NodeBase {
   //! \ingroup MultiPhase
   virtual double pressure_increment() const = 0;
 
+  //! Return map of velocity constraints
+  //! \ingroup MultiPhase
+  virtual std::map<unsigned, double>& velocity_constraints() = 0;
+
+  //! Update intermediate velocity at the node
+  //! \ingroup MultiPhase
+  virtual void update_intermediate_velocity(
+      const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
+      double dt) = 0;
+
+  //! Return the nodal intermediate velocity
+  //! \ingroup MultiPhase
+  virtual VectorDim intermediate_velocity(const unsigned phase) = 0;
+
+  //! Return the nodal intermediate acceleration
+  //! \ingroup MultiPhase
+  virtual VectorDim intermediate_acceleration(const unsigned phase) = 0;
+
+  //! Compute intermediate force
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_intermediate_force(const double dt) = 0;
+
+  //! Return total intermediate force
+  //! \ingroup MultiPhase
+  virtual VectorDim force_total_inter() = 0;
+
+  //! Return fluid intermediate force
+  //! \ingroup MultiPhase
+  virtual VectorDim force_fluid_inter() = 0;
+
   //! Update correction force
   //! \ingroup MultiPhase
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -388,6 +441,12 @@ class NodeBase {
   //! \ingroup MultiPhase
   virtual bool compute_nodal_correction_force(
       const VectorDim& correction_force) = 0;
+
+  //! Compute nodal correction force term for two phase
+  //! \ingroup MultiPhase
+  virtual bool compute_nodal_correction_force(
+      const VectorDim& force_cor_part_solid,
+      const VectorDim& force_cor_part_water) = 0;
 
   /**@}*/
 

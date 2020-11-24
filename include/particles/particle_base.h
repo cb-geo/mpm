@@ -491,6 +491,15 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
     return 0;
   };
+
+  //! TwoPhase functions specific for semi-implicit
+  //! Map drag matrix to cell assuming linear-darcy drag force
+  virtual bool map_drag_matrix_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function (map_drag_matrix_to_cell) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
   //----------------------------------------------------------------------------
 
  protected:
