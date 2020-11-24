@@ -8,6 +8,8 @@ mpm::AssemblerEigenSemiImplicitTwoPhase<
 }
 
 //! Assemble coefficient matrix for two-phase predictor
+//! FIXME: Can be optimized since mass coefficient is constant, no need to call
+//! it Tdim times
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_left(
     unsigned dir, double dt) {
@@ -297,16 +299,16 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_corrector_right(
 
     // Reserve storage for sparse matrix
     switch (Tdim) {
-      // For 2d: 10 entries /column
+      // For 2d: 10 entries /column x 2 phase
       case (2): {
         correction_matrix_.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
+            Eigen::VectorXi::Constant(active_dof_ * Tdim, 2 * 10));
         break;
       }
-      // For 3d: 30 entries /column
+      // For 3d: 30 entries /column x 2 phase
       case (3): {
         correction_matrix_.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
+            Eigen::VectorXi::Constant(active_dof_ * Tdim, 2 * 30));
         break;
       }
     }
