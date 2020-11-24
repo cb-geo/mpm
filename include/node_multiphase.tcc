@@ -15,20 +15,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
   }
 }
 
-//! Update density at the nodes from particle
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_density(bool update,
-                                                     unsigned phase,
-                                                     double density) noexcept {
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Update/assign mass
-  node_mutex_.lock();
-  density_(phase) = (density_(phase) * factor) + density;
-  node_mutex_.unlock();
-}
-
 //! Initialise two-phase nodal properties
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise_twophase() noexcept {
