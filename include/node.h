@@ -423,17 +423,12 @@ class Node : public NodeBase<Tdim> {
 
   //! Update nodal intermediate velocity
   //! \ingroup MultiPhase
-  void update_intermediate_velocity(const unsigned phase,
-                                    const Eigen::MatrixXd& acceleration_inter,
-                                    double dt) {
-    // Update nodal intermediate acceleration
-    acceleration_inter_.col(phase) =
-        acceleration_inter.row(active_id_).transpose();
-    // Update nodal intermediate vlocity
-    velocity_inter_.col(phase) =
-        velocity_.col(phase) +
-        dt * acceleration_inter.row(active_id_).transpose();
-  }
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] acceleration_inter solved intermediate acceleration
+  //! \param[in] dt Timestep in analysis
+  void update_intermediate_acceleration_velocity(
+      const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
+      double dt) override;
 
   //! Return the nodal intermediate velocity
   //! \ingroup MultiPhase
@@ -482,8 +477,8 @@ class Node : public NodeBase<Tdim> {
   //! Compute nodal correction force term for two phase
   //! \ingroup MultiPhase
   bool compute_nodal_correction_force(
-      const VectorDim& force_cor_part_solid,
-      const VectorDim& force_cor_part_water) override;
+      const VectorDim& solid_correction_force,
+      const VectorDim& liquid_correction_force) override;
 
   /**@}*/
 

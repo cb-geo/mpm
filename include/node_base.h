@@ -398,7 +398,7 @@ class NodeBase {
 
   //! Update intermediate velocity at the node
   //! \ingroup MultiPhase
-  virtual void update_intermediate_velocity(
+  virtual void update_intermediate_acceleration_velocity(
       const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
       double dt) = 0;
 
@@ -445,8 +445,8 @@ class NodeBase {
   //! Compute nodal correction force term for two phase
   //! \ingroup MultiPhase
   virtual bool compute_nodal_correction_force(
-      const VectorDim& force_cor_part_solid,
-      const VectorDim& force_cor_part_water) = 0;
+      const VectorDim& solid_correction_force,
+      const VectorDim& liquid_correction_force) = 0;
 
   /**@}*/
 

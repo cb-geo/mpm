@@ -21,6 +21,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise_twophase() noexcept {
   this->initialise();
   // Specific variables for two phase
   drag_force_coefficient_.setZero();
+  drag_force_.setZero();
+  force_total_inter_.setZero();
+  force_fluid_inter_.setZero();
+  velocity_inter_.setZero();
+  acceleration_inter_.setZero();
 }
 
 //! Update drag force coefficient
@@ -157,6 +162,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
 }
 
 //! Compute semi-implicit acceleration and velocity
+// FIXME: This is a copy of two-phase semi-implicit correction
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::
     compute_acceleration_velocity_navierstokes_semi_implicit(unsigned phase,
@@ -196,6 +202,94 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
   return status;
 }
 
+//! Compute semi-implicit acceleration and velocity
+// FIXME: This is a copy of navier stokes semi-implicit correction
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::
+    compute_acceleration_velocity_twophase_semi_implicit(unsigned phase,
+                                                         double dt) {
+  bool status = true;
+  const double tolerance = std::numeric_limits<double>::min();
+  try {
+
+    // Semi-implicit solver
+    Eigen::Matrix<double, Tdim, 1> acceleration_corrected =
+        correction_force_.col(phase) / mass_(phase);
+
+    // Acceleration
+    this->acceleration_.col(phase) = acceleration_corrected;
+
+    // Update velocity
+    velocity_.col(phase) += acceleration_corrected * dt;
+
+    // Apply friction constraints
+    this->apply_friction_constraints(dt);
+
+    // Apply velocity constraints, which also sets acceleration to 0,
+    // when velocity is set.
+    this->apply_velocity_constraints();
+
+    // Set a threshold
+    for (unsigned i = 0; i < Tdim; ++i) {
+      if (std::abs(velocity_.col(phase)(i)) < tolerance)
+        velocity_.col(phase)(i) = 0.;
+      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
+        acceleration_.col(phase)(i) = 0.;
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute semi-implicit acceleration and velocity  with cundall damping factor
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::
+    compute_acceleration_velocity_twophase_semi_implicit_cundall(
+        unsigned phase, double dt, double damping_factor) {
+  bool status = true;
+  const double tolerance = std::numeric_limits<double>::min();
+  try {
+    if (mass_(phase) > tolerance) {
+      // Unbalance force
+      auto unbalanced_force = correction_force_.col(phase);
+
+      // Semi-implicit solver
+      auto acceleration_corrected =
+          (unbalanced_force - damping_factor * unbalanced_force.norm() *
+                                  this->velocity_.col(phase).cwiseSign()) /
+          this->mass_(phase);
+
+      // Acceleration
+      this->acceleration_.col(phase) = acceleration_corrected;
+
+      // Update velocity
+      velocity_.col(phase) += acceleration_corrected * dt;
+
+      // Apply friction constraints
+      this->apply_friction_constraints(dt);
+
+      // Apply velocity constraints, which also sets acceleration to 0,
+      // when velocity is set.
+      this->apply_velocity_constraints();
+
+      // Set a threshold
+      for (unsigned i = 0; i < Tdim; ++i) {
+        if (std::abs(velocity_.col(phase)(i)) < tolerance)
+          velocity_.col(phase)(i) = 0.;
+        if (std::abs(acceleration_.col(phase)(i)) < tolerance)
+          acceleration_.col(phase)(i) = 0.;
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Update pressure increment at the node
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
@@ -207,6 +301,47 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
   if (pressure_constraints_.find(phase) != pressure_constraints_.end() ||
       this->free_surface())
     this->pressure_increment_ = 0;
+}
+
+//! Compute intermediate force
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_intermediate_force(
+    const double dt) {
+  bool status = true;
+
+  try {
+    // TODO: Not sure mutex is needed here.
+    node_mutex_.lock();
+
+    // Total force matrix
+    auto force_total = internal_force_ + external_force_;
+    // Force vector for mixture
+    force_total_inter_ = force_total.col(mpm::NodePhase::NMixture);
+    // Force vector for liquid
+    force_fluid_inter_ = force_total.col(mpm::NodePhase::NLiquid) - drag_force_;
+
+    // TODO: Not sure mutex is needed here.
+    node_mutex_.unlock();
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Update intermediate acceleration and velocity at the node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_intermediate_acceleration_velocity(
+    const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
+    double dt) {
+  // Update nodal intermediate acceleration
+  acceleration_inter_.col(phase) =
+      acceleration_inter.row(active_id_).transpose();
+
+  // Update nodal intermediate velocity
+  velocity_inter_.col(phase) =
+      velocity_.col(phase) +
+      dt * acceleration_inter.row(active_id_).transpose();
 }
 
 //! Update correction force
@@ -231,10 +366,29 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
     const VectorDim& correction_force) {
   bool status = true;
-
   try {
-    // Compute correction force for water phase
+    // Compute correction force for fluid phase
     correction_force_.col(0) = correction_force;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute nodal corrected force for two-phase
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
+    const VectorDim& solid_correction_force,
+    const VectorDim& liquid_correction_force) {
+  bool status = true;
+  try {
+    // Compute corrected force for solid phase
+    correction_force_.col(0) =
+        mass_(0) * acceleration_inter_.col(0) + solid_correction_force;
+    // Compute corrected force for liquid phase
+    correction_force_.col(1) =
+        mass_(1) * acceleration_inter_.col(1) + liquid_correction_force;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

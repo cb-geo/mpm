@@ -13,7 +13,7 @@
 namespace mpm {
 
 //! TwoPhaseParticle class
-//! \brief Class that stores the information about second-phase (water)
+//! \brief Class that stores the information about second-phase (liquid)
 //! particles
 //! \tparam Tdim Dimension
 template <unsigned Tdim>

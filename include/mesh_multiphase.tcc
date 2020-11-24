@@ -610,3 +610,57 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
   }
   return status;
 };
+
+//! Compute nodal corrected force for twophase
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::compute_nodal_correction_force_twophase(
+    const Eigen::SparseMatrix<double>& correction_matrix,
+    const Eigen::VectorXd& pressure_increment, double dt) {
+  bool status = true;
+  try {
+    //! Active node size
+    const auto nactive_node = active_nodes_.size();
+
+    // Part of nodal corrected force of one direction
+    Eigen::MatrixXd correction_force;
+    correction_force.resize(nactive_node * 2, Tdim);
+
+    // Iterate over each direction
+    for (unsigned i = 0; i < Tdim; ++i) {
+      // Solid phase
+      correction_force.block(0, i, nactive_node, 1) =
+          -correction_matrix.block(0, nactive_node * i, nactive_node,
+                                   nactive_node) *
+          pressure_increment;
+      // Liquid phase
+      correction_force.block(nactive_node, i, nactive_node, 1) =
+          -correction_matrix.block(nactive_node, nactive_node * i, nactive_node,
+                                   nactive_node) *
+          pressure_increment;
+    }
+
+    // Iterate over each active node
+    VectorDim nodal_correction_force_solid;
+    VectorDim nodal_correction_force_liquid;
+    // Iterate over each active node
+    for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend();
+         ++nitr) {
+      //! Active id
+      unsigned active_id = (*nitr)->active_id();
+      // Solid phase
+      nodal_correction_force_solid =
+          (correction_force.row(active_id)).transpose();
+      // Liquid phase
+      nodal_correction_force_liquid =
+          (correction_force.row(active_id + nactive_node)).transpose();
+
+      // Compute corrected force for each node
+      map_nodes_[(*nitr)->id()]->compute_nodal_correction_force(
+          nodal_correction_force_solid, nodal_correction_force_liquid);
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+};
