@@ -309,16 +309,6 @@ class Node : public NodeBase<Tdim> {
   //! \ingroup MultiPhase
   bool free_surface() const override { return free_surface_; }
 
-  //! Assign signed distance
-  //! \ingroup MultiPhase
-  void assign_signed_distance(double signed_distance) override {
-    signed_distance_ = signed_distance;
-  }
-
-  //! Return signed distance
-  //! \ingroup MultiPhase
-  double signed_distance() override { return signed_distance_; }
-
   //! Initialise two-phase nodal properties
   //! \ingroup MultiPhase
   void initialise_twophase() noexcept override;

@@ -304,14 +304,6 @@ class NodeBase {
   //! \ingroup MultiPhase
   virtual bool free_surface() const = 0;
 
-  //! Assign signed distance
-  //! \ingroup MultiPhase
-  virtual void assign_signed_distance(double signed_distance) = 0;
-
-  //! Return signed distance
-  //! \ingroup MultiPhase
-  virtual double signed_distance() = 0;
-
   //! Initialise two-phase nodal properties
   //! \ingroup MultiPhase
   virtual void initialise_twophase() noexcept = 0;
