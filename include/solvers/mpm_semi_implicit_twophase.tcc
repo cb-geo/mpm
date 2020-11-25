@@ -237,6 +237,14 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
             std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
                       std::placeholders::_1));
       }
+
+#pragma omp section
+      {
+        // Iterate over particles to compute nodal drag force coefficient
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_drag_force_coefficient,
+                      std::placeholders::_1));
+      }
     }  // Wait for tasks to finish
 
 #ifdef USE_MPI
@@ -271,6 +279,13 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
                     std::placeholders::_1, false, mpm::NodePhase::NLiquid,
                     std::placeholders::_2));
+
+      // MPI all reduce drag force
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+          std::bind(&mpm::NodeBase<Tdim>::drag_force_coefficient,
+                    std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Tdim>::update_drag_force_coefficient,
+                    std::placeholders::_1, false, std::placeholders::_2));
     }
 #endif
 

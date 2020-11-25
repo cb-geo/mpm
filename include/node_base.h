@@ -320,11 +320,6 @@ class NodeBase {
   //! \ingroup MultiPhase
   virtual VectorDim drag_force_coefficient() const = 0;
 
-  //! Update drag force
-  //! \ingroup MultiPhase
-  //! \param[in] drag_force Drag force vector
-  virtual void update_drag_force(const VectorDim& drag_force) = 0;
-
   //! Compute acceleration and velocity for two phase
   //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis
@@ -405,18 +400,6 @@ class NodeBase {
   //! Return the nodal intermediate acceleration
   //! \ingroup MultiPhase
   virtual VectorDim intermediate_acceleration(const unsigned phase) const = 0;
-
-  //! Compute intermediate force
-  //! \ingroup MultiPhase
-  virtual void compute_intermediate_force() = 0;
-
-  //! Return total intermediate force
-  //! \ingroup MultiPhase
-  virtual VectorDim force_total_inter() const = 0;
-
-  //! Return fluid intermediate force
-  //! \ingroup MultiPhase
-  virtual VectorDim force_fluid_inter() const = 0;
 
   //! Update correction force
   //! \ingroup MultiPhase

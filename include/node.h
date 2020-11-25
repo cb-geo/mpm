@@ -327,13 +327,6 @@ class Node : public NodeBase<Tdim> {
     return drag_force_coefficient_;
   }
 
-  //! Update drag force
-  //! \ingroup MultiPhase
-  //! \param[in] drag_force Drag force vector
-  void update_drag_force(const VectorDim& drag_force) override {
-    drag_force_ += drag_force;
-  };
-
   //! Compute acceleration and velocity for two phase
   //! \ingroup MultiPhase
   //! \param[in] dt Timestep in analysis
@@ -438,16 +431,6 @@ class Node : public NodeBase<Tdim> {
   VectorDim intermediate_acceleration(const unsigned phase) const override {
     return acceleration_inter_.col(phase);
   }
-
-  //! Compute intermediate force
-  //! \ingroup MultiPhase
-  void compute_intermediate_force() override;
-
-  //! Return total intermediate force
-  VectorDim force_total_inter() const override { return force_total_inter_; }
-
-  //! Return fluid intermediate force
-  VectorDim force_fluid_inter() const override { return force_fluid_inter_; }
 
   //! Update correction force
   //! \ingroup MultiPhase
@@ -559,12 +542,6 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> correction_force_;
   //! Drag force
   Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
-  //! Drag_force
-  VectorDim drag_force_;
-  //! Intermediate total force
-  VectorDim force_total_inter_;
-  //! Intermediate fluid force
-  VectorDim force_fluid_inter_;
   //! Intermediate velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_inter_;
   //! Intermediate acceleration

@@ -21,9 +21,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise_twophase() noexcept {
   this->initialise();
   // Specific variables for two phase
   drag_force_coefficient_.setZero();
-  drag_force_.setZero();
-  force_total_inter_.setZero();
-  force_fluid_inter_.setZero();
+
+  // FIXME: Remove all of these
   velocity_inter_.setZero();
   acceleration_inter_.setZero();
 }
@@ -256,17 +255,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
   if (pressure_constraints_.find(phase) != pressure_constraints_.end() ||
       this->free_surface())
     this->pressure_increment_ = 0;
-}
-
-//! Compute intermediate force
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_intermediate_force() {
-  // Total force matrix
-  const auto force_total = internal_force_ + external_force_;
-  // Force vector for mixture
-  force_total_inter_ = force_total.col(mpm::NodePhase::NMixture);
-  // Force vector for liquid
-  force_fluid_inter_ = force_total.col(mpm::NodePhase::NLiquid) - drag_force_;
 }
 
 //! Update intermediate acceleration and velocity at the node

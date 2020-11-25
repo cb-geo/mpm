@@ -190,7 +190,6 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
     // Compute free surface cells, nodes, and particles
     if (free_surface_detection_ != "none") {
-      // TODO: Parallel free-surface computation is not yet implemented
       mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
 
       // Spawn a task for initializing pressure at free surface

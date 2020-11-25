@@ -105,52 +105,13 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_right(
     double dt) {
   bool status = true;
   try {
-    // Resize force vector
-    predictor_rhs_vector_.resize(active_dof_ * 2, Tdim);
-    predictor_rhs_vector_.setZero();
-
     // Resize intermediate velocity vector
     intermediate_acceleration_.resize(active_dof_ * 2, Tdim);
     intermediate_acceleration_.setZero();
 
-    // Initialise relative velocity matrix
-    Eigen::MatrixXd relative_velocity;
-    // Initialise cell drag force matrix
-    Eigen::MatrixXd cell_drag_force;
-
-    // Cell pointer
-    const auto& cells = mesh_->cells();
-
-    for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend(); ++cell_itr) {
-      if ((*cell_itr)->status()) {
-        // Nodes pointer of the cell
-        const auto& nodes = (*cell_itr)->nodes();
-
-        // Reset relative velocity matrix
-        relative_velocity.resize(nodes.size(), Tdim);
-        relative_velocity.setZero();
-        // Compute relative velocity matrix
-        for (unsigned i = 0; i < nodes.size(); ++i)
-          relative_velocity.row(i) =
-              (nodes.at(i)->velocity(mpm::NodePhase::NLiquid) -
-               nodes.at(i)->velocity(mpm::NodePhase::NSolid))
-                  .transpose();
-
-        // Reset drag force matrix
-        cell_drag_force.resize(nodes.size(), Tdim);
-        cell_drag_force.setZero();
-
-        // Local drag matrix
-        for (unsigned dir = 0; dir < Tdim; dir++)
-          cell_drag_force.col(dir) =
-              (*cell_itr)->drag_matrix(dir) * relative_velocity.col(dir);
-
-        // Update nodal drag force
-        for (unsigned i = 0; i < nodes.size(); ++i) {
-          nodes.at(i)->update_drag_force(cell_drag_force.row(i).transpose());
-        }
-      }
-    }
+    // Resize force vector
+    predictor_rhs_vector_.resize(active_dof_ * 2, Tdim);
+    predictor_rhs_vector_.setZero();
 
     // Active nodes pointer
     const auto& nodes = mesh_->active_nodes();
@@ -158,13 +119,22 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_right(
     mpm::Index nid = 0;
     for (auto node_itr = nodes.cbegin(); node_itr != nodes.cend(); ++node_itr) {
       // Compute nodal intermediate force
-      (*node_itr)->compute_intermediate_force();
+      const Eigen::Matrix<double, Tdim, 1> mixture_force =
+          (*node_itr)->external_force(mpm::NodePhase::NMixture) +
+          (*node_itr)->internal_force(mpm::NodePhase::NMixture);
+
+      const Eigen::Matrix<double, Tdim, 1> drag_force =
+          (*node_itr)->drag_force_coefficient().cwiseProduct(
+              (*node_itr)->velocity(mpm::NodePhase::NLiquid) -
+              (*node_itr)->velocity(mpm::NodePhase::NSolid));
+
+      const Eigen::Matrix<double, Tdim, 1> fluid_force =
+          (*node_itr)->external_force(mpm::NodePhase::NLiquid) +
+          (*node_itr)->internal_force(mpm::NodePhase::NLiquid) - drag_force;
 
       // Assemble intermediate force vector
-      predictor_rhs_vector_.row(nid) =
-          (*node_itr)->force_total_inter().transpose();
-      predictor_rhs_vector_.row(nid + active_dof_) =
-          (*node_itr)->force_fluid_inter().transpose();
+      predictor_rhs_vector_.row(nid) = mixture_force.transpose();
+      predictor_rhs_vector_.row(nid + active_dof_) = fluid_force.transpose();
       ++nid;
     }
   } catch (std::exception& exception) {
