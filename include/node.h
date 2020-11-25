@@ -420,18 +420,6 @@ class Node : public NodeBase<Tdim> {
       const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
       double dt) override;
 
-  //! Return the nodal intermediate velocity
-  //! \ingroup MultiPhase
-  VectorDim intermediate_velocity(const unsigned phase) const override {
-    return velocity_inter_.col(phase);
-  }
-
-  //! Return the nodal intermediate acceleration
-  //! \ingroup MultiPhase
-  VectorDim intermediate_acceleration(const unsigned phase) const override {
-    return acceleration_inter_.col(phase);
-  }
-
   //! Update correction force
   //! \ingroup MultiPhase
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -542,10 +530,6 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> correction_force_;
   //! Drag force
   Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
-  //! Intermediate velocity
-  Eigen::Matrix<double, Tdim, Tnphases> velocity_inter_;
-  //! Intermediate acceleration
-  Eigen::Matrix<double, Tdim, Tnphases> acceleration_inter_;
   /**@}*/
 };  // Node class
 }  // namespace mpm

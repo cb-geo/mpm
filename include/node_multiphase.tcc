@@ -21,10 +21,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise_twophase() noexcept {
   this->initialise();
   // Specific variables for two phase
   drag_force_coefficient_.setZero();
-
-  // FIXME: Remove all of these
-  velocity_inter_.setZero();
-  acceleration_inter_.setZero();
 }
 
 //! Update drag force coefficient
@@ -263,13 +259,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_intermediate_acceleration_velocity(
     const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
     double dt) {
   // Update nodal intermediate acceleration
-  acceleration_inter_.col(phase) =
-      acceleration_inter.row(active_id_).transpose();
+  acceleration_.col(phase) = acceleration_inter.row(active_id_).transpose();
 
   // Update nodal intermediate velocity
-  velocity_inter_.col(phase) =
-      velocity_.col(phase) +
-      dt * acceleration_inter.row(active_id_).transpose();
+  velocity_.col(phase) += dt * acceleration_inter.row(active_id_).transpose();
 }
 
 //! Update correction force
@@ -303,9 +296,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
     const VectorDim& solid_correction_force,
     const VectorDim& liquid_correction_force) {
   // Compute corrected force for solid phase
-  correction_force_.col(0) =
-      mass_(0) * acceleration_inter_.col(0) + solid_correction_force;
+  correction_force_.col(0) = solid_correction_force;
   // Compute corrected force for liquid phase
-  correction_force_.col(1) =
-      mass_(1) * acceleration_inter_.col(1) + liquid_correction_force;
+  correction_force_.col(1) = liquid_correction_force;
 }

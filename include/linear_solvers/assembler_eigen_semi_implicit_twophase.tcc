@@ -236,13 +236,9 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_poisson_right(
          ++node_itr) {
       // Compute nodal intermediate force
       solid_velocity.row(node_index) =
-          (*node_itr)
-              ->intermediate_velocity(mpm::NodePhase::NSolid)
-              .transpose();
+          (*node_itr)->velocity(mpm::NodePhase::NSolid).transpose();
       liquid_velocity.row(node_index) =
-          (*node_itr)
-              ->intermediate_velocity(mpm::NodePhase::NLiquid)
-              .transpose();
+          (*node_itr)->velocity(mpm::NodePhase::NLiquid).transpose();
       node_index++;
     }
 

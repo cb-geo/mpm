@@ -393,14 +393,6 @@ class NodeBase {
       const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
       double dt) = 0;
 
-  //! Return the nodal intermediate velocity
-  //! \ingroup MultiPhase
-  virtual VectorDim intermediate_velocity(const unsigned phase) const = 0;
-
-  //! Return the nodal intermediate acceleration
-  //! \ingroup MultiPhase
-  virtual VectorDim intermediate_acceleration(const unsigned phase) const = 0;
-
   //! Update correction force
   //! \ingroup MultiPhase
   //! \param[in] update A boolean to update (true) or assign (false)
