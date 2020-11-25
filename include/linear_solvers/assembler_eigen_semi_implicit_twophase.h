@@ -20,7 +20,7 @@ class AssemblerEigenSemiImplicitTwoPhase
   AssemblerEigenSemiImplicitTwoPhase();
 
   //! Assemble coefficient matrix for two-phase predictor
-  bool assemble_predictor_left(unsigned dir, double dt) override;
+  bool assemble_predictor_left(double dt) override;
 
   //! Return predictor coefficient LHS matrix
   Eigen::SparseMatrix<double>& predictor_lhs_matrix(unsigned dir) override {

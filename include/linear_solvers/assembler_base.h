@@ -95,7 +95,7 @@ class AssemblerBase {
 
   //! TwoPhase functions--------------------------------------------------------
   //! Assemble coefficient matrix for two-phase predictor
-  virtual bool assemble_predictor_left(unsigned dir, double dt) {
+  virtual bool assemble_predictor_left(double dt) {
     throw std::runtime_error(
         "Calling the base class function (assemble_predictor_left) in "
         "AssemblerBase:: illegal operation!");

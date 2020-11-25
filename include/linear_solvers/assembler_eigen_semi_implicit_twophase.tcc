@@ -8,86 +8,89 @@ mpm::AssemblerEigenSemiImplicitTwoPhase<
 }
 
 //! Assemble coefficient matrix for two-phase predictor
-//! FIXME: Can be optimized since mass coefficient is constant, no need to call
-//! it Tdim times
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_left(
-    unsigned dir, double dt) {
+    double dt) {
   bool status = true;
   try {
-    // Initialise coefficient_matrix
-    Eigen::SparseMatrix<double> coefficient_matrix;
+    // Loop over three direction
+    for (unsigned dir = 0; dir < Tdim; dir++) {
+      // Initialise coefficient_matrix
+      Eigen::SparseMatrix<double> coefficient_matrix;
+      coefficient_matrix.setZero();
 
-    // Resize coefficient matrix
-    coefficient_matrix.resize(2 * active_dof_, 2 * active_dof_);
-    coefficient_matrix.setZero();
+      // Resize coefficient matrix
+      coefficient_matrix.resize(2 * active_dof_, 2 * active_dof_);
 
-    // Reserve storage for sparse matrix
-    switch (Tdim) {
-      // For 2d: 10 entries /column
-      case (2): {
-        coefficient_matrix.reserve(
-            Eigen::VectorXi::Constant(2 * active_dof_, 10));
-        break;
-      }
-      // For 3d: 30 entries /column
-      case (3): {
-        coefficient_matrix.reserve(
-            Eigen::VectorXi::Constant(2 * active_dof_, 30));
-        break;
-      }
-    }
-
-    // Cell pointer
-    const auto& cells = mesh_->cells();
-
-    // Iterate over cells for drag force coefficient
-    mpm::Index cid = 0;
-    for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend(); ++cell_itr) {
-      if ((*cell_itr)->status()) {
-        // Node ids in each cell
-        const auto nids = global_node_indices_.at(cid);
-        // Local drag matrix
-        auto cell_drag_matrix = (*cell_itr)->drag_matrix(dir);
-        // Assemble global coefficient matrix
-        for (unsigned i = 0; i < nids.size(); ++i) {
-          for (unsigned j = 0; j < nids.size(); ++j) {
-            coefficient_matrix.coeffRef(nids(i) + active_dof_, nids(j)) +=
-                -cell_drag_matrix(i, j) * dt;
-            coefficient_matrix.coeffRef(nids(i) + active_dof_,
-                                        nids(j) + active_dof_) +=
-                cell_drag_matrix(i, j) * dt;
-          }
+      // Reserve storage for sparse matrix
+      switch (Tdim) {
+        // For 2d: 10 entries /column
+        case (2): {
+          coefficient_matrix.reserve(
+              Eigen::VectorXi::Constant(2 * active_dof_, 2 * 10));
+          break;
         }
-        ++cid;
+        // For 3d: 30 entries /column
+        case (3): {
+          coefficient_matrix.reserve(
+              Eigen::VectorXi::Constant(2 * active_dof_, 2 * 30));
+          break;
+        }
       }
+
+      // Cell pointer
+      const auto& cells = mesh_->cells();
+
+      // Iterate over cells for drag force coefficient
+      mpm::Index cid = 0;
+      for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend();
+           ++cell_itr) {
+        if ((*cell_itr)->status()) {
+          // Node ids in each cell
+          const auto nids = global_node_indices_.at(cid);
+          // Local drag matrix
+          auto cell_drag_matrix = (*cell_itr)->drag_matrix(dir);
+          // Assemble global coefficient matrix
+          for (unsigned i = 0; i < nids.size(); ++i) {
+            for (unsigned j = 0; j < nids.size(); ++j) {
+              coefficient_matrix.coeffRef(nids(i) + active_dof_, nids(j)) +=
+                  -cell_drag_matrix(i, j) * dt;
+              coefficient_matrix.coeffRef(nids(i) + active_dof_,
+                                          nids(j) + active_dof_) +=
+                  cell_drag_matrix(i, j) * dt;
+            }
+          }
+          ++cid;
+        }
+      }
+
+      // Active nodes pointer
+      const auto& nodes = mesh_->active_nodes();
+      // Iterate over cells for mass coefficient
+      for (auto node_itr = nodes.cbegin(); node_itr != nodes.cend();
+           ++node_itr) {
+        // Id for active node
+        auto active_id = (*node_itr)->active_id();
+        // Assemble global coefficient matrix for solid mass
+        coefficient_matrix.coeffRef(active_id, active_id) +=
+            (*node_itr)->mass(mpm::NodePhase::NSolid);
+        // Assemble global coefficient matrix for liquid mass
+        coefficient_matrix.coeffRef(active_id + active_dof_,
+                                    active_id + active_dof_) +=
+            (*node_itr)->mass(mpm::NodePhase::NLiquid);
+        coefficient_matrix.coeffRef(active_id, active_id + active_dof_) +=
+            (*node_itr)->mass(mpm::NodePhase::NLiquid);
+      }
+
+      // Add coefficient matrix to map
+      if (predictor_lhs_matrix_.find(dir) != predictor_lhs_matrix_.end())
+        predictor_lhs_matrix_.erase(dir);
+
+      predictor_lhs_matrix_.insert(
+          std::make_pair<unsigned, Eigen::SparseMatrix<double>>(
+              static_cast<unsigned>(dir),
+              static_cast<Eigen::SparseMatrix<double>>(coefficient_matrix)));
     }
-
-    // Active nodes pointer
-    const auto& nodes = mesh_->active_nodes();
-    // Iterate over cells for mass coefficient
-    for (auto node_itr = nodes.cbegin(); node_itr != nodes.cend(); ++node_itr) {
-      // Id for active node
-      auto active_id = (*node_itr)->active_id();
-      // Assemble global coefficient matrix for solid mass
-      coefficient_matrix.coeffRef(active_id, active_id) +=
-          (*node_itr)->mass(mpm::NodePhase::NSolid);
-      // Assemble global coefficient matrix for liquid mass
-      coefficient_matrix.coeffRef(active_id + active_dof_,
-                                  active_id + active_dof_) +=
-          (*node_itr)->mass(mpm::NodePhase::NLiquid);
-      coefficient_matrix.coeffRef(active_id, active_id + active_dof_) +=
-          (*node_itr)->mass(mpm::NodePhase::NLiquid);
-    }
-
-    // Add coefficient matrix to map
-    if (predictor_lhs_matrix_.find(dir) != predictor_lhs_matrix_.end())
-      predictor_lhs_matrix_.erase(dir);
-
-    predictor_lhs_matrix_.insert(
-        std::make_pair<unsigned, Eigen::SparseMatrix<double>>(
-            static_cast<unsigned>(dir),
-            static_cast<Eigen::SparseMatrix<double>>(coefficient_matrix)));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -121,7 +124,8 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_right(
     for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend(); ++cell_itr) {
       if ((*cell_itr)->status()) {
         // Nodes pointer of the cell
-        auto nodes = (*cell_itr)->nodes();
+        const auto& nodes = (*cell_itr)->nodes();
+
         // Reset relative velocity matrix
         relative_velocity.resize(nodes.size(), Tdim);
         relative_velocity.setZero();
@@ -433,9 +437,9 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<
   bool status = false;
   try {
     // Modify the force vector(b = b - A * bc)
-    for (unsigned i = 0; i < Tdim; i++) {
-      predictor_rhs_vector_.col(i) -=
-          predictor_lhs_matrix_.at(i) * velocity_constraints_.col(i);
+    for (unsigned dir = 0; dir < Tdim; dir++) {
+      predictor_rhs_vector_.col(dir) -=
+          predictor_lhs_matrix_.at(dir) * velocity_constraints_.col(dir);
 
       // Iterate over velocity constraints (non-zero elements)
       for (unsigned j = 0; j < velocity_constraints_.outerSize(); ++j) {
@@ -443,13 +447,13 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<
                  velocity_constraints_, j);
              itr; ++itr) {
           // Check direction
-          if (itr.col() == i) {
+          if (itr.col() == dir) {
             // Assign 0 to specified column
-            predictor_lhs_matrix_.at(i).col(itr.row()) *= 0;
+            predictor_lhs_matrix_.at(dir).col(itr.row()) *= 0;
             // Assign 0 to specified row
-            predictor_lhs_matrix_.at(i).row(itr.row()) *= 0;
+            predictor_lhs_matrix_.at(dir).row(itr.row()) *= 0;
             // Assign 1  to diagnal element
-            predictor_lhs_matrix_.at(i).coeffRef(itr.row(), itr.row()) = 1.0;
+            predictor_lhs_matrix_.at(dir).coeffRef(itr.row(), itr.row()) = 1.0;
 
             predictor_rhs_vector_(itr.row(), itr.col()) = 0.;
           }

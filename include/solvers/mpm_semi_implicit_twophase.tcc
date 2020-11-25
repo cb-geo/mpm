@@ -498,9 +498,7 @@ bool mpm::MPMSemiImplicitTwoPhase<
                   std::placeholders::_1));
 
     // Assemble coefficient matrix LHS for each direction
-    // FIXME: Can be optimized by not redoing the mass coefficient
-    for (unsigned dir = 0; dir < Tdim; ++dir)
-      assembler_->assemble_predictor_left(dir, dt_);
+    assembler_->assemble_predictor_left(dt_);
 
     // Assemble predictor RHS force vector
     assembler_->assemble_predictor_right(dt_);
