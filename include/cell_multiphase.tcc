@@ -104,7 +104,7 @@ void mpm::Cell<Tdim>::compute_local_drag_matrix(
     const Eigen::VectorXd& shapefn, double pvolume,
     const VectorDim& multiplier) noexcept {
 
-  assert(drag_matrix_.size() < Tdim);
+  assert(drag_matrix_.size() == Tdim);
 
   // Lock the storage
   std::lock_guard<std::mutex> guard(cell_mutex_);
