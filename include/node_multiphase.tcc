@@ -162,11 +162,10 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
 }
 
 //! Compute semi-implicit acceleration and velocity
-// FIXME: This is a copy of two-phase semi-implicit correction
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::
-    compute_acceleration_velocity_navierstokes_semi_implicit(unsigned phase,
-                                                             double dt) {
+    compute_acceleration_velocity_semi_implicit_corrector(unsigned phase,
+                                                          double dt) {
   bool status = true;
   const double tolerance = std::numeric_limits<double>::min();
   try {
@@ -202,52 +201,10 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
   return status;
 }
 
-//! Compute semi-implicit acceleration and velocity
-// FIXME: This is a copy of navier stokes semi-implicit correction
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::
-    compute_acceleration_velocity_twophase_semi_implicit(unsigned phase,
-                                                         double dt) {
-  bool status = true;
-  const double tolerance = std::numeric_limits<double>::min();
-  try {
-
-    // Semi-implicit solver
-    Eigen::Matrix<double, Tdim, 1> acceleration_corrected =
-        correction_force_.col(phase) / mass_(phase);
-
-    // Acceleration
-    this->acceleration_.col(phase) = acceleration_corrected;
-
-    // Update velocity
-    velocity_.col(phase) += acceleration_corrected * dt;
-
-    // Apply friction constraints
-    this->apply_friction_constraints(dt);
-
-    // Apply velocity constraints, which also sets acceleration to 0,
-    // when velocity is set.
-    this->apply_velocity_constraints();
-
-    // Set a threshold
-    for (unsigned i = 0; i < Tdim; ++i) {
-      if (std::abs(velocity_.col(phase)(i)) < tolerance)
-        velocity_.col(phase)(i) = 0.;
-      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
-        acceleration_.col(phase)(i) = 0.;
-    }
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Compute semi-implicit acceleration and velocity  with cundall damping factor
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::
-    compute_acceleration_velocity_twophase_semi_implicit_cundall(
+    compute_acceleration_velocity_semi_implicit_corrector_cundall(
         unsigned phase, double dt, double damping_factor) {
   bool status = true;
   const double tolerance = std::numeric_limits<double>::min();

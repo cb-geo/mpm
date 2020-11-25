@@ -327,7 +327,7 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
       mesh_->iterate_over_nodes_predicate(
           std::bind(
               &mpm::NodeBase<Tdim>::
-                  compute_acceleration_velocity_twophase_semi_implicit_cundall,
+                  compute_acceleration_velocity_semi_implicit_corrector_cundall,
               std::placeholders::_1, mpm::NodePhase::NSolid, this->dt_,
               damping_factor_),
           std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
@@ -335,7 +335,7 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
       mesh_->iterate_over_nodes_predicate(
           std::bind(
               &mpm::NodeBase<Tdim>::
-                  compute_acceleration_velocity_twophase_semi_implicit_cundall,
+                  compute_acceleration_velocity_semi_implicit_corrector_cundall,
               std::placeholders::_1, mpm::NodePhase::NLiquid, this->dt_,
               damping_factor_),
           std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
@@ -344,14 +344,14 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
       mesh_->iterate_over_nodes_predicate(
           std::bind(
               &mpm::NodeBase<
-                  Tdim>::compute_acceleration_velocity_twophase_semi_implicit,
+                  Tdim>::compute_acceleration_velocity_semi_implicit_corrector,
               std::placeholders::_1, mpm::NodePhase::NSolid, this->dt_),
           std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
       mesh_->iterate_over_nodes_predicate(
           std::bind(
               &mpm::NodeBase<
-                  Tdim>::compute_acceleration_velocity_twophase_semi_implicit,
+                  Tdim>::compute_acceleration_velocity_semi_implicit_corrector,
               std::placeholders::_1, mpm::NodePhase::NLiquid, this->dt_),
           std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
     }

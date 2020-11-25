@@ -337,28 +337,24 @@ class NodeBase {
   virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept = 0;
 
-  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! Compute semi-implicit acceleration and velocity
   //! \ingroup MultiPhase
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
+  //! \details Can be used for both semi-implicit navier-stokes and two-phase
+  //! solvers
   //! \retval status Computation status
-  virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
+  virtual bool compute_acceleration_velocity_semi_implicit_corrector(
       unsigned phase, double dt) = 0;
 
-  //! Compute two-phase semi-implicit acceleration and velocity
+  //! Compute semi-implicit acceleration and velocity with Cundall damping
   //! \ingroup MultiPhase
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
+  //! \details Can be used for both semi-implicit navier-stokes and two-phase
+  //! solvers
   //! \retval status Computation status
-  virtual bool compute_acceleration_velocity_twophase_semi_implicit(
-      unsigned phase, double dt) = 0;
-
-  //! Compute two-phase semi-implicit semi-implicit acceleration and velocity
-  //! \ingroup MultiPhase
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  virtual bool compute_acceleration_velocity_twophase_semi_implicit_cundall(
+  virtual bool compute_acceleration_velocity_semi_implicit_corrector_cundall(
       unsigned phase, double dt, double damping_factor) = 0;
 
   //! Assign active id
