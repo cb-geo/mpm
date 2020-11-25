@@ -363,7 +363,7 @@ class NodeBase {
 
   //! Return active id
   //! \ingroup MultiPhase
-  virtual mpm::Index active_id() = 0;
+  virtual mpm::Index active_id() const = 0;
 
   //! Assign global active id
   //! \ingroup MultiPhase
@@ -371,12 +371,12 @@ class NodeBase {
 
   //! Return global active id
   //! \ingroup MultiPhase
-  virtual mpm::Index global_active_id() = 0;
+  virtual mpm::Index global_active_id() const = 0;
 
   //! Return pressure constraint
   //! \ingroup MultiPhase
   virtual double pressure_constraint(const unsigned phase,
-                                     const double current_time) = 0;
+                                     const double current_time) const = 0;
 
   //! Update pressure increment at the node
   //! \ingroup MultiPhase
@@ -400,25 +400,23 @@ class NodeBase {
 
   //! Return the nodal intermediate velocity
   //! \ingroup MultiPhase
-  virtual VectorDim intermediate_velocity(const unsigned phase) = 0;
+  virtual VectorDim intermediate_velocity(const unsigned phase) const = 0;
 
   //! Return the nodal intermediate acceleration
   //! \ingroup MultiPhase
-  virtual VectorDim intermediate_acceleration(const unsigned phase) = 0;
+  virtual VectorDim intermediate_acceleration(const unsigned phase) const = 0;
 
   //! Compute intermediate force
   //! \ingroup MultiPhase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  virtual bool compute_intermediate_force(const double dt) = 0;
+  virtual void compute_intermediate_force() = 0;
 
   //! Return total intermediate force
   //! \ingroup MultiPhase
-  virtual VectorDim force_total_inter() = 0;
+  virtual VectorDim force_total_inter() const = 0;
 
   //! Return fluid intermediate force
   //! \ingroup MultiPhase
-  virtual VectorDim force_fluid_inter() = 0;
+  virtual VectorDim force_fluid_inter() const = 0;
 
   //! Update correction force
   //! \ingroup MultiPhase
@@ -435,12 +433,12 @@ class NodeBase {
 
   //! Compute nodal correction force term
   //! \ingroup MultiPhase
-  virtual bool compute_nodal_correction_force(
+  virtual void compute_nodal_correction_force(
       const VectorDim& correction_force) = 0;
 
   //! Compute nodal correction force term for two phase
   //! \ingroup MultiPhase
-  virtual bool compute_nodal_correction_force(
+  virtual void compute_nodal_correction_force(
       const VectorDim& solid_correction_force,
       const VectorDim& liquid_correction_force) = 0;
 

@@ -158,7 +158,7 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_right(
     mpm::Index nid = 0;
     for (auto node_itr = nodes.cbegin(); node_itr != nodes.cend(); ++node_itr) {
       // Compute nodal intermediate force
-      (*node_itr)->compute_intermediate_force(dt);
+      (*node_itr)->compute_intermediate_force();
 
       // Assemble intermediate force vector
       predictor_rhs_vector_.row(nid) =

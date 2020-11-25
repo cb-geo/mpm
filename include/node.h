@@ -373,7 +373,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Return active id
   //! \ingroup MultiPhase
-  mpm::Index active_id() override { return active_id_; }
+  mpm::Index active_id() const override { return active_id_; }
 
   //! Assign global active id
   //! \ingroup MultiPhase
@@ -381,7 +381,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Return global active id
   //! \ingroup MultiPhase
-  mpm::Index global_active_id() override { return global_active_id_; }
+  mpm::Index global_active_id() const override { return global_active_id_; }
 
   //! Return nodal pressure constraint
   //! \ingroup MultiPhase
@@ -389,16 +389,17 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] current_time current time of the analysis
   //! \retval pressure constraint at proper time for given phase
   double pressure_constraint(const unsigned phase,
-                             const double current_time) override {
+                             const double current_time) const override {
+    double constraint = std::numeric_limits<double>::max();
     if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
       const double scalar =
           (pressure_function_.find(phase) != pressure_function_.end())
-              ? pressure_function_[phase]->value(current_time)
+              ? pressure_function_.at(phase)->value(current_time)
               : 1.0;
 
-      return scalar * pressure_constraints_[phase];
-    } else
-      return std::numeric_limits<double>::max();
+      constraint = scalar * pressure_constraints_.at(phase);
+    }
+    return constraint;
   }
 
   //! Update pressure increment at the node
@@ -428,27 +429,25 @@ class Node : public NodeBase<Tdim> {
 
   //! Return the nodal intermediate velocity
   //! \ingroup MultiPhase
-  VectorDim intermediate_velocity(const unsigned phase) {
+  VectorDim intermediate_velocity(const unsigned phase) const override {
     return velocity_inter_.col(phase);
   }
 
   //! Return the nodal intermediate acceleration
   //! \ingroup MultiPhase
-  VectorDim intermediate_acceleration(const unsigned phase) {
+  VectorDim intermediate_acceleration(const unsigned phase) const override {
     return acceleration_inter_.col(phase);
   }
 
   //! Compute intermediate force
   //! \ingroup MultiPhase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  bool compute_intermediate_force(const double dt) override;
+  void compute_intermediate_force() override;
 
   //! Return total intermediate force
-  VectorDim force_total_inter() override { return force_total_inter_; }
+  VectorDim force_total_inter() const override { return force_total_inter_; }
 
   //! Return fluid intermediate force
-  VectorDim force_fluid_inter() override { return force_fluid_inter_; }
+  VectorDim force_fluid_inter() const override { return force_fluid_inter_; }
 
   //! Update correction force
   //! \ingroup MultiPhase
@@ -467,12 +466,12 @@ class Node : public NodeBase<Tdim> {
 
   //! Compute nodal correction force term
   //! \ingroup MultiPhase
-  bool compute_nodal_correction_force(
+  void compute_nodal_correction_force(
       const VectorDim& correction_force) override;
 
   //! Compute nodal correction force term for two phase
   //! \ingroup MultiPhase
-  bool compute_nodal_correction_force(
+  void compute_nodal_correction_force(
       const VectorDim& solid_correction_force,
       const VectorDim& liquid_correction_force) override;
 
