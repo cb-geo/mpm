@@ -523,10 +523,20 @@ bool mpm::MPMSemiImplicitTwoPhase<
 
 #ifdef USE_MPI
     // Assign global active dof to solver
-    linear_solver_->assign_global_active_dof(assembler_->global_active_dof());
+    linear_solver_->assign_global_active_dof(2 *
+                                             assembler_->global_active_dof());
+
+    // Prepare rank global mapper to compute predictor equation
+    auto predictor_rgm = assembler_->rank_global_mapper();
+    auto predictor_rgm_liquid = assembler_->rank_global_mapper();
+    std::for_each(
+        predictor_rgm_liquid.begin(), predictor_rgm_liquid.end(),
+        [size = assembler_->global_active_dof()](int& rgm) { rgm += size; });
+    predictor_rgm.insert(predictor_rgm.end(), predictor_rgm_liquid.begin(),
+                         predictor_rgm_liquid.end());
 
     // Assign rank global mapper to solver
-    linear_solver_->assign_rank_global_mapper(assembler_->rank_global_mapper());
+    linear_solver_->assign_rank_global_mapper(predictor_rgm);
 #endif
 
     // Compute matrix equation of each direction
