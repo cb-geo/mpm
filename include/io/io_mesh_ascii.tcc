@@ -270,12 +270,12 @@ std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID and read stream
+          mpm::Index id;
+          // Angles and ream stream
+          Eigen::Matrix<double, Tdim, 1> angles;
           while (istream.good()) {
-            // ID and read stream
-            mpm::Index id;
             istream >> id;
-            // Angles and ream stream
-            Eigen::Matrix<double, Tdim, 1> angles;
             for (unsigned i = 0; i < Tdim; ++i) istream >> angles[i];
             euler_angles.emplace(std::make_pair(id, angles));
           }
@@ -314,11 +314,11 @@ std::vector<std::tuple<mpm::Index, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Volume
+          double volume;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Volume
-            double volume;
             // Read stream
             istream >> id >> volume;
             volumes.emplace_back(std::make_tuple(id, volume));
@@ -358,9 +358,9 @@ std::vector<std::array<mpm::Index, 2>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index pid, cid;
           while (istream.good()) {
-            // ID
-            mpm::Index pid, cid;
             // Read stream
             istream >> pid >> cid;
             particles_cells.emplace_back(std::array<mpm::Index, 2>({pid, cid}));
@@ -416,13 +416,13 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Velocity
+          double velocity;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Velocity
-            double velocity;
             // Read stream
             istream >> id >> dir >> velocity;
             constraints.emplace_back(std::make_tuple(id, dir, velocity));
@@ -462,15 +462,15 @@ std::vector<std::tuple<mpm::Index, unsigned, int, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Sign
+          int sign;
+          // Friction
+          double friction;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Sign
-            int sign;
-            // Friction
-            double friction;
             // Read stream
             istream >> id >> dir >> sign >> friction;
             constraints.emplace_back(std::make_tuple(id, dir, sign, friction));
@@ -509,13 +509,13 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Force
+          double force;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Force
-            double force;
             // Read stream
             istream >> id >> dir >> force;
             forces.emplace_back(std::make_tuple(id, dir, force));
@@ -555,11 +555,11 @@ std::vector<std::tuple<double, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // x value
+          double x_value;
+          // fx value
+          double fx_value;
           while (istream.good()) {
-            // x value
-            double x_value;
-            // fx value
-            double fx_value;
             // Read stream
             istream >> x_value >> fx_value;
             math_function.emplace_back(std::make_tuple(x_value, fx_value));
