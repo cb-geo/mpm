@@ -530,3 +530,47 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
   }
   return forces;
 }
+
+//! Return math function
+template <unsigned Tdim>
+std::vector<std::tuple<double, double>>
+    mpm::IOMeshAscii<Tdim>::read_math_function(
+        const std::string& math_function_file) {
+
+  // initialize math function
+  std::vector<std::tuple<double, double>> math_function;
+  math_function.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(math_function_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // x value
+            double x_value;
+            // fx value
+            double fx_value;
+            // Read stream
+            istream >> x_value >> fx_value;
+            math_function.emplace_back(std::make_tuple(x_value, fx_value));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read math function : {}", exception.what());
+    file.close();
+  }
+  return math_function;
+}

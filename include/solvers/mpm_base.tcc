@@ -762,16 +762,43 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
       const std::string function_type =
           function_props["type"].template get<std::string>();
 
+      // Initiate another function_prop to be passed
+      auto function_props_update = function_props;
+
+      // Create a file reader
+      const std::string io_type =
+          io_->json_object("mesh")["io_type"].template get<std::string>();
+      auto reader = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+
+      // Math function is specified in a file, replace function_props_update
+      if (function_props.find("file") != function_props.end()) {
+        std::string math_file =
+            function_props.at("file").template get<std::string>();
+        auto math_function_values =
+            reader->read_math_function(io_->file_name(math_file));
+
+        // Make separate arrays
+        std::vector<double> xvalues;
+        std::vector<double> fxvalues;
+        for (const auto& math_function_value : math_function_values) {
+          xvalues.emplace_back(std::get<0>(math_function_value));
+          fxvalues.emplace_back(std::get<1>(math_function_value));
+        }
+
+        function_props_update["xvalues"] = xvalues;
+        function_props_update["fxvalues"] = fxvalues;
+      }
+
       // Create a new function from JSON object
       auto function =
           Factory<mpm::FunctionBase, unsigned, const Json&>::instance()->create(
               function_type, std::move(function_id), function_props);
 
-      // Add material to list
+      // Add math function to list
       auto insert_status =
           math_functions_.insert(std::make_pair(function->id(), function));
 
-      // If insert material failed
+      // If insert math function failed
       if (!insert_status.second) {
         status = false;
         throw std::runtime_error(

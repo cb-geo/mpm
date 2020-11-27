@@ -337,7 +337,7 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
-      // Try to read constrtaints from a non-existant file
+      // Try to read forces from a non-existant file
       auto forces = read_mesh->read_forces("forces-missing.txt");
       // Check number of forces
       REQUIRE(forces.size() == 0);
@@ -479,6 +479,57 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
         for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
           REQUIRE(stresses.at(i)[j] ==
                   Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check math function file") {
+    // Vector of math function
+    std::vector<std::tuple<double, double>> math_function_values;
+
+    // Constraint
+    math_function_values.emplace_back(std::make_tuple(0.0, 1.75));
+    math_function_values.emplace_back(std::make_tuple(0.2, -1.25));
+    math_function_values.emplace_back(std::make_tuple(0.4, -3.99));
+    math_function_values.emplace_back(std::make_tuple(0.6, 4.55));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("math-functions.txt");
+    // Write particle coordinates
+    for (const auto& math_function_value : math_function_values) {
+      file << std::get<0>(math_function_value) << "\t";
+      file << std::get<1>(math_function_value) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read math function
+    SECTION("Check math functions") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read function from a non-existant file
+      auto math_functions =
+          read_mesh->read_math_function("math-functions-missing.txt");
+      // Check number of function
+      REQUIRE(math_functions.size() == 0);
+
+      // Check math function
+      math_functions = read_mesh->read_math_function("math-functions.txt");
+      // Check number of values
+      REQUIRE(math_functions.size() == math_function_values.size());
+
+      // Check math function
+      for (unsigned i = 0; i < math_function_values.size(); ++i) {
+        REQUIRE(
+            std::get<0>(math_functions.at(i)) ==
+            Approx(std::get<0>(math_function_values.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(math_functions.at(i)) ==
+            Approx(std::get<1>(math_function_values.at(i))).epsilon(Tolerance));
       }
     }
   }

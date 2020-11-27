@@ -91,6 +91,11 @@ class IOMeshAscii : public IOMesh<Tdim> {
   std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) override;
 
+  //! Read math function file
+  //! \param[in] math function file name with values of x and fx
+  std::vector<std::tuple<double, double>> read_math_function(
+      const std::string& math_function_file) override;
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
