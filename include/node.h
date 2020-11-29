@@ -208,7 +208,7 @@ class Node : public NodeBase<Tdim> {
                                    double swave_v) override;
 
   //! Apply absorbing constraint
-  void apply_absorbing_constraint(double dt) override;
+  void apply_absorbing_constraint() override;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -309,7 +309,9 @@ class Node : public NodeBase<Tdim> {
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Absorbing Constraints
-  std::map<unsigned, double> absorbing_constraints_;
+  std::tuple<unsigned, double, double> absorbing_constraints_;
+  //! Absorbing Traction
+  Eigen::Matrix<double, Tdim, Tnphases> absorbing_traction_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node

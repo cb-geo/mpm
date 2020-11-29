@@ -19,7 +19,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   concentrated_force_.setZero();
 
   // Clear any nodal constraints
-  absorbing_constraints_.clear();
+  absorbing_traction_.setZero();
 
   this->initialise();
 }
@@ -120,11 +120,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
 
-  // Apply absorbing constraint
-  this->apply_absorbing_contraint()
-
-      // Update/assign external force
-      node_mutex_.lock();
+  // Update/assign external force
+  node_mutex_.lock();
   external_force_.col(phase) = external_force_.col(phase) * factor + force;
   node_mutex_.unlock();
 }
@@ -353,16 +350,14 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
   }
 }
 
-// bool assign_nodal_absorbing_constraints(double pwave_v, double swave_v);
+// bool assign_absorbing_constraints(double pwave_v, double swave_v);
 // !Assign absorbing constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(
-    unsigned dir, double pwave_v, double swave_v) {
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(unsigned dir, double pwave_v, double swave_v) {
   bool status = true;
-  // Assign shear velocity constraint
   try {
     if (dir < Tdim) {
-      this->absorbing_constraint_ = std::make_tuple(
+      this->absorbing_constraints_ = std::make_tuple(
           static_cast<unsigned>(dir), static_cast<double>(pwave_v),
           static_cast<double>(swave_v));
     } else
@@ -378,38 +373,34 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(
 // !Apply absorbing constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint() {
-  // Set velocity constraint
-  for (const auto& constraint : this->absorbing_constraints_) {
-    // Extract normal direction
-    const unsigned dir_n = constraint.first;
+  // Extract normal direction
+  const unsigned dir_n = std::get<0>(this->absorbing_constraints_);
 
-    // Extract p-wave velocity
-    const double pwave_v = constraint.second;
+  // Extract p-wave velocity
+  const double pwave_v = std::get<1>(this->absorbing_constraints_);
 
-    // Extract s-wave velocity
-    const double swave_v = constraint.third
+  // Extract s-wave velocity
+  const double swave_v = std::get<2>(this->absorbing_constraints_);
 
-                           // Phase: Integer value of division (dir / Tdim)
-                           const auto phase_n =
-        static_cast<unsigned>(dir_n / Tdim);
+  // Phase: Integer value of division (dir / Tdim)
+  const auto phase_n = static_cast<unsigned>(dir_n / Tdim);
 
-    if (Tdim == 2) {
-      // Determine Shear Direction
-      const unsigned dir_s = (Tdim - 1) - dir_n;
-      const auto phase_s = static_cast<unsigned>(dir_s / Tdim);
+  if (Tdim == 2) {
+    // Determine Shear Direction
+    const unsigned dir_s = (Tdim - 1) - dir_n;
+    const auto phase_s = static_cast<unsigned>(dir_s / Tdim);
 
-      // Calculate Traction Forces
-      double mass_density_s = mass_(phase_s) / volume_(phase_s);
-      double velocity_s = velocity_(dir_s, phase_s);
-      double traction_s = -velocity_s * mass_density_s * swave_v;
+    // Calculate Traction Forces
+    double mass_density_s = mass_(phase_s) / volume_(phase_s);
+    double velocity_s = velocity_(dir_s, phase_s);
+    const double traction_s = -velocity_s * mass_density_s * swave_v;
 
-      double mass_density_n = mass_(phase_n) / volume_(phase_n);
-      double velocity_n = velocity_(dir_n, phase_n);
-      double traction_n = -velocity_n * mass_density_n * pwave_v;
-
-      external_force_.col(phase_n) += traction_n external_force_.col(phase_s) +=
-          traction_s
-    }
+    double mass_density_n = mass_(phase_n) / volume_(phase_n);
+    double velocity_n = velocity_(dir_n, phase_n);
+    const double traction_n = -velocity_n * mass_density_n * pwave_v;
+ 
+    absorbing_traction_(dir_s,phase_s) = traction_s;
+    absorbing_traction_(dir_n,phase_n) = traction_n;
   }
 }
 

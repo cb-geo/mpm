@@ -200,7 +200,7 @@ class NodeBase {
                                            double swave_v) = 0;
 
   //! Apply absorbing constraint
-  virtual void apply_absorbing_constraint(double dt) = 0;
+  virtual void apply_absorbing_constraint() = 0;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
