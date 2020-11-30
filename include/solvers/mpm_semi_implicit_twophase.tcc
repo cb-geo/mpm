@@ -425,26 +425,87 @@ template <unsigned Tdim>
 bool mpm::MPMSemiImplicitTwoPhase<Tdim>::initialise_matrix() {
   bool status = true;
   try {
-    // Max iteration steps
-    unsigned max_iter =
-        analysis_["linear_solver"]["max_iter"].template get<unsigned>();
-    // Tolerance
-    double tolerance =
-        analysis_["linear_solver"]["tolerance"].template get<double>();
     // Get matrix assembler type
     std::string assembler_type = analysis_["linear_solver"]["assembler_type"]
                                      .template get<std::string>();
-    // Get matrix solver type
-    std::string solver_type =
-        analysis_["linear_solver"]["solver_type"].template get<std::string>();
     // Create matrix assembler
     assembler_ =
         Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
-    // Create matrix solver
-    linear_solver_ =
-        Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
-                double>::instance()
-            ->create(solver_type, std::move(max_iter), std::move(tolerance));
+
+    // Solver settings
+    if (analysis_["linear_solver"].contains("solver_settings") &&
+        analysis_["linear_solver"].at("solver_settings").is_array() &&
+        analysis_["linear_solver"].at("solver_settings").size() > 0) {
+      mpm::MPMBase<Tdim>::initialise_linear_solver(
+          analysis_["linear_solver"]["solver_settings"], linear_solver_);
+    }
+    // Default solver settings
+    else {
+      std::string solver_type = "IterativeEigen";
+      unsigned max_iter = 1000;
+      double tolerance = 1.E-7;
+      std::string sub_solver_type_pressure = "cg";
+      std::string sub_solver_type_acc = "lscg";
+
+      // In case the default settings are specified in json
+      if (analysis_["linear_solver"].contains("solver_type")) {
+        solver_type = analysis_["linear_solver"]["solver_type"]
+                          .template get<std::string>();
+      }
+      // Max iteration steps
+      if (analysis_["linear_solver"].contains("max_iter")) {
+        max_iter =
+            analysis_["linear_solver"]["max_iter"].template get<unsigned>();
+      }
+      // Tolerance
+      if (analysis_["linear_solver"].contains("tolerance")) {
+        tolerance =
+            analysis_["linear_solver"]["tolerance"].template get<double>();
+      }
+
+      // NOTE: Only KrylovPETSC solver is supported for MPI
+#ifdef USE_MPI
+      // Get number of MPI ranks
+      int mpi_size = 1;
+      MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+      if (solver_type != "KrylovPETSC" && mpi_size > 1) {
+        console_->warn(
+            "The linear solver in MPI setting is automatically set to default: "
+            "\'KrylovPETSC\'. Only \'KrylovPETSC\' solver is supported for "
+            "MPI.");
+        solver_type = "KrylovPETSC";
+      }
+#endif
+
+      // If "KrylovPETSC" is selected, modify lscg to lsqr for solving acc
+      if (solver_type == "KrylovPETSC") sub_solver_type_acc = "lsqr";
+
+      // Create matrix solver for pressure
+      auto press_lin_solver =
+          Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                  double>::instance()
+              ->create(solver_type, std::move(max_iter), std::move(tolerance));
+      press_lin_solver->set_sub_solver_type(sub_solver_type_pressure);
+      linear_solver_.insert(
+          std::pair<
+              std::string,
+              std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>(
+              "pressure", press_lin_solver));
+
+      // Create matrix solver for acceleration
+      auto acc_lin_solver =
+          Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                  double>::instance()
+              ->create(solver_type, std::move(max_iter), std::move(tolerance));
+      acc_lin_solver->set_sub_solver_type(sub_solver_type_acc);
+      linear_solver_.insert(
+          std::pair<
+              std::string,
+              std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>(
+              "acceleration", acc_lin_solver));
+    }
+
     // Assign mesh pointer to assembler
     assembler_->assign_mesh_pointer(mesh_);
 
@@ -504,7 +565,7 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::reinitialise_matrix() {
 //! Compute intermediate velocity
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitTwoPhase<
-    Tdim>::compute_intermediate_acceleration_velocity(std::string solver_type) {
+    Tdim>::compute_intermediate_acceleration_velocity() {
   bool status = true;
   try {
     // Map coupling drag matrix to cell
@@ -523,8 +584,8 @@ bool mpm::MPMSemiImplicitTwoPhase<
 
 #ifdef USE_MPI
     // Assign global active dof to solver
-    linear_solver_->assign_global_active_dof(2 *
-                                             assembler_->global_active_dof());
+    linear_solver_["acceleration"]->assign_global_active_dof(
+        2 * assembler_->global_active_dof());
 
     // Prepare rank global mapper to compute predictor equation
     auto predictor_rgm = assembler_->rank_global_mapper();
@@ -536,16 +597,16 @@ bool mpm::MPMSemiImplicitTwoPhase<
                          predictor_rgm_liquid.end());
 
     // Assign rank global mapper to solver
-    linear_solver_->assign_rank_global_mapper(predictor_rgm);
+    linear_solver_["acceleration"]->assign_rank_global_mapper(predictor_rgm);
 #endif
 
     // Compute matrix equation of each direction
     for (unsigned dir = 0; dir < Tdim; ++dir) {
       // Solve equation 1 to compute intermediate acceleration
       assembler_->assign_intermediate_acceleration(
-          dir, linear_solver_->solve(
+          dir, linear_solver_["acceleration"]->solve(
                    assembler_->predictor_lhs_matrix(dir),
-                   assembler_->predictor_rhs_vector().col(dir), solver_type));
+                   assembler_->predictor_rhs_vector().col(dir)));
     }
 
     // Update intermediate acceleration and velocity of solid phase
@@ -577,8 +638,7 @@ bool mpm::MPMSemiImplicitTwoPhase<
 
 // Compute poisson equation
 template <unsigned Tdim>
-bool mpm::MPMSemiImplicitTwoPhase<Tdim>::compute_poisson_equation(
-    std::string solver_type) {
+bool mpm::MPMSemiImplicitTwoPhase<Tdim>::compute_poisson_equation() {
   bool status = true;
   try {
     // Construct local cell laplacian matrix
@@ -605,16 +665,17 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::compute_poisson_equation(
 
 #ifdef USE_MPI
     // Assign global active dof to solver
-    linear_solver_->assign_global_active_dof(assembler_->global_active_dof());
+    linear_solver_["pressure"]->assign_global_active_dof(
+        assembler_->global_active_dof());
 
     // Assign rank global mapper to solver
-    linear_solver_->assign_rank_global_mapper(assembler_->rank_global_mapper());
+    linear_solver_["pressure"]->assign_rank_global_mapper(
+        assembler_->rank_global_mapper());
 #endif
 
     // Solve matrix equation and assign solution to assembler
-    assembler_->assign_pressure_increment(
-        linear_solver_->solve(assembler_->laplacian_matrix(),
-                              assembler_->poisson_rhs_vector(), solver_type));
+    assembler_->assign_pressure_increment(linear_solver_["pressure"]->solve(
+        assembler_->laplacian_matrix(), assembler_->poisson_rhs_vector()));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
