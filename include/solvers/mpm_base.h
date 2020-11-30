@@ -25,6 +25,7 @@
 #include "mpm_scheme_usf.h"
 #include "mpm_scheme_usl.h"
 #include "particle.h"
+#include "solver_base.h"
 #include "vector.h"
 
 namespace mpm {
@@ -94,6 +95,17 @@ class MPMBase : public MPM {
   //! Domain decomposition
   //! \param[in] initial_step Start of simulation or later steps
   void mpi_domain_decompose(bool initial_step = false) override;
+
+ protected:
+  //! Initialise implicit solver
+  //! \param[in] lin_solver_props Linear solver properties
+  //! \param[in, out] linear_solver Linear solver map
+  void initialise_linear_solver(
+      const Json& lin_solver_props,
+      tsl::robin_map<
+          std::string,
+          std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>&
+          linear_solver);
 
  private:
   //! Return if a mesh will be isoparametric or not

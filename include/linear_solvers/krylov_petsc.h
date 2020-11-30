@@ -38,6 +38,8 @@ class KrylovPETSC : public SolverBase<Traits> {
     if (ierr) {
       throw std::runtime_error("Error when initialiazing Petsc.");
     }
+    abs_tolerance_ = PETSC_DEFAULT;
+    div_tolerance_ = PETSC_DEFAULT;
 #endif
   };
 
@@ -51,8 +53,7 @@ class KrylovPETSC : public SolverBase<Traits> {
 
   //! Matrix solver with default initial guess
   Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
-                        const Eigen::VectorXd& b,
-                        std::string solver_type) override;
+                        const Eigen::VectorXd& b) override;
 
   //! Return the type of solver
   std::string solver_type() const { return "PETSC"; }
@@ -68,14 +69,22 @@ class KrylovPETSC : public SolverBase<Traits> {
   };
 
  protected:
+  //! Solver type
+  using SolverBase<Traits>::sub_solver_type_;
+  //! Preconditioner type
+  using SolverBase<Traits>::preconditioner_type_;
   //! Maximum number of iterations
   using SolverBase<Traits>::max_iter_;
-  //! Tolerance
+  //! Relative tolerance
   using SolverBase<Traits>::tolerance_;
+  //! Absolute tolerance
+  using SolverBase<Traits>::abs_tolerance_;
+  //! Divergence tolerance
+  using SolverBase<Traits>::div_tolerance_;
+  //! Verbosity
+  using SolverBase<Traits>::verbosity_;
   //! Logger
   using SolverBase<Traits>::console_;
-  //! cg_type_ (leastSquaresConjugateGradient or ConjugateGradient)
-  std::string cg_type_;
   //! Global active dof
   unsigned global_active_dof_;
   //! Rank global Mapper
