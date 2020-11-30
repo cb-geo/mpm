@@ -8,7 +8,6 @@
 #include "mpm_base.h"
 
 #include "assembler_base.h"
-#include "cg_eigen.h"
 #include "solver_base.h"
 
 namespace mpm {
@@ -39,7 +38,7 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   bool reinitialise_matrix();
 
   //! Compute poisson equation
-  bool compute_poisson_equation(std::string solver_type = "cg");
+  bool compute_poisson_equation();
 
   //! Compute corrected velocity
   bool compute_correction_force();
@@ -83,7 +82,9 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   //! Assembler object
   std::shared_ptr<mpm::AssemblerBase<Tdim>> assembler_;
   //! Linear solver object
-  std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>> linear_solver_;
+  tsl::robin_map<std::string,
+                 std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>
+      linear_solver_;
   //! Method to detect free surface detection
   std::string free_surface_detection_;
   //! Volume tolerance for free surface

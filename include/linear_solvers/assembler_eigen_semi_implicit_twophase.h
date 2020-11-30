@@ -6,10 +6,8 @@
 
 // Speed log
 #include "assembler_eigen_semi_implicit_navierstokes.h"
-#include "spdlog/spdlog.h"
-
-#include "cg_eigen.h"
 #include "mesh.h"
+#include "spdlog/spdlog.h"
 
 namespace mpm {
 template <unsigned Tdim>

@@ -1370,3 +1370,61 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
       std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
                 std::placeholders::_1, phase));
 }
+
+//! MPM implicit solver initialization
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::initialise_linear_solver(
+    const Json& lin_solver_props,
+    tsl::robin_map<
+        std::string,
+        std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>&
+        linear_solver) {
+  // Iterate over specific solver settings
+  for (const auto& solver : lin_solver_props) {
+    std::string dof = solver["dof"].template get<std::string>();
+    std::string solver_type = solver["solver_type"].template get<std::string>();
+    // NOTE: Only KrylovPETSC solver is supported for MPI
+#ifdef USE_MPI
+    // Get number of MPI ranks
+    int mpi_size = 1;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (solver_type != "KrylovPETSC" && mpi_size > 1) {
+      console_->warn(
+          "The linear solver for DOF:\'{}\' in MPI setting is "
+          "automatically set to default: \'KrylovPETSC\'. Only "
+          "\'KrylovPETSC\' solver is supported for MPI.",
+          dof);
+      solver_type = "KrylovPETSC";
+    }
+#endif
+    unsigned max_iter = solver["max_iter"].template get<unsigned>();
+    double tolerance = solver["tolerance"].template get<double>();
+    auto lin_solver =
+        Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                double>::instance()
+            ->create(solver_type, std::move(max_iter), std::move(tolerance));
+
+    // Specific settings
+    if (solver.contains("sub_solver_type"))
+      lin_solver->set_sub_solver_type(
+          solver["sub_solver_type"].template get<std::string>());
+    if (solver.contains("preconditioner_type"))
+      lin_solver->set_preconditioner_type(
+          solver["preconditioner_type"].template get<std::string>());
+    if (solver.contains("abs_tolerance"))
+      lin_solver->set_abs_tolerance(
+          solver["abs_tolerance"].template get<double>());
+    if (solver.contains("div_tolerance"))
+      lin_solver->set_div_tolerance(
+          solver["div_tolerance"].template get<double>());
+    if (solver.contains("verbosity"))
+      lin_solver->set_verbosity(solver["verbosity"].template get<unsigned>());
+
+    // Add solver set to map
+    linear_solver.insert(
+        std::pair<
+            std::string,
+            std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>(
+            dof, lin_solver));
+  }
+}

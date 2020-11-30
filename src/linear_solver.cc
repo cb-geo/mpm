@@ -2,7 +2,7 @@
 #include "assembler_eigen_semi_implicit_navierstokes.h"
 #include "assembler_eigen_semi_implicit_twophase.h"
 
-#include "cg_eigen.h"
+#include "iterative_eigen.h"
 #include "krylov_petsc.h"
 #include "solver_base.h"
 
@@ -30,8 +30,9 @@ static Register<mpm::AssemblerBase<3>,
 // Linear Solver collections
 // Eigen Conjugate Gradient
 static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
-                mpm::CGEigen<Eigen::SparseMatrix<double>>, unsigned, double>
-    solver_eigen_cg("CGEigen");
+                mpm::IterativeEigen<Eigen::SparseMatrix<double>>, unsigned,
+                double>
+    solver_iterative_eigen("IterativeEigen");
 
 // Krylov Methods PTSC
 #ifdef USE_PETSC
