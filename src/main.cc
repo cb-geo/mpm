@@ -4,6 +4,9 @@
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
+#ifdef USE_PETSC
+#include <petscksp.h>
+#endif
 #include "spdlog/spdlog.h"
 
 #include "io.h"
@@ -26,6 +29,11 @@ int main(int argc, char** argv) {
   // Pass the buffer allocated to MPI so it uses it when we issue MPI_Bsend
   MPI_Buffer_attach(mpi_buffer, mpi_buffer_size);
 
+#endif
+
+#ifdef USE_PETSC
+  // Initialize PETSc
+  PetscInitialize(&argc, &argv, 0, 0);
 #endif
 
   try {
@@ -56,6 +64,12 @@ int main(int argc, char** argv) {
 
   } catch (std::exception& exception) {
     std::cerr << "MPM main: " << exception.what() << std::endl;
+
+#ifdef USE_PETSC
+    // Finalize PETSc
+    PetscFinalize();
+#endif
+
 #ifdef USE_MPI
     free(mpi_buffer);
     MPI_Buffer_detach(&mpi_buffer, &mpi_buffer_size);

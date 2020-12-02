@@ -8,6 +8,9 @@
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
+#ifdef USE_PETSC
+#include <petscksp.h>
+#endif
 
 int main(int argc, char** argv) {
   try {
@@ -22,7 +25,17 @@ int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 #endif
 
+#ifdef USE_PETSC
+    // Initialize PETSc
+    PetscInitialize(&argc, &argv, 0, 0);
+#endif
+
     int result = session.run();
+
+#ifdef USE_PETSC
+    // Finalize PETSc
+    PetscFinalize();
+#endif
 
 #ifdef USE_MPI
     MPI_Finalize();
