@@ -159,6 +159,12 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       }
     }
 
+    // Free work space
+    VecDestroy(&petsc_x);
+    VecDestroy(&petsc_b);
+    MatDestroy(&petsc_A);
+    KSPDestroy(&solver);
+
     // Solver End
     auto solver_end = std::chrono::steady_clock::now();
     if (verbosity_ > 0 && mpi_rank == 0)
