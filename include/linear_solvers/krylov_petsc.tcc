@@ -71,14 +71,23 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     KSPSetOperators(solver, petsc_A, petsc_A);
 
     // Set solver_type
-    if (sub_solver_type_ == "cg")
+    if (sub_solver_type_ == "cg") {
       KSPSetType(solver, KSPCG);
-    else if (sub_solver_type_ == "gmres")
+      KSPCGSetType(solver, KSP_CG_SYMMETRIC);
+    } else if (sub_solver_type_ == "gmres")
       KSPSetType(solver, KSPGMRES);
     else if (sub_solver_type_ == "bicgstab")
       KSPSetType(solver, KSPBCGS);
     else if (sub_solver_type_ == "lsqr")
       KSPSetType(solver, KSPLSQR);
+    else {
+      if (verbosity_ > 0 && mpi_rank == 0)
+        console_->warn(
+            "Sub solver type is not available! Using \"gmres\" as default "
+            "type. Available sub solver type implemented in KrylovPETSC "
+            "class are: \"cg\", \"gmres\", \"lsqr\", and "
+            "\"bicgstab\".");
+    }
 
     // Set tolerance
     KSPSetTolerances(solver, tolerance_, abs_tolerance_, div_tolerance_,
@@ -87,7 +96,6 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     // Set preconditioner
     if (preconditioner_type_ != "none") {
       PC pc;
-      if (sub_solver_type_ == "cg") KSPCGSetType(solver, KSP_CG_SYMMETRIC);
       KSPSetInitialGuessNonzero(solver, PETSC_TRUE);
       KSPGetPC(solver, &pc);
       PCFactorSetShiftType(pc, MAT_SHIFT_POSITIVE_DEFINITE);
@@ -123,9 +131,10 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     // Warn if solver does not converge
     if (reason < 0) {
       PetscPrintf(MPI_COMM_WORLD,
-                  "\nKrylov PETSC solver \"%s\" DIVERGED, try to modify the "
-                  "preconditioner, set tolerance and maximum iteration.\n",
-                  sub_solver_type_.c_str());
+                  "\nKrylov PETSC solver \"%s\" with \"%s\" preconditioner "
+                  "DIVERGED, try to modify the preconditioner, set tolerance "
+                  "and maximum iteration.\n",
+                  sub_solver_type_.c_str(), preconditioner_type_.c_str());
     }
 
     // Scatter and gather for cloning procedure
