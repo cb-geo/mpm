@@ -17,45 +17,21 @@ Eigen::VectorXd mpm::IterativeEigen<Traits>::solve(
     }
 
     if (sub_solver_type_ == "cg") {
-      if (preconditioner_type_ == "none") {
-        Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> solver;
+      Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> solver;
 
-        solver.setMaxIterations(max_iter_);
-        solver.setTolerance(tolerance_);
-        solver.compute(A);
+      solver.setMaxIterations(max_iter_);
+      solver.setTolerance(tolerance_);
+      solver.compute(A);
 
-        x = solver.solve(b);
+      x = solver.solve(b);
 
-        if (verbosity_ >= 1) {
-          std::cout << "#iterations:     " << solver.iterations() << std::endl;
-          std::cout << "estimated error: " << solver.error() << std::endl;
-        }
+      if (verbosity_ >= 1) {
+        std::cout << "#iterations:     " << solver.iterations() << std::endl;
+        std::cout << "estimated error: " << solver.error() << std::endl;
+      }
 
-        if (solver.info() != Eigen::Success) {
-          throw std::runtime_error("Fail to solve linear systems!\n");
-        }
-      } else if (preconditioner_type_ == "icc") {
-        Eigen::ConjugateGradient<Eigen::SparseMatrix<double>,
-                                 Eigen::Lower | Eigen::Upper,
-                                 Eigen::IncompleteCholesky<double>>
-            solver;
-
-        solver.setMaxIterations(max_iter_);
-        solver.setTolerance(tolerance_);
-        solver.compute(A);
-
-        x = solver.solve(b);
-
-        if (verbosity_ >= 1) {
-          std::cout << "#iterations:     " << solver.iterations() << std::endl;
-          std::cout << "estimated error: " << solver.error() << std::endl;
-        }
-
-        if (solver.info() != Eigen::Success) {
-          throw std::runtime_error("Fail to solve linear systems!\n");
-        }
-      } else {
-        throw std::runtime_error("Preconditioner type is unavailable!\n");
+      if (solver.info() != Eigen::Success) {
+        throw std::runtime_error("Fail to solve linear systems!\n");
       }
 
     } else if (sub_solver_type_ == "lscg") {
@@ -93,6 +69,11 @@ Eigen::VectorXd mpm::IterativeEigen<Traits>::solve(
       if (solver.info() != Eigen::Success) {
         throw std::runtime_error("Fail to solve linear systems!\n");
       }
+    } else {
+      throw std::runtime_error(
+          "Sub solver type is not available! Available sub solver type "
+          "implemented in IterativeEigen class are: \"cg\", \"lscg\", and "
+          "\"bicgstab\".\n");
     }
 
     // Solver End
