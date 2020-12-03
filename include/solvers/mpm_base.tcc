@@ -772,17 +772,18 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
 
       // Math function is specified in a file, replace function_props_update
       if (function_props.find("file") != function_props.end()) {
-        std::string math_file =
-            function_props.at("file").template get<std::string>();
-        auto math_function_values =
-            reader->read_math_function(io_->file_name(math_file));
-
         // Make separate arrays
         std::vector<double> xvalues;
         std::vector<double> fxvalues;
-        for (const auto& math_function_value : math_function_values) {
-          xvalues.emplace_back(std::get<0>(math_function_value));
-          fxvalues.emplace_back(std::get<1>(math_function_value));
+
+        // Read file
+        std::string math_file =
+            function_props.at("file").template get<std::string>();
+        io::CSVReader<2> in(math_file);
+        double x_value, fx_value;
+        while (in.read_row(x_value, fx_value)) {
+          xvalues.emplace_back(x_value);
+          fxvalues.emplace_back(fx_value);
         }
 
         function_props_update["xvalues"] = xvalues;
@@ -792,7 +793,7 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
       // Create a new function from JSON object
       auto function =
           Factory<mpm::FunctionBase, unsigned, const Json&>::instance()->create(
-              function_type, std::move(function_id), function_props);
+              function_type, std::move(function_id), function_props_update);
 
       // Add math function to list
       auto insert_status =

@@ -27,6 +27,9 @@
 #include "particle.h"
 #include "vector.h"
 
+// CSV-parser
+#include "csv.h"
+
 namespace mpm {
 
 //! Variable type
