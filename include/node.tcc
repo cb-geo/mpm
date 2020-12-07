@@ -383,25 +383,30 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint() {
   const double swave_v = std::get<2>(this->absorbing_constraints_);
 
   // Phase: Integer value of division (dir / Tdim)
-  const auto phase_n = static_cast<unsigned>(dir_n / Tdim);
+  const unsigned phase = 0;
 
-  if (Tdim == 2) {
-    // Determine Shear Direction
-    const unsigned dir_s = (Tdim - 1) - dir_n;
-    const auto phase_s = static_cast<unsigned>(dir_s / Tdim);
+  // Create Traction Value  
+  double traction = 10;
 
-    // Calculate Traction Forces
-    double mass_density_s = mass_(phase_s) / volume_(phase_s);
-    double velocity_s = velocity_(dir_s, phase_s);
-    const double traction_s = -velocity_s * mass_density_s * swave_v;
-
-    double mass_density_n = mass_(phase_n) / volume_(phase_n);
-    double velocity_n = velocity_(dir_n, phase_n);
-    const double traction_n = -velocity_n * mass_density_n * pwave_v;
- 
-    absorbing_traction_(dir_s,phase_s) = traction_s;
-    absorbing_traction_(dir_n,phase_n) = traction_n;
+  //if (Tdim == 2) {
+  for (unsigned dir = 0; dir < Tdim; ++dir) {
+  	// Calculate Traction Forces
+	if (dir == dir_n) {
+    	double mass_density = mass_(phase) / volume_(phase);
+    	double velocity = velocity_(dir, phase);
+    	traction = -velocity * mass_density * pwave_v;
+    } else {
+    	double mass_density = mass_(phase) / volume_(phase);
+    	double velocity = velocity_(dir, phase);
+    	traction = -velocity * mass_density * swave_v;
+    }
+    // Apply traction forces
+    absorbing_traction_(dir,phase) = traction;
+  
+    //}
   }
+  // Update external force
+  this->update_external_force(true, phase, absorbing_traction_.col(phase)); 
 }
 
 //! Assign friction constraint
