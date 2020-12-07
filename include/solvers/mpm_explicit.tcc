@@ -9,9 +9,6 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSL<Tdim>>(mesh_, dt_);
   else
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSF<Tdim>>(mesh_, dt_);
-
-  //! Interface scheme
-    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_);
 }
 
 //! MPM Explicit compute stress strain
@@ -63,7 +60,17 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
   // Interface
-  interface_ = io_->analysis_bool("interface");
+  if (analysis_.find("interface") != analysis_.end()) {
+    interface_ = true;
+  }
+
+  // Interface scheme
+  if (interface_) {
+    double friction = analysis_["interface"]["friction"].template get<double>();
+    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_, friction);
+  } else {
+    contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
+  }
 
   // Initialise material
   this->initialise_materials();
