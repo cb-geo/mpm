@@ -956,19 +956,34 @@ void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
   int mpi_rank = 0;
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-#endif
   const unsigned rank_max = std::numeric_limits<unsigned>::max();
-
-  // Assign MPI rank if the cell has particles
+  const unsigned ncells = this->ncells();
+  // Vector of cell ranks
+  std::vector<int> cell_ranks;
+  cell_ranks.resize(ncells);
+  // Fetch MPI rank if the cell has particles
+  unsigned i = 0;
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     int cell_rank = 0;
     if ((*citr)->nparticles() > 0) cell_rank = mpi_rank;
-    int recv_rank = 0;
-    MPI_Allreduce(&cell_rank, &recv_rank, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    (*citr)->rank(recv_rank);
+    cell_ranks.at(i) = cell_rank;
+    ++i;
   }
 
-#ifdef USE_MPI
+  // MPI Receive cell ranks
+  std::vector<int> recv_ranks;
+  recv_ranks.resize(ncells);
+  MPI_Allreduce(cell_ranks.data(), recv_ranks.data(), ncells, MPI_INT, MPI_SUM,
+                MPI_COMM_WORLD);
+
+  // Assign MPI rank
+  unsigned j = 0;
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int recv_rank = recv_ranks.at(j);
+    (*citr)->rank(recv_rank);
+    ++j;
+  }
+
   // Identify shared nodes across MPI domains
   this->find_domain_shared_nodes();
   // Identify ghost boundary cells
