@@ -77,9 +77,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Initialise particles
   if (!resume) this->initialise_particles();
 
-  // Initialise loading conditions
-  this->initialise_loads();
-
   // Create nodal properties
   if (interface_) mesh_->create_nodal_properties();
 
@@ -102,6 +99,15 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     bool initial_step = (resume == true) ? false : true;
     this->mpi_domain_decompose(initial_step);
   }
+
+  //! Particle entity sets and velocity constraints
+  if (resume) {
+    this->particle_entity_sets(false);
+    this->particle_velocity_constraints();
+  }
+
+  // Initialise loading conditions
+  this->initialise_loads();
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop

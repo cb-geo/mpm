@@ -355,12 +355,10 @@ void mpm::MPMBase<Tdim>::initialise_particles() {
                      .count());
 
   // Particle entity sets
-  auto particles_sets_begin = std::chrono::steady_clock::now();
-  this->particle_entity_sets(mesh_props, check_duplicates);
-  auto particles_sets_end = std::chrono::steady_clock::now();
+  this->particle_entity_sets(check_duplicates);
 
   // Read and assign particles velocity constraints
-  this->particle_velocity_constraints(mesh_props, particle_io);
+  this->particle_velocity_constraints();
 
   console_->info("Rank {} Create particle sets: {} ms", mpi_rank,
                  std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1018,9 +1016,13 @@ void mpm::MPMBase<Tdim>::particles_volumes(
 
 // Particle velocity constraints
 template <unsigned Tdim>
-void mpm::MPMBase<Tdim>::particle_velocity_constraints(
-    const Json& mesh_props,
-    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+void mpm::MPMBase<Tdim>::particle_velocity_constraints() {
+  auto mesh_props = io_->json_object("mesh");
+  // Create a file reader
+  const std::string io_type =
+      io_->json_object("mesh")["io_type"].template get<std::string>();
+  auto reader = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+
   try {
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
         mesh_props["boundary_conditions"].find(
@@ -1084,8 +1086,9 @@ void mpm::MPMBase<Tdim>::particles_stresses(
 
 //! Particle entity sets
 template <unsigned Tdim>
-void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
-                                              bool check_duplicates) {
+void mpm::MPMBase<Tdim>::particle_entity_sets(bool check_duplicates) {
+  // Get mesh properties
+  auto mesh_props = io_->json_object("mesh");
   // Read and assign particle sets
   try {
     if (mesh_props.find("entity_sets") != mesh_props.end()) {
