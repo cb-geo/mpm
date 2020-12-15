@@ -350,10 +350,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
   }
 }
 
-// bool assign_absorbing_constraints(double pwave_v, double swave_v);
-// !Assign absorbing constraints
+//! Assign absorbing constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(unsigned dir, double pwave_v, double swave_v) {
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(
+    unsigned dir, double pwave_v, double swave_v) {
   bool status = true;
   try {
     if (dir < Tdim) {
@@ -376,37 +376,34 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint() {
   // Extract normal direction
   const unsigned dir_n = std::get<0>(this->absorbing_constraints_);
 
-  // Extract p-wave velocity
+  // Extract P-wave velocity
   const double pwave_v = std::get<1>(this->absorbing_constraints_);
 
-  // Extract s-wave velocity
+  // Extract S-wave velocity
   const double swave_v = std::get<2>(this->absorbing_constraints_);
 
   // Phase: Integer value of division (dir / Tdim)
   const unsigned phase = 0;
 
-  // Create Traction Value  
-  double traction = 10;
+  // Create Traction Value
+  double traction;
 
-  //if (Tdim == 2) {
   for (unsigned dir = 0; dir < Tdim; ++dir) {
-  	// Calculate Traction Forces
-	if (dir == dir_n) {
-    	double mass_density = mass_(phase) / volume_(phase);
-    	double velocity = velocity_(dir, phase);
-    	traction = -velocity * mass_density * pwave_v;
+    // Get mass density and velocity
+    double mass_density = mass_(phase) / volume_(phase);
+    double velocity = velocity_(dir, phase);
+
+    // Calculate Traction Forces
+    if (dir == dir_n) {
+      traction = -velocity * mass_density * pwave_v;
     } else {
-    	double mass_density = mass_(phase) / volume_(phase);
-    	double velocity = velocity_(dir, phase);
-    	traction = -velocity * mass_density * swave_v;
+      traction = -velocity * mass_density * swave_v;
     }
     // Apply traction forces
-    absorbing_traction_(dir,phase) = traction;
-  
-    //}
+    absorbing_traction_(dir, phase) = traction;
   }
   // Update external force
-  this->update_external_force(true, phase, absorbing_traction_.col(phase)); 
+  this->update_external_force(true, phase, absorbing_traction_.col(phase));
 }
 
 //! Assign friction constraint
