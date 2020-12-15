@@ -736,28 +736,38 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         // Calculate traction and check updated external force
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == direction_normal) {
-            double traction_normal = -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_normal).epsilon(Tolerance));
+            double traction_normal =
+                -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_normal).epsilon(Tolerance));
           } else {
-            double traction_shear = -velocity_swave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_shear).epsilon(Tolerance));
+            double traction_shear =
+                -velocity_swave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_shear).epsilon(Tolerance));
           }
-        } 
+        }
 
         // Check for incorrect direction
         const unsigned direction_incorrect = 4;
-        REQUIRE(node->assign_absorbing_constraint(direction_incorrect, velocity_pwave, velocity_swave) == false);
+        REQUIRE(node->assign_absorbing_constraint(direction_incorrect,
+                                                  velocity_pwave,
+                                                  velocity_swave) == false);
 
         // Check external force hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == direction_normal) {
-            double traction_normal = -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_normal).epsilon(Tolerance));
+            double traction_normal =
+                -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_normal).epsilon(Tolerance));
           } else {
-            double traction_shear = -velocity_swave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_shear).epsilon(Tolerance));
+            double traction_shear =
+                -velocity_swave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_shear).epsilon(Tolerance));
           }
-        } 
+        }
       }
 
       SECTION("Check concentrated force") {
@@ -1373,7 +1383,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         double velocity_swave = 8000;
 
         // Assign absorbing constraint
-        REQUIRE(node->assign_absorbing_constraint(direction_normal, velocity_pwave, velocity_swave));
+        REQUIRE(node->assign_absorbing_constraint(
+            direction_normal, velocity_pwave, velocity_swave));
 
         // Calculate mass density
         double mass_density = node->mass(Nphase) / node->volume(Nphase);
@@ -1388,26 +1399,36 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         // Calculate traction and check updated external force
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == direction_normal) {
-            double traction_normal = -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_normal).epsilon(Tolerance));
+            double traction_normal =
+                -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_normal).epsilon(Tolerance));
           } else {
-            double traction_shear = -velocity_swave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_shear).epsilon(Tolerance));
+            double traction_shear =
+                -velocity_swave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_shear).epsilon(Tolerance));
           }
         }
 
         // Check for incorrect direction
         const unsigned direction_incorrect = 4;
-        REQUIRE(node->assign_absorbing_constraint(direction_incorrect, velocity_pwave, velocity_swave) == false);
+        REQUIRE(node->assign_absorbing_constraint(direction_incorrect,
+                                                  velocity_pwave,
+                                                  velocity_swave) == false);
 
         // Check external force hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == direction_normal) {
-            double traction_normal = -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_normal).epsilon(Tolerance));
+            double traction_normal =
+                -velocity_pwave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_normal).epsilon(Tolerance));
           } else {
-            double traction_shear = -velocity_swave * node->velocity(Nphase)(i) * mass_density;
-            REQUIRE(node->external_force(Nphase)(i) == Approx(traction_shear).epsilon(Tolerance));
+            double traction_shear =
+                -velocity_swave * node->velocity(Nphase)(i) * mass_density;
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction_shear).epsilon(Tolerance));
           }
         }
       }
