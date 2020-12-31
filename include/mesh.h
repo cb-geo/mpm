@@ -228,6 +228,9 @@ class Mesh {
   void transfer_nonrank_particles(
       const std::vector<mpm::Index>& exchange_cells);
 
+  //! Resume cell ranks and partitioned domain
+  void resume_domain_cell_ranks();
+
   //! Find shared nodes across MPI domains in the mesh
   void find_domain_shared_nodes();
 
