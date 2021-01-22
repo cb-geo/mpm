@@ -18,11 +18,9 @@ inline void mpm::ContactFriction<Tdim>::initialise() {
                 std::placeholders::_1));
 }
 
-//! Compute contact forces
+//! Compute nodal kinematics
 template <unsigned Tdim>
-inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
-    const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase, double time,
-    bool concentrated_nodal_forces) {
+inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics(){
 
   // Map multimaterial properties from particles to nodes
   mesh_->iterate_over_particles(std::bind(
@@ -43,6 +41,13 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
                 std::placeholders::_1));
+}
+
+//! Compute contact forces
+template <unsigned Tdim>
+inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
+    const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase, double time,
+    bool concentrated_nodal_forces) {
 
   // Map multimaterial body force
   mesh_->iterate_over_particles(
@@ -83,12 +88,13 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
   // Iterate over each node to apply this contact's mechanics law
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::apply_contact_mechanics,
-                std::placeholders::_1, friction_));  
+                std::placeholders::_1, friction_, dt));  
 }
 
 //! Update particle position
 template <unsigned Tdim>
-inline void mpm::ContactFriction<Tdim>::update_particles_contact(double dt) {
+inline void mpm::ContactFriction<Tdim>::update_particles_contact(
+    double dt, bool velocity_update) {
 
   // Apply particle velocity constraints
   mesh_->apply_particle_velocity_constraints();
@@ -96,5 +102,5 @@ inline void mpm::ContactFriction<Tdim>::update_particles_contact(double dt) {
   // Iterate over all particles and compute updated position
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_contact_updated_position,
-                std::placeholders::_1, dt));
+                std::placeholders::_1, dt, velocity_update));
 }

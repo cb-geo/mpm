@@ -17,6 +17,9 @@ class Contact {
   //! Intialize
   virtual inline void initialise(){};
 
+  //! Compute nodal kinematics
+  virtual inline void compute_nodal_kinematics(){};
+
   //! Compute contact forces
   //! \param[in] gravity Gravity vector
   //! \param[in] phase Index to indicate material phase
@@ -33,7 +36,8 @@ class Contact {
 
   //! Update particle position
   //! \param[in] dt Timestep in analysis
-  virtual inline void update_particles_contact(double dt){};
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  virtual inline void update_particles_contact(double dt, bool velocity_update){};
 
  protected:
   //! Mesh object

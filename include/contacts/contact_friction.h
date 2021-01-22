@@ -17,6 +17,9 @@ class ContactFriction : public Contact<Tdim> {
   //! Intialize
   virtual inline void initialise() override;
 
+  //! Compute nodal kinematics
+  virtual inline void compute_nodal_kinematics() override;
+
   //! Compute contact forces
   //! \param[in] gravity Gravity vector
   //! \param[in] phase Index to indicate material phase
@@ -33,7 +36,9 @@ class ContactFriction : public Contact<Tdim> {
 
   //! Update particle position
   //! \param[in] dt Timestep in analysis
-  virtual inline void update_particles_contact(double dt) override;
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  virtual inline void update_particles_contact(double dt,
+                                               bool velocity_update) override;
 
  protected:
   //! Mesh object
