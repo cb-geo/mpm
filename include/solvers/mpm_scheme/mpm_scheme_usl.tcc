@@ -7,13 +7,14 @@ mpm::MPMSchemeUSL<Tdim>::MPMSchemeUSL(
 //! Precompute stresses and strains
 template <unsigned Tdim>
 inline void mpm::MPMSchemeUSL<Tdim>::precompute_stress_strain(
-  unsigned phase, bool pressure_smoothing, bool interface) {}
+    unsigned phase, bool pressure_smoothing, bool interface) {}
 
 //! Postcompute stresses and strains
 template <unsigned Tdim>
 inline void mpm::MPMSchemeUSL<Tdim>::postcompute_stress_strain(
-  unsigned phase, bool pressure_smoothing, bool interface) {
-  mpm::MPMScheme<Tdim>::compute_stress_strain(phase, pressure_smoothing, interface);
+    unsigned phase, bool pressure_smoothing, bool interface) {
+  mpm::MPMScheme<Tdim>::compute_stress_strain(phase, pressure_smoothing,
+                                              interface);
 }
 
 //! Stress update scheme

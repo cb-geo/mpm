@@ -22,14 +22,16 @@ class MPMSchemeUSF : public MPMScheme<Tdim> {
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing
   //! \param[in] interface Enable or disable interface
-  virtual inline void precompute_stress_strain(
-    unsigned phase, bool pressure_smoothing, bool interface) override;
+  virtual inline void precompute_stress_strain(unsigned phase,
+                                               bool pressure_smoothing,
+                                               bool interface) override;
   //! Postcompute stress
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing
   //! \param[in] interface Enable or disable interface
-  virtual inline void postcompute_stress_strain(
-    unsigned phase, bool pressure_smoothing, bool interface) override;
+  virtual inline void postcompute_stress_strain(unsigned phase,
+                                                bool pressure_smoothing,
+                                                bool interface) override;
 
   //! Stress update scheme
   //! \retval scheme Stress update scheme

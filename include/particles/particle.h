@@ -346,7 +346,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] interface Enable or disable the interface
   //! \retval strain rate at particle inside a cell_ptr
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
-    const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept;
+      const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept;
 
   //! Compute pack size
   //! \retval pack size of serialized object

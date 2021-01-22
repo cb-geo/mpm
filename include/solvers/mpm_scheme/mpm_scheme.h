@@ -68,8 +68,7 @@ class MPMScheme {
   //! \param[in] damping_type Type of damping
   //! \param[in] damping_factor Value of critical damping
   virtual inline void compute_particle_kinematics(
-      unsigned phase, const std::string& damping_type,
-      double damping_factor);
+      unsigned phase, const std::string& damping_type, double damping_factor);
 
   //! Update particles
   //! \param[in] velocity_update Velocity or acceleration update flag

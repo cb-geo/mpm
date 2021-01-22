@@ -12,7 +12,8 @@ template <unsigned Tdim>
 class ContactFriction : public Contact<Tdim> {
  public:
   //! Default constructor with mesh class
-  ContactFriction(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double friction);
+  ContactFriction(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
+                  double friction);
 
   //! Intialize
   virtual inline void initialise() override;

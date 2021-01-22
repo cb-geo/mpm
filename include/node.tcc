@@ -298,7 +298,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
   // Iterate over all materials in this node
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // Get mass of the current material
-    double mass = property_handle_->property("masses", prop_id_, *mitr)(0,0);
+    double mass = property_handle_->property("masses", prop_id_, *mitr)(0, 0);
 
     if (mass > tolerance) {
       // Get internal and external forces of the current material
@@ -315,9 +315,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
 
       // Update velocity: velocity += acceleration * dt
       VectorDim velocity = acceleration * dt;
-      property_handle_->update_property("velocities", prop_id_, *mitr,
-                                        velocity, Tdim);
-      
+      property_handle_->update_property("velocities", prop_id_, *mitr, velocity,
+                                        Tdim);
+
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
       this->apply_contact_velocity_constraints();
@@ -662,7 +662,7 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-      velocity_.col(0) * mass - momentum;
+        velocity_.col(0) * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
@@ -725,8 +725,8 @@ void mpm::Node<Tdim, Tdof,
       normal_unit_vector = domain_gradient.normalized();
 
     // Necessarily make the normal unit vector parallel to interface
-    // normal_unit_vector << 0.0, 1.0;
-    // if (*mitr == 0) normal_unit_vector = normal_unit_vector * -1;
+    normal_unit_vector << 0.0, 1.0;
+    if (*mitr == 0) normal_unit_vector = normal_unit_vector * -1;
 
     // assign nodal-multimaterial normal unit vector to property pool
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
@@ -740,7 +740,7 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
   // Iterate over all materials in the material_ids set
   node_mutex_.lock();
-  
+
   const double tolerance = 1.0E-15;
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // Calculate the velocity by dividing the momentum by the mass

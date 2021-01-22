@@ -1,7 +1,7 @@
 //! Construct a particle with id and coordinates
 template <unsigned Tdim>
 mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
-  : mpm::ParticleBase<Tdim>(id, coord) {
+    : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   // Clear cell ptr
   cell_ = nullptr;
@@ -18,7 +18,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
 //! Construct a particle with id, coordinates and status
 template <unsigned Tdim>
 mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
-  : mpm::ParticleBase<Tdim>(id, coord, status) {
+    : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
   nodes_.clear();
@@ -663,7 +663,7 @@ inline void mpm::Particle<3>::map_multimaterial_internal_force() noexcept {
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
-  const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
+    const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
@@ -681,7 +681,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
-  const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
+    const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
@@ -703,7 +703,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_rate(
-  const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
+    const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
@@ -930,7 +930,7 @@ void mpm::Particle<Tdim>::compute_contact_updated_position(
       }
     } else {
       for (unsigned i = 0; i < nodes_.size(); ++i) {
-        Eigen::Matrix<double, Tdim, 1> acceleration = 
+        Eigen::Matrix<double, Tdim, 1> acceleration =
             Eigen::Matrix<double, Tdim, 1>::Zero();
         if (nodes_[i]->material_ids().size() > 1)
           acceleration =

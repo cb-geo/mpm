@@ -71,8 +71,9 @@ inline void mpm::MPMScheme<Tdim>::compute_nodal_kinematics(unsigned phase) {
 
 //! Initialize nodes, cells and shape functions
 template <unsigned Tdim>
-inline void mpm::MPMScheme<Tdim>::compute_stress_strain(
-  unsigned phase, bool pressure_smoothing, bool interface) {
+inline void mpm::MPMScheme<Tdim>::compute_stress_strain(unsigned phase,
+                                                        bool pressure_smoothing,
+                                                        bool interface) {
 
   // Iterate over each particle to calculate strain
   mesh_->iterate_over_particles(
@@ -190,8 +191,7 @@ inline void mpm::MPMScheme<Tdim>::compute_particle_kinematics(
 
 // Update particles
 template <unsigned Tdim>
-inline void mpm::MPMScheme<Tdim>::update_particles(
-  bool velocity_update) {
+inline void mpm::MPMScheme<Tdim>::update_particles(bool velocity_update) {
 
   // Apply particle velocity constraints
   mesh_->apply_particle_velocity_constraints();

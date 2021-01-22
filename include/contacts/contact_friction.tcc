@@ -1,7 +1,7 @@
 //! Constructor of contact with mesh
 template <unsigned Tdim>
 mpm::ContactFriction<Tdim>::ContactFriction(
-  const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double friction)
+    const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double friction)
     : mpm::Contact<Tdim>(mesh) {
   friction_ = friction;
 }
@@ -20,7 +20,7 @@ inline void mpm::ContactFriction<Tdim>::initialise() {
 
 //! Compute nodal kinematics
 template <unsigned Tdim>
-inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics(){
+inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics() {
 
   // Map multimaterial properties from particles to nodes
   mesh_->iterate_over_particles(std::bind(
@@ -88,7 +88,7 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
   // Iterate over each node to apply this contact's mechanics law
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::apply_contact_mechanics,
-                std::placeholders::_1, friction_));  
+                std::placeholders::_1, friction_));
 }
 
 //! Update particle position

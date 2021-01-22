@@ -37,7 +37,8 @@ class Contact {
   //! Update particle position
   //! \param[in] dt Timestep in analysis
   //! \param[in] velocity_update Update particle velocity from nodal vel
-  virtual inline void update_particles_contact(double dt, bool velocity_update){};
+  virtual inline void update_particles_contact(double dt,
+                                               bool velocity_update){};
 
  protected:
   //! Mesh object
