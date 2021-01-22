@@ -124,8 +124,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Mass momentum and compute velocity at nodes
     mpm_scheme_->compute_nodal_kinematics(phase);
 
+    // Compute mass, momentum and velocity at the nodes in contact interfaces
+    contact_->compute_nodal_kinematics();
+
     // Update stress first
-    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_,
+                                          interface_);
 
     // Compute forces
     mpm_scheme_->compute_forces(gravity_, phase, step_,
@@ -143,13 +147,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Compute particle updated position
     if (interface_) {
-      contact_->update_particles_contact(dt_);
+      contact_->update_particles_contact(dt_, velocity_update_);
     } else {
       mpm_scheme_->update_particles(velocity_update_);
     }
 
     // Update Stress Last
-    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_,
+                                           interface_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);
