@@ -280,6 +280,7 @@ class NodeBase {
                                                       double current_time) = 0;
 
   //! Apply contact mechanics to the nodes
+  //! \param[in] friction Friction coefficient
   virtual void apply_contact_mechanics(double friction) = 0;
 
 };  // NodeBase class

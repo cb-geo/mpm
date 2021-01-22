@@ -88,7 +88,7 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
   // Iterate over each node to apply this contact's mechanics law
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::apply_contact_mechanics,
-                std::placeholders::_1, friction_, dt));  
+                std::placeholders::_1, friction_));  
 }
 
 //! Update particle position

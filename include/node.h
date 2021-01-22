@@ -293,6 +293,7 @@ class Node : public NodeBase<Tdim> {
                                               double current_time) override;
 
   //! Apply contact mechanics to the nodes
+  //! \param[in] friction Friction coefficient
   void apply_contact_mechanics(double friction) override;
 
  private:

@@ -751,7 +751,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
           property_handle_->property("momenta", prop_id_, *mitr, Tdim);
       VectorDim velocity = (1 / mass) * momentum;
       for (int i = 0; i < Tdim; ++i) {
-        if (velocity(i,0) < tolerance) velocity(i,0) = 0.0;
+        if (velocity(i, 0) < tolerance) velocity(i, 0) = 0.0;
       }
 
       // Assign the velocity to its corresponding node and material ids in the
@@ -796,7 +796,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_multimaterial_concentrated_force(
 //! Apply contact mechanics to the nodes
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
-
   // Check if there is more than one material in the material_ids_ set
   node_mutex_.lock();
   double tolerance = 1.0e-12;
@@ -805,52 +804,44 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
     for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
          ++mitr) {
       // Determine the normal component of the relative velocity
-      VectorDim normal_unit_vector =
-          property_handle_->property("normal_unit_vectors", prop_id_, *mitr,
-                                     Tdim);
-      VectorDim relative_velocity =
-          property_handle_->property("relative_velocities", prop_id_, *mitr,
-                                     Tdim);
+      VectorDim normal_unit_vector = property_handle_->property(
+          "normal_unit_vectors", prop_id_, *mitr, Tdim);
+      VectorDim relative_velocity = property_handle_->property(
+          "relative_velocities", prop_id_, *mitr, Tdim);
       double velocity_normal = relative_velocity.dot(normal_unit_vector);
       velocity_normal =
           (abs(velocity_normal) < tolerance) ? 0.0 : velocity_normal;
 
       // Check if the material is approaching the other materials (v_norm > 0)
       if (velocity_normal > 0) {
-        // Determine the tangent_unit_vector
-        VectorDim tangent_unit_vector = VectorDim::Zero();
-        double velocity_tangent = relative_velocity.dot(tangent_unit_vector);
+        // Determine the friction coefficient to apply tangent correction
+        double cross_product =
+            relative_velocity(0, 0) * normal_unit_vector(1, 0) -
+            relative_velocity(1, 0) * normal_unit_vector(0, 0);
+        double mu =
+            std::min(friction, std::abs(cross_product) / velocity_normal);
 
-        // Check if material is sliding (|v_tan| > mu*|v_norm|) or stuck
-        // (|v_tan| <= mu*|v_norm|)
-        if (std::abs(velocity_tangent) > friction * std::abs(velocity_normal)) {
-          // Compute normal and tangential correction
-          VectorDim normal_correction =
-              -velocity_normal * normal_unit_vector;
-          VectorDim tangent_correction =
-              -friction * velocity_normal * tangent_unit_vector;
+        // Compute normal and tangential correction
+        VectorDim normal_correction = -velocity_normal * normal_unit_vector;
+        VectorDim tangent_correction = VectorDim::Zero();
+        tangent_correction(0, 0) = normal_unit_vector(1, 0) * cross_product;
+        tangent_correction(1, 0) = -normal_unit_vector(0, 0) * cross_product;
+        tangent_correction = -mu * velocity_normal / std::abs(cross_product) *
+                             tangent_correction;
 
-          // Update the velocity with the computed corrections
-          VectorDim corrections =
-              normal_correction + tangent_correction;
-          VectorDim velocity =
-              property_handle_->property("velocities", prop_id_, *mitr, Tdim);
-          velocity = velocity + corrections;
-          // correct the normal component
-          velocity(1, 0) = this->velocity_.col(0)(1,0);
+        // Update the velocity with the computed corrections
+        VectorDim corrections = normal_correction + tangent_correction;
+        VectorDim velocity =
+            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+        velocity = velocity + corrections;
 
-          for (int i = 0; i < Tdim; ++i) {
-            if (velocity(i,0) < tolerance) velocity(i,0) = 0.0;
-          }
+        // Approximate small values to 0
+        for (int i = 0; i < Tdim; ++i)
+          if (velocity(i, 0) < tolerance) velocity(i, 0) = 0.0;
 
-          property_handle_->assign_property("velocities", prop_id_, *mitr,
-                                            velocity, Tdim);
-        } else {
-          // If material is stuck, use the velocity calculated considering all
-          // materials as the same (conventional MPM algorithm)
-          property_handle_->assign_property("velocities", prop_id_, *mitr,
-                                            this->velocity_.col(0), Tdim);
-        }
+        // Assign new velocity
+        property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                          velocity, Tdim);
       }
     }
   }
