@@ -1,7 +1,7 @@
 //! Construct a particle with id and coordinates
 template <unsigned Tdim>
 mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
-    : mpm::ParticleBase<Tdim>(id, coord) {
+  : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   // Clear cell ptr
   cell_ = nullptr;
@@ -18,7 +18,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
 //! Construct a particle with id, coordinates and status
 template <unsigned Tdim>
 mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
-    : mpm::ParticleBase<Tdim>(id, coord, status) {
+  : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
   nodes_.clear();
@@ -582,17 +582,18 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_body_force(
     const VectorDim& pgravity) noexcept {
   // Compute nodal body forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    VectorDim body_force = pgravity * mass_ * shapefn_(i);
-    nodes_[i]->update_property(true, "external_forces", body_force,
-                               this->material_id(), Tdim);
-  }
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      VectorDim body_force = pgravity * mass_ * shapefn_(i);
+      nodes_[i]->update_property(true, "external_forces", body_force,
+                                 this->material_id(), Tdim);
+    }
 }
 
 //! Map multimaterial traction force
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_traction_force() noexcept {
-  if (this->set_traction_) {
+  if (this->set_traction_ && !this->constrained_) {
     // Map particle traction forces to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i) {
       VectorDim traction_force = shapefn_[i] * traction_;
@@ -606,64 +607,70 @@ void mpm::Particle<Tdim>::map_multimaterial_traction_force() noexcept {
 template <>
 inline void mpm::Particle<1>::map_multimaterial_internal_force() noexcept {
   // Compute nodal internal forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    // Compute force: -pstress * volume
-    Eigen::Matrix<double, 1, 1> force;
-    force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      // Compute force: -pstress * volume
+      Eigen::Matrix<double, 1, 1> force;
+      force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
-    nodes_[i]->update_property(true, "internal_forces", force,
-                               this->material_id(), 1);
-  }
+      nodes_[i]->update_property(true, "internal_forces", force,
+                                 this->material_id(), 1);
+    }
 }
 
 //! Map multimaterial internal force
 template <>
 inline void mpm::Particle<2>::map_multimaterial_internal_force() noexcept {
   // Compute nodal internal forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    // Compute force: -pstress * volume
-    Eigen::Matrix<double, 2, 1> force;
-    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
-    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      // Compute force: -pstress * volume
+      Eigen::Matrix<double, 2, 1> force;
+      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
 
-    force *= -1. * this->volume_;
+      force *= -1. * this->volume_;
 
-    nodes_[i]->update_property(true, "internal_forces", force,
-                               this->material_id(), 2);
-  }
+      nodes_[i]->update_property(true, "internal_forces", force,
+                                 this->material_id(), 2);
+    }
 }
 
 //! Map multimaterial internal force
 template <>
 inline void mpm::Particle<3>::map_multimaterial_internal_force() noexcept {
   // Compute nodal internal forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    // Compute force: -pstress * volume
-    Eigen::Matrix<double, 3, 1> force;
-    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
-               dn_dx_(i, 2) * stress_[5];
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      // Compute force: -pstress * volume
+      Eigen::Matrix<double, 3, 1> force;
+      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
+                 dn_dx_(i, 2) * stress_[5];
 
-    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
-               dn_dx_(i, 2) * stress_[4];
+      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
+                 dn_dx_(i, 2) * stress_[4];
 
-    force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
-               dn_dx_(i, 0) * stress_[5];
+      force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
+                 dn_dx_(i, 0) * stress_[5];
 
-    force *= -1. * this->volume_;
+      force *= -1. * this->volume_;
 
-    nodes_[i]->update_property(true, "internal_forces", force,
-                               this->material_id(), 3);
-  }
+      nodes_[i]->update_property(true, "internal_forces", force,
+                                 this->material_id(), 3);
+    }
 }
+
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
-    const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept {
+  const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     Eigen::Matrix<double, 1, 1> vel = nodes_[i]->velocity(phase);
+    if (interface)
+      vel = nodes_[i]->property("velocities", this->material_id(phase), 1);
     strain_rate[0] += dn_dx(i, 0) * vel[0];
   }
 
@@ -674,12 +681,14 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
-    const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept {
+  const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     Eigen::Matrix<double, 2, 1> vel = nodes_[i]->velocity(phase);
+    if (interface)
+      vel = nodes_[i]->property("velocities", this->material_id(phase), 2);
     strain_rate[0] += dn_dx(i, 0) * vel[0];
     strain_rate[1] += dn_dx(i, 1) * vel[1];
     strain_rate[3] += dn_dx(i, 1) * vel[0] + dn_dx(i, 0) * vel[1];
@@ -694,12 +703,14 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_rate(
-    const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept {
+  const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     Eigen::Matrix<double, 3, 1> vel = nodes_[i]->velocity(phase);
+    if (interface)
+      vel = nodes_[i]->property("velocities", this->material_id(phase), 3);
     strain_rate[0] += dn_dx(i, 0) * vel[0];
     strain_rate[1] += dn_dx(i, 1) * vel[1];
     strain_rate[2] += dn_dx(i, 2) * vel[2];
@@ -715,9 +726,10 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_rate(
 
 // Compute strain of the particle
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_strain(double dt) noexcept {
+void mpm::Particle<Tdim>::compute_strain(double dt, bool interface) noexcept {
   // Assign strain rate
-  strain_rate_ = this->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
+  strain_rate_ =
+      this->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid, interface);
   // Update dstrain
   dstrain_ = strain_rate_ * dt;
   // Update strain
@@ -725,8 +737,8 @@ void mpm::Particle<Tdim>::compute_strain(double dt) noexcept {
 
   // Compute at centroid
   // Strain rate for reduced integration
-  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
-      this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Solid);
+  Eigen::Matrix<double, 6, 1> strain_rate_centroid = this->compute_strain_rate(
+      dn_dx_centroid_, mpm::ParticlePhase::Solid, interface);
 
   // Assign volumetric strain at centroid
   dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
@@ -749,60 +761,64 @@ void mpm::Particle<Tdim>::compute_stress() noexcept {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) noexcept {
   // Compute nodal body forces
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
-                                     (pgravity * mass_ * shapefn_(i)));
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
+                                       (pgravity * mass_ * shapefn_(i)));
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<1>::map_internal_force() noexcept {
   // Compute nodal internal forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    // Compute force: -pstress * volume
-    Eigen::Matrix<double, 1, 1> force;
-    force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      // Compute force: -pstress * volume
+      Eigen::Matrix<double, 1, 1> force;
+      force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
-    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-  }
+      nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+    }
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<2>::map_internal_force() noexcept {
   // Compute nodal internal forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    // Compute force: -pstress * volume
-    Eigen::Matrix<double, 2, 1> force;
-    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
-    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      // Compute force: -pstress * volume
+      Eigen::Matrix<double, 2, 1> force;
+      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
 
-    force *= -1. * this->volume_;
+      force *= -1. * this->volume_;
 
-    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-  }
+      nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+    }
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<3>::map_internal_force() noexcept {
   // Compute nodal internal forces
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    // Compute force: -pstress * volume
-    Eigen::Matrix<double, 3, 1> force;
-    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
-               dn_dx_(i, 2) * stress_[5];
+  if (!this->constrained_)
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      // Compute force: -pstress * volume
+      Eigen::Matrix<double, 3, 1> force;
+      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
+                 dn_dx_(i, 2) * stress_[5];
 
-    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
-               dn_dx_(i, 2) * stress_[4];
+      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
+                 dn_dx_(i, 2) * stress_[4];
 
-    force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
-               dn_dx_(i, 0) * stress_[5];
+      force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
+                 dn_dx_(i, 0) * stress_[5];
 
-    force *= -1. * this->volume_;
+      force *= -1. * this->volume_;
 
-    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-  }
+      nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+    }
 }
 
 // Assign velocity to the particle
@@ -838,7 +854,7 @@ bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
 //! Map traction force
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() noexcept {
-  if (this->set_traction_) {
+  if (this->set_traction_ && !this->constrained_) {
     // Map particle traction forces to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i)
       nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
@@ -856,25 +872,29 @@ void mpm::Particle<Tdim>::compute_updated_position(
   Eigen::Matrix<double, Tdim, 1> nodal_velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
 
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_velocity +=
-        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
-
-  // Acceleration update
-  if (!velocity_update) {
-    // Get interpolated nodal acceleration
-    Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-        Eigen::Matrix<double, Tdim, 1>::Zero();
+  if (!this->constrained_) {
     for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodal_acceleration +=
-          shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
+      nodal_velocity +=
+          shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
 
-    // Update particle velocity from interpolated nodal acceleration
-    this->velocity_ += nodal_acceleration * dt;
+    // Acceleration update
+    if (!velocity_update) {
+      // Get interpolated nodal acceleration
+      Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+          Eigen::Matrix<double, Tdim, 1>::Zero();
+      for (unsigned i = 0; i < nodes_.size(); ++i)
+        nodal_acceleration +=
+            shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
+
+      // Update particle velocity from interpolated nodal acceleration
+      this->velocity_ += nodal_acceleration * dt;
+    }
+    // Update particle velocity using interpolated nodal velocity
+    else
+      this->velocity_ = nodal_velocity;
+  } else {
+    nodal_velocity = this->velocity_;
   }
-  // Update particle velocity using interpolated nodal velocity
-  else
-    this->velocity_ = nodal_velocity;
 
   // New position = current position + velocity * dt
   this->coordinates_ += nodal_velocity * dt;
@@ -884,26 +904,50 @@ void mpm::Particle<Tdim>::compute_updated_position(
 
 // Compute updated position of the particle
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_contact_updated_position(double dt) noexcept {
+void mpm::Particle<Tdim>::compute_contact_updated_position(
+    double dt, bool velocity_update) noexcept {
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
   // Get interpolated nodal velocity considering this particle's material id
   Eigen::Matrix<double, Tdim, 1> nodal_velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
 
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    Eigen::Matrix<double, Tdim, 1> velocity =
-        Eigen::Matrix<double, Tdim, 1>::Zero();
-    if (nodes_[i]->material_ids().size() > 1)
-      velocity = nodes_[i]->property("velocities", this->material_id(), Tdim);
-    else
-      velocity = nodes_[i]->velocity(0);
+  // Initialize nodal acceleration
+  Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
 
-    nodal_velocity += shapefn_[i] * velocity;
+  if (!this->constrained_) {
+    if (velocity_update) {
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
+        VectorDim velocity = VectorDim::Zero();
+        if (nodes_[i]->material_ids().size() > 1)
+          velocity =
+              nodes_[i]->property("velocities", this->material_id(), Tdim);
+        else
+          velocity = nodes_[i]->velocity(0);
+
+        nodal_velocity += shapefn_[i] * velocity;
+      }
+    } else {
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
+        Eigen::Matrix<double, Tdim, 1> acceleration = 
+            Eigen::Matrix<double, Tdim, 1>::Zero();
+        if (nodes_[i]->material_ids().size() > 1)
+          acceleration =
+              nodes_[i]->property("accelerations", this->material_id(), Tdim);
+        else
+          acceleration = nodes_[i]->acceleration(0);
+
+        nodal_acceleration += shapefn_[i] * acceleration;
+      }
+      nodal_velocity = this->velocity_ + nodal_acceleration * dt;
+    }
+
+    // Update particle velocity using interpolated nodal velocity
+    this->velocity_ = nodal_velocity;
+  } else {
+    nodal_velocity = this->velocity_;
   }
-
-  // Update particle velocity using interpolated nodal velocity
-  this->velocity_ = nodal_velocity;
 
   // New position = current position + velocity * dt
   this->coordinates_ += nodal_velocity * dt;
@@ -960,6 +1004,7 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
                                                               double velocity) {
   // Set particle velocity constraint
   this->velocity_(dir) = velocity;
+  this->constrained_ = true;
 }
 
 //! Return particle scalar data

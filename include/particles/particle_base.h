@@ -213,7 +213,7 @@ class ParticleBase {
   virtual double pressure(unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
   //! Compute strain
-  virtual void compute_strain(double dt) noexcept = 0;
+  virtual void compute_strain(double dt, bool interface) noexcept = 0;
 
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
@@ -274,7 +274,9 @@ class ParticleBase {
 
   //! Compute updated position of the particle from contact nodes
   //! \param[in] dt Analysis time step
-  virtual void compute_contact_updated_position(double dt) noexcept = 0;
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  virtual void compute_contact_updated_position(
+      double dt, bool velocity_update) noexcept = 0;
 
   //! Return a state variable
   virtual double state_variable(
@@ -339,6 +341,8 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
+  //! Constrained status
+  bool constrained_{false};
   //! Reference coordinates (in a cell)
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell

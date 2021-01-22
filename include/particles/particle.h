@@ -176,7 +176,8 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Compute strain
   //! \param[in] dt Analysis time step
-  void compute_strain(double dt) noexcept override;
+  //! \param[in] interface Enable or disable interface
+  void compute_strain(double dt, bool interface) noexcept override;
 
   //! Return strain of the particle
   Eigen::Matrix<double, 6, 1> strain() const override { return strain_; }
@@ -247,7 +248,9 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Compute updated position of the particle from contact nodes
   //! \param[in] dt Analysis time step
-  void compute_contact_updated_position(double dt) noexcept override;
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  void compute_contact_updated_position(
+      double dt, bool velocity_update = false) noexcept override;
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -340,9 +343,10 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute strain rate
   //! \param[in] dn_dx The spatial gradient of shape function
   //! \param[in] phase Index to indicate phase
-  //! \retval strain rate at particle inside a cell
+  //! \param[in] interface Enable or disable the interface
+  //! \retval strain rate at particle inside a cell_ptr
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
-      const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
+    const Eigen::MatrixXd& dn_dx, unsigned phase, bool interface) noexcept;
 
   //! Compute pack size
   //! \retval pack size of serialized object
@@ -363,6 +367,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::nodes_;
   //! Status
   using ParticleBase<Tdim>::status_;
+  //! Constrained status
+  using ParticleBase<Tdim>::constrained_;
   //! Material
   using ParticleBase<Tdim>::material_;
   //! Material id

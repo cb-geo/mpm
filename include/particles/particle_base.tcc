@@ -12,6 +12,6 @@ mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord)
 template <unsigned Tdim>
 mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord,
                                       bool status)
-    : mpm::ParticleBase<Tdim>::ParticleBase(id, coord) {
+  : mpm::ParticleBase<Tdim>::ParticleBase(id, coord) {
   status_ = status;
 }
