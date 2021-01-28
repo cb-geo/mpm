@@ -294,7 +294,8 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply contact mechanics to the nodes
   //! \param[in] friction Friction coefficient
-  void apply_contact_mechanics(double friction) override;
+  //! \param[in] dt Time-step
+  void apply_contact_mechanics(double friction, double dt) override;
 
  private:
   //! Mutex

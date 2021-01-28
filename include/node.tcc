@@ -758,6 +758,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
       // property pool
       property_handle_->assign_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
+      //property_handle_->assign_property("current_velocities", prop_id_, *mitr, velocity,
+      //                                  Tdim);
     }
   }
   node_mutex_.unlock();
@@ -795,7 +797,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_multimaterial_concentrated_force(
 
 //! Apply contact mechanics to the nodes
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
+                                                              double dt) {
   // Check if there is more than one material in the material_ids_ set
   node_mutex_.lock();
   double tolerance = 1.0e-12;
@@ -831,17 +834,30 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction) {
 
         // Update the velocity with the computed corrections
         VectorDim corrections = normal_correction + tangent_correction;
-        VectorDim velocity =
+        VectorDim corrected_velocity =
             property_handle_->property("velocities", prop_id_, *mitr, Tdim);
-        velocity = velocity + corrections;
+        corrected_velocity = corrected_velocity + corrections;
 
         // Approximate small values to 0
         for (int i = 0; i < Tdim; ++i)
-          if (velocity(i, 0) < tolerance) velocity(i, 0) = 0.0;
+          if (corrected_velocity(i, 0) < tolerance)
+            corrected_velocity(i, 0) = 0.0;
 
         // Assign new velocity
         property_handle_->assign_property("velocities", prop_id_, *mitr,
-                                          velocity, Tdim);
+                                          corrected_velocity, Tdim);
+
+        // Determine the corrected acceleration
+        VectorDim current_velocity = property_handle_->property(
+            "current_velocities", prop_id_, *mitr, Tdim);
+        VectorDim corrected_acceleration =
+            (corrected_velocity - current_velocity) / dt;
+        property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                          corrected_acceleration, Tdim);
+
+        // Update current velocity
+        property_handle_->assign_property("current_velocities", prop_id_, *mitr,
+                                          corrected_velocity, Tdim);
       }
     }
   }

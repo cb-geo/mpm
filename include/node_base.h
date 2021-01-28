@@ -281,7 +281,8 @@ class NodeBase {
 
   //! Apply contact mechanics to the nodes
   //! \param[in] friction Friction coefficient
-  virtual void apply_contact_mechanics(double friction) = 0;
+  //! \param[in] dt Time-step
+  virtual void apply_contact_mechanics(double friction, double dt) = 0;
 
 };  // NodeBase class
 }  // namespace mpm
