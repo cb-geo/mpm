@@ -1961,6 +1961,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
                                        materials_.size());
     nodal_properties_->create_property("external_forces", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("current_velocities", nrows,
+                                       materials_.size());
     nodal_properties_->create_property("velocities", nrows, materials_.size());
     nodal_properties_->create_property("accelerations", nrows,
                                        materials_.size());

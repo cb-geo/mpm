@@ -56,6 +56,7 @@ void mpm::NodalProperties::initialise_nodal_properties() {
     // cols = number of materials
     Eigen::MatrixXd zeroed_property =
         Eigen::MatrixXd::Zero(prop_itr->second.rows(), prop_itr->second.cols());
-    this->assign_property(prop_itr->first, 0, 0, zeroed_property);
+    if (prop_itr->first != "current_velocities")
+      this->assign_property(prop_itr->first, 0, 0, zeroed_property);
   }
 }
