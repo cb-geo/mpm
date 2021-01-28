@@ -917,34 +917,31 @@ void mpm::Particle<Tdim>::compute_contact_updated_position(
       Eigen::Matrix<double, Tdim, 1>::Zero();
 
   if (!this->constrained_) {
-    if (velocity_update) {
-      for (unsigned i = 0; i < nodes_.size(); ++i) {
-        VectorDim velocity = VectorDim::Zero();
-        if (nodes_[i]->material_ids().size() > 1)
-          velocity =
-              nodes_[i]->property("velocities", this->material_id(), Tdim);
-        else
-          velocity = nodes_[i]->velocity(0);
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      VectorDim velocity = VectorDim::Zero();
+      // if (nodes_[i]->material_ids().size() > 1)
+      velocity = nodes_[i]->property("velocities", this->material_id(), Tdim);
+      // else
+      // velocity = nodes_[i]->velocity(mpm::ParticlePhase::Solid);
 
-        nodal_velocity += shapefn_[i] * velocity;
-      }
-    } else {
+      nodal_velocity += shapefn_[i] * velocity;
+    }
+
+    if (!velocity_update) {
       for (unsigned i = 0; i < nodes_.size(); ++i) {
         Eigen::Matrix<double, Tdim, 1> acceleration =
             Eigen::Matrix<double, Tdim, 1>::Zero();
-        if (nodes_[i]->material_ids().size() > 1)
-          acceleration =
-              nodes_[i]->property("accelerations", this->material_id(), Tdim);
-        else
-          acceleration = nodes_[i]->acceleration(0);
+        // if (nodes_[i]->material_ids().size() > 1)
+        acceleration =
+            nodes_[i]->property("accelerations", this->material_id(), Tdim);
+        // else
+        // acceleration = nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
 
         nodal_acceleration += shapefn_[i] * acceleration;
       }
-      nodal_velocity = this->velocity_ + nodal_acceleration * dt;
-    }
-
-    // Update particle velocity using interpolated nodal velocity
-    this->velocity_ = nodal_velocity;
+      this->velocity_ += nodal_acceleration * dt;
+    } else  // Update particle velocity using interpolated nodal velocity
+      this->velocity_ = nodal_velocity;
   } else {
     nodal_velocity = this->velocity_;
   }
