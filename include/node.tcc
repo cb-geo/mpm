@@ -318,6 +318,11 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
       property_handle_->update_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
 
+      // Update current velocity if there is only one material
+      if (material_ids_.size() == 1)
+        property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                          velocity, Tdim);
+
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
       this->apply_contact_velocity_constraints();
@@ -815,14 +820,17 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
       velocity_normal =
           (abs(velocity_normal) < tolerance) ? 0.0 : velocity_normal;
 
+      // Get current velocity
+      VectorDim corrected_velocity =
+          property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+
       // Check if the material is approaching the other materials (v_norm > 0)
       if (velocity_normal > 0) {
         // Determine the friction coefficient to apply tangent correction
         double cross_product =
             relative_velocity(0, 0) * normal_unit_vector(1, 0) -
             relative_velocity(1, 0) * normal_unit_vector(0, 0);
-        double mu =
-            std::min(friction, std::abs(cross_product) / velocity_normal);
+        double mu = std::min(friction,std::abs(cross_product)/velocity_normal);
 
         // Compute normal and tangential correction
         VectorDim normal_correction = -velocity_normal * normal_unit_vector;
@@ -834,13 +842,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
 
         // Update the velocity with the computed corrections
         VectorDim corrections = normal_correction + tangent_correction;
-        VectorDim corrected_velocity =
-            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
         corrected_velocity = corrected_velocity + corrections;
 
         // Approximate small values to 0
         for (int i = 0; i < Tdim; ++i)
-          if (corrected_velocity(i, 0) < tolerance)
+          if (std::abs(corrected_velocity(i, 0)) < tolerance)
             corrected_velocity(i, 0) = 0.0;
 
         // Assign new velocity
@@ -854,11 +860,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
             (corrected_velocity - current_velocity) / dt;
         property_handle_->assign_property("accelerations", prop_id_, *mitr,
                                           corrected_acceleration, Tdim);
-
-        // Update current velocity
-        property_handle_->assign_property("current_velocities", prop_id_, *mitr,
-                                          corrected_velocity, Tdim);
       }
+      // Update current velocity
+      property_handle_->assign_property("current_velocities", prop_id_, *mitr,
+                                        corrected_velocity, Tdim);
     }
   }
   node_mutex_.unlock();
