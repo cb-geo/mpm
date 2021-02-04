@@ -178,7 +178,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/test_main.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/contact_test.cc
+#    ${mpm_SOURCE_DIR}/tests/contact_test.cc
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
@@ -192,7 +192,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
     ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
-    ${mpm_SOURCE_DIR}/tests/interface_test.cc
+#    ${mpm_SOURCE_DIR}/tests/interface_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_test.cc
     ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
@@ -213,7 +213,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
-    ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
+#    ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
     ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc

@@ -242,9 +242,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   node3->apply_multimaterial_concentrated_force(0, dt);
 
   // Compute strain and stress at particles
-  particle1->compute_strain(dt);
-  particle2->compute_strain(dt);
-  particle3->compute_strain(dt);
+  particle1->compute_strain(dt,true);
+  particle2->compute_strain(dt,true);
+  particle3->compute_strain(dt,true);
   particle1->compute_stress();
   particle2->compute_stress();
   particle3->compute_stress();
