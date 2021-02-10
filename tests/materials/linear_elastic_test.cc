@@ -147,6 +147,19 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(stress(4) == Approx(0.00000000000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.00000000000000e+00).epsilon(Tolerance));
   }
+
+  SECTION("LinearElastic check properties earthquake") {
+    unsigned id = 0;
+    jmaterial["earthquake"] = true;
+    jmaterial["layer_thickness"] = 10000;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
+
+    REQUIRE(material->template property<double>("layer_thickness") ==
+        Approx(jmaterial["layer_thickness"]).epsilon(Tolerance));
+  }
 }
 
 //! Check linearelastic class in 3D
