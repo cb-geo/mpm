@@ -10,18 +10,32 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
     poisson_ratio_ =
         material_properties.at("poisson_ratio").template get<double>();
 
-    // Special material properties
-    if (material_properties.contains("s_wave_velocity")) {
-      s_wave_velocity_ =
-          material_properties.at("s_wave_velocity").template get<double>();
-    }
-    if (material_properties.contains("p_wave_velocity")) {
-      p_wave_velocity_ =
-          material_properties.at("p_wave_velocity").template get<double>();
-    }
-
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+
+    // Special material properties
+    if (material_properties.contains("earthquake")) {
+      bool earthquake =
+          material_properties.at("earthquake").template get<bool>();
+
+      if (earthquake) {
+        // Calculate constrained and shear modulus
+        double constrained_modulus =
+            youngs_modulus_ * (1. - poisson_ratio_) /
+            ((1. + poisson_ratio_) * (1. - 2. * poisson_ratio_));
+        double shear_modulus = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
+
+        // Calculate wave velocities
+        p_wave_velocity_ = sqrt(constrained_modulus / density_);
+        s_wave_velocity_ = sqrt(shear_modulus / density_);
+
+        // Calculate spring coefficients
+        layer_thickness_ =
+            material_properties.at("layer_thickness").template get<double>();
+        p_spring_coeff_ = constrained_modulus / layer_thickness_;
+        s_spring_coeff_ = shear_modulus / layer_thickness_;
+      }
+    }
 
     properties_ = material_properties;
     // Set elastic tensor
