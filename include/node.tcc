@@ -17,7 +17,6 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   // Clear any velocity constraints
   velocity_constraints_.clear();
   concentrated_force_.setZero();
-
   this->initialise();
 }
 

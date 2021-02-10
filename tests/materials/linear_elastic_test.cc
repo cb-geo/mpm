@@ -168,7 +168,6 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
   jmaterial["youngs_modulus"] = 1.0E+7;
   jmaterial["poisson_ratio"] = 0.3;
 
-  
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
