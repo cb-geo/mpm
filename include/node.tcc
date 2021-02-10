@@ -18,9 +18,6 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   velocity_constraints_.clear();
   concentrated_force_.setZero();
 
-  // Clear any nodal constraints
-  absorbing_traction_.setZero();
-
   this->initialise();
 }
 
@@ -348,62 +345,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
       this->acceleration_ = rotation_matrix_ * local_acceleration;
     }
   }
-}
-
-//! Assign absorbing constraints
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(
-    unsigned dir, double pwave_v, double swave_v) {
-  bool status = true;
-  try {
-    if (dir < Tdim) {
-      this->absorbing_constraints_ = std::make_tuple(
-          static_cast<unsigned>(dir), static_cast<double>(pwave_v),
-          static_cast<double>(swave_v));
-    } else
-      throw std::runtime_error("Constraint direction is out of bounds");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-// !Apply absorbing constraints
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint() {
-  // Extract normal direction
-  const unsigned dir_n = std::get<0>(this->absorbing_constraints_);
-
-  // Extract P-wave velocity
-  const double pwave_v = std::get<1>(this->absorbing_constraints_);
-
-  // Extract S-wave velocity
-  const double swave_v = std::get<2>(this->absorbing_constraints_);
-
-  // Phase: Integer value of division (dir / Tdim)
-  const unsigned phase = 0;
-
-  // Create Traction Value
-  double traction;
-
-  for (unsigned dir = 0; dir < Tdim; ++dir) {
-    // Get mass density and velocity
-    double mass_density = mass_(phase) / volume_(phase);
-    double velocity = velocity_(dir, phase);
-
-    // Calculate Traction Forces
-    if (dir == dir_n) {
-      traction = -velocity * mass_density * pwave_v;
-    } else {
-      traction = -velocity * mass_density * swave_v;
-    }
-    // Apply traction forces
-    absorbing_traction_(dir, phase) = traction;
-  }
-  // Update external force
-  this->update_external_force(true, phase, absorbing_traction_.col(phase));
 }
 
 //! Assign friction constraint

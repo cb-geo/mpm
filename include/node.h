@@ -201,15 +201,6 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
-  //! Assign absorbing constraint
-  //! \param[in] pwave_v P-wave velocity
-  //! \param[in] swave_v S-wave velocity
-  bool assign_absorbing_constraint(unsigned dir, double pwave_v,
-                                   double swave_v) override;
-
-  //! Apply absorbing constraint
-  void apply_absorbing_constraint() override;
-
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of friction constraint
@@ -308,10 +299,6 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
-  //! Absorbing Constraints
-  std::tuple<unsigned, double, double> absorbing_constraints_;
-  //! Absorbing Traction
-  Eigen::Matrix<double, Tdim, Tnphases> absorbing_traction_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node

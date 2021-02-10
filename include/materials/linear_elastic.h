@@ -71,6 +71,10 @@ class LinearElastic : public Material<Tdim> {
   Matrix6x6 de_;
   //! Density
   double density_{std::numeric_limits<double>::max()};
+  //! S-Wave Velocity
+  double s_wave_velocity_{0.0};
+  //! P-Wave Velocity
+  double p_wave_velocity_{0.0};
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio

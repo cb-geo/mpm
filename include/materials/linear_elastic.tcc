@@ -9,6 +9,17 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
         material_properties.at("youngs_modulus").template get<double>();
     poisson_ratio_ =
         material_properties.at("poisson_ratio").template get<double>();
+
+    // Special material properties
+    if (material_properties.contains("s_wave_velocity")) {
+      s_wave_velocity_ = 
+          material_properties.at("s_wave_velocity").template get<double>();
+    }
+    if (material_properties.contains("p_wave_velocity")) {
+      p_wave_velocity_ = 
+          material_properties.at("p_wave_velocity").template get<double>();
+    }
+
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
