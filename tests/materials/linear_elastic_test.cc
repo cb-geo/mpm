@@ -158,7 +158,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
             "LinearElastic2D", std::move(id), jmaterial);
 
     REQUIRE(material->template property<double>("layer_thickness") ==
-        Approx(jmaterial["layer_thickness"]).epsilon(Tolerance));
+            Approx(jmaterial["layer_thickness"]).epsilon(Tolerance));
   }
 }
 
