@@ -319,9 +319,11 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
                                         Tdim);
 
       // Update current velocity if there is only one material
-      if (material_ids_.size() == 1)
-        property_handle_->assign_property("velocities", prop_id_, *mitr,
-                                          velocity, Tdim);
+      if (material_ids_.size() == 1) {
+        VectorDim current_velocity = property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+        property_handle_->assign_property("current_velocities", prop_id_, *mitr,
+                                          current_velocity, Tdim);
+      }
 
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
