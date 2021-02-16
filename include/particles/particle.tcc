@@ -582,18 +582,17 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_body_force(
     const VectorDim& pgravity) noexcept {
   // Compute nodal body forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      VectorDim body_force = pgravity * mass_ * shapefn_(i);
-      nodes_[i]->update_property(true, "external_forces", body_force,
-                                 this->material_id(), Tdim);
-    }
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    VectorDim body_force = pgravity * mass_ * shapefn_(i);
+    nodes_[i]->update_property(true, "external_forces", body_force,
+                               this->material_id(), Tdim);
+  }
 }
 
 //! Map multimaterial traction force
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_traction_force() noexcept {
-  if (this->set_traction_ && !this->constrained_) {
+  if (this->set_traction_) {
     // Map particle traction forces to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i) {
       VectorDim traction_force = shapefn_[i] * traction_;
@@ -607,57 +606,54 @@ void mpm::Particle<Tdim>::map_multimaterial_traction_force() noexcept {
 template <>
 inline void mpm::Particle<1>::map_multimaterial_internal_force() noexcept {
   // Compute nodal internal forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      // Compute force: -pstress * volume
-      Eigen::Matrix<double, 1, 1> force;
-      force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 1, 1> force;
+    force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
-      nodes_[i]->update_property(true, "internal_forces", force,
-                                 this->material_id(), 1);
-    }
+    nodes_[i]->update_property(true, "internal_forces", force,
+                               this->material_id(), 1);
+  }
 }
 
 //! Map multimaterial internal force
 template <>
 inline void mpm::Particle<2>::map_multimaterial_internal_force() noexcept {
   // Compute nodal internal forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      // Compute force: -pstress * volume
-      Eigen::Matrix<double, 2, 1> force;
-      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
-      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 2, 1> force;
+    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
 
-      force *= -1. * this->volume_;
+    force *= -1. * this->volume_;
 
-      nodes_[i]->update_property(true, "internal_forces", force,
-                                 this->material_id(), 2);
-    }
+    nodes_[i]->update_property(true, "internal_forces", force,
+                               this->material_id(), 2);
+  }
 }
 
 //! Map multimaterial internal force
 template <>
 inline void mpm::Particle<3>::map_multimaterial_internal_force() noexcept {
   // Compute nodal internal forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      // Compute force: -pstress * volume
-      Eigen::Matrix<double, 3, 1> force;
-      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
-                 dn_dx_(i, 2) * stress_[5];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 3, 1> force;
+    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
+               dn_dx_(i, 2) * stress_[5];
 
-      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
-                 dn_dx_(i, 2) * stress_[4];
+    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
+               dn_dx_(i, 2) * stress_[4];
 
-      force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
-                 dn_dx_(i, 0) * stress_[5];
+    force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
+               dn_dx_(i, 0) * stress_[5];
 
-      force *= -1. * this->volume_;
+    force *= -1. * this->volume_;
 
-      nodes_[i]->update_property(true, "internal_forces", force,
-                                 this->material_id(), 3);
-    }
+    nodes_[i]->update_property(true, "internal_forces", force,
+                               this->material_id(), 3);
+  }
 }
 
 // Compute strain rate of the particle
@@ -761,64 +757,60 @@ void mpm::Particle<Tdim>::compute_stress() noexcept {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) noexcept {
   // Compute nodal body forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
-                                       (pgravity * mass_ * shapefn_(i)));
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
+                                     (pgravity * mass_ * shapefn_(i)));
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<1>::map_internal_force() noexcept {
   // Compute nodal internal forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      // Compute force: -pstress * volume
-      Eigen::Matrix<double, 1, 1> force;
-      force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 1, 1> force;
+    force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
-      nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-    }
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+  }
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<2>::map_internal_force() noexcept {
   // Compute nodal internal forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      // Compute force: -pstress * volume
-      Eigen::Matrix<double, 2, 1> force;
-      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
-      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 2, 1> force;
+    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
 
-      force *= -1. * this->volume_;
+    force *= -1. * this->volume_;
 
-      nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-    }
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+  }
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<3>::map_internal_force() noexcept {
   // Compute nodal internal forces
-  if (!this->constrained_)
-    for (unsigned i = 0; i < nodes_.size(); ++i) {
-      // Compute force: -pstress * volume
-      Eigen::Matrix<double, 3, 1> force;
-      force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
-                 dn_dx_(i, 2) * stress_[5];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 3, 1> force;
+    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
+               dn_dx_(i, 2) * stress_[5];
 
-      force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
-                 dn_dx_(i, 2) * stress_[4];
+    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
+               dn_dx_(i, 2) * stress_[4];
 
-      force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
-                 dn_dx_(i, 0) * stress_[5];
+    force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
+               dn_dx_(i, 0) * stress_[5];
 
-      force *= -1. * this->volume_;
+    force *= -1. * this->volume_;
 
-      nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-    }
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+  }
 }
 
 // Assign velocity to the particle
@@ -854,7 +846,7 @@ bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
 //! Map traction force
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() noexcept {
-  if (this->set_traction_ && !this->constrained_) {
+  if (this->set_traction_) {
     // Map particle traction forces to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i)
       nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
