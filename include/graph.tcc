@@ -57,6 +57,7 @@ void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
     if ((*citr)->id() >= start && (*citr)->id() < end) {
       if (offset == 0) this->ndims_ = (*citr)->centroid().rows();
 
+      unsigned nparticles = (*citr)->nglobal_particles();
       //! Insert the offset of the size of cell's neighbour
       offset += (*citr)->nneighbours();
 
@@ -68,9 +69,10 @@ void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
       //! get the id of neighbours
       for (const auto& neighbour : neighbours) {
         adjncy_.emplace_back(neighbour);
-        adjwgt_.emplace_back(1.);
+        adjwgt_.emplace_back(map_cells_[neighbour]->nglobal_particles() +
+                             nparticles);
       }
-      vwgt_.emplace_back((*citr)->nglobal_particles());
+      vwgt_.emplace_back(nparticles);
     }
   }
 

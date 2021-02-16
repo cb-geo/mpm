@@ -13,6 +13,7 @@
 #include "graph.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
+#include "map.h"
 #include "material.h"
 #include "mesh.h"
 #include "node.h"
@@ -203,13 +204,33 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   cellvector->add(cell13);
   cellvector->add(cell14);
 
+  // Map vector
+  auto cellmap = std::make_shared<mpm::Map<mpm::Cell<Dim>>>();
+
+  // add cells into map
+  cellmap->insert(0, cell0);
+  cellmap->insert(1, cell1);
+  cellmap->insert(2, cell2);
+  cellmap->insert(3, cell3);
+  cellmap->insert(4, cell4);
+  cellmap->insert(5, cell5);
+  cellmap->insert(6, cell6);
+  cellmap->insert(7, cell7);
+  cellmap->insert(8, cell8);
+  cellmap->insert(9, cell9);
+  cellmap->insert(10, cell10);
+  cellmap->insert(11, cell11);
+  cellmap->insert(12, cell12);
+  cellmap->insert(13, cell13);
+  cellmap->insert(14, cell14);
+
   // simluate number of tasks
   int num_threads = 3;
 
   // initialize graph
-  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellvector);
-  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellvector);
-  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellvector);
+  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellvector, *cellmap);
+  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellvector, *cellmap);
+  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellvector, *cellmap);
 
   // Construct graphs
   graph1.construct_graph(num_threads, 0);
@@ -518,7 +539,8 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
         MPI_Comm comm;
         int val = MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
-        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+        auto graph =
+            std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mesh->map_cells());
 
         // Find number of particles in each cell across MPI ranks
         mesh->find_nglobal_particles_cells();
@@ -812,7 +834,8 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
         MPI_Comm comm;
         int val = MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
-        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+        auto graph =
+            std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mesh->map_cells());
 
         // Find number of particles in each cell across MPI ranks
         mesh->find_nglobal_particles_cells();

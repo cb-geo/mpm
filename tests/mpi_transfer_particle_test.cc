@@ -330,7 +330,8 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
       // Create graph object if empty
-      auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+      auto graph =
+          std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mesh->map_cells());
 
       // Find global nparticles
       REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
@@ -702,7 +703,8 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
       // Create graph object if empty
-      auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+      auto graph =
+          std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mesh->map_cells());
 
       // Find global nparticles
       REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
