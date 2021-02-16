@@ -320,7 +320,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
 
       // Update current velocity if there is only one material
       if (material_ids_.size() == 1) {
-        VectorDim current_velocity = property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+        VectorDim current_velocity =
+            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
         property_handle_->assign_property("current_velocities", prop_id_, *mitr,
                                           current_velocity, Tdim);
       }
@@ -758,14 +759,15 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
           property_handle_->property("momenta", prop_id_, *mitr, Tdim);
       VectorDim velocity = (1 / mass) * momentum;
       for (int i = 0; i < Tdim; ++i) {
-        if (velocity(i, 0) < tolerance) velocity(i, 0) = 0.0;
+        if (std::abs(velocity(i, 0)) < tolerance) velocity(i, 0) = 0.0;
       }
 
       // Assign the velocity to its corresponding node and material ids in the
       // property pool
       property_handle_->assign_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
-      //property_handle_->assign_property("current_velocities", prop_id_, *mitr, velocity,
+      // property_handle_->assign_property("current_velocities", prop_id_,
+      // *mitr, velocity,
       //                                  Tdim);
     }
   }
@@ -832,7 +834,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
         double cross_product =
             relative_velocity(0, 0) * normal_unit_vector(1, 0) -
             relative_velocity(1, 0) * normal_unit_vector(0, 0);
-        double mu = std::min(friction,std::abs(cross_product)/velocity_normal);
+        double mu =
+            std::min(friction, std::abs(cross_product) / velocity_normal);
 
         // Compute normal and tangential correction
         VectorDim normal_correction = -velocity_normal * normal_unit_vector;
