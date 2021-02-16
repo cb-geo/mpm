@@ -1159,7 +1159,7 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
 #ifdef USE_GRAPH_PARTITIONING
     // Create graph object if empty
     if (initial_step || graph_ == nullptr)
-      graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells());
+      graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), mesh_->map_cells());
 
     // Find number of particles in each cell across MPI ranks
     mesh_->find_nglobal_particles_cells();

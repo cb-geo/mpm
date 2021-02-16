@@ -26,7 +26,8 @@ class Graph {
  public:
   //! Constructor with cells, size and rank
   //! \param[in] cells Vector of cells
-  explicit Graph(Vector<Cell<Tdim>> cells);
+  //! \param[in] map_cells Map of cells
+  Graph(Vector<Cell<Tdim>> cells, Map<Cell<Tdim>> map_cells);
 
   //! Construct graph
   //! \param[in] mpi_size # of MPI tasks
@@ -67,6 +68,8 @@ class Graph {
  private:
   // Vector of cells
   Vector<Cell<Tdim>> cells_;
+  // Map of cells
+  Map<Cell<Tdim>> map_cells_;
   // Number of partitions
   int nparts_ = 0;
   // Number of dimensions

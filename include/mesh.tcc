@@ -1704,6 +1704,12 @@ mpm::Vector<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
   return this->cells_;
 }
 
+// Return cells
+template <unsigned Tdim>
+mpm::Map<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::map_cells() {
+  return this->map_cells_;
+}
+
 //! Create map of container of cells in sets
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cell_sets(

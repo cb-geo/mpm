@@ -440,6 +440,9 @@ class Mesh {
   //! Get the vector of cell
   mpm::Vector<Cell<Tdim>> cells();
 
+  //! Get the map of cell
+  Map<Cell<Tdim>> map_cells();
+
   //! Return particle cell ids
   std::map<mpm::Index, mpm::Index>* particles_cell_ids();
 
