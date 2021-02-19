@@ -1,30 +1,12 @@
 #include "git.h"
 
-bool GitMetadata::Populated() {
-    return true;
-}
-bool GitMetadata::AnyUncommittedChanges() {
-    return false;
-}
-std::string GitMetadata::AuthorName() {
-    return "schd";
-}
-std::string GitMetadata::AuthorEmail() {
-    return "sacha.duverger@inrae.fr";
-}
-std::string GitMetadata::CommitSHA1() {
-    return "4a2bc8fc1d997ae0c906c4442d4a7210cc94082d";
-}
-std::string GitMetadata::CommitDate() {
-    return "2021-02-19 13:59:25 +0100";
-}
-std::string GitMetadata::CommitSubject() {
-    return ":wrench: clang format";
-}
-std::string GitMetadata::CommitBody() {
-    return "";
-}
-std::string GitMetadata::Describe() {
-    return "4a2bc8fc";
-}
+bool GitMetadata::Populated() { return true; }
+bool GitMetadata::AnyUncommittedChanges() { return false; }
+std::string GitMetadata::AuthorName() { return "schd"; }
+std::string GitMetadata::AuthorEmail() { return "sacha.duverger@inrae.fr"; }
+std::string GitMetadata::CommitSHA1() { return "ffbec37e9c680ba62ac9b0b5f94bac70de6ee0e6";}
+std::string GitMetadata::CommitDate() { return "2021-02-19 18:59:00 +0100"; }
+std::string GitMetadata::CommitSubject() { return ":hammer: Manually format git.cc.in"; }
+std::string GitMetadata::CommitBody() { return ""; }
+std::string GitMetadata::Describe() { return "ffbec37e"; }
 
