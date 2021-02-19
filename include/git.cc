@@ -1,12 +1,11 @@
 #include "git.h"
 
 bool GitMetadata::Populated() { return true; }
-bool GitMetadata::AnyUncommittedChanges() { return false; }
+bool GitMetadata::AnyUncommittedChanges() { return true; }
 std::string GitMetadata::AuthorName() { return "schd"; }
 std::string GitMetadata::AuthorEmail() { return "sacha.duverger@inrae.fr"; }
-std::string GitMetadata::CommitSHA1() { return "ffbec37e9c680ba62ac9b0b5f94bac70de6ee0e6";}
-std::string GitMetadata::CommitDate() { return "2021-02-19 18:59:00 +0100"; }
-std::string GitMetadata::CommitSubject() { return ":hammer: Manually format git.cc.in"; }
+std::string GitMetadata::CommitSHA1() { return "5ad8c545a3c20ee4d43d89e53013080b9512dce5"; }
+std::string GitMetadata::CommitDate() { return "2021-02-19 19:05:51 +0100"; }
+std::string GitMetadata::CommitSubject() { return ":hammer: Update git.cc"; }
 std::string GitMetadata::CommitBody() { return ""; }
-std::string GitMetadata::Describe() { return "ffbec37e"; }
-
+std::string GitMetadata::Describe() { return "5ad8c545"; }
