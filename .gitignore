@@ -15,8 +15,7 @@
 !*/src/*
 !*/include/*
 !*/tests/*
-!cmake/git_watcher.cmake
-!include/git.cc.in
+include/git.cc
 docs/*
 CMakeCache.txt
 CMakeFiles/*
