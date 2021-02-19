@@ -4,7 +4,7 @@ bool GitMetadata::Populated() {
     return true;
 }
 bool GitMetadata::AnyUncommittedChanges() {
-    return true;
+    return false;
 }
 std::string GitMetadata::AuthorName() {
     return "schd";
@@ -13,18 +13,18 @@ std::string GitMetadata::AuthorEmail() {
     return "sacha.duverger@inrae.fr";
 }
 std::string GitMetadata::CommitSHA1() {
-    return "e4c44e702eca1d5ecb667573a60fee852a119357";
+    return "4a2bc8fc1d997ae0c906c4442d4a7210cc94082d";
 }
 std::string GitMetadata::CommitDate() {
-    return "2021-02-19 10:30:55 +0100";
+    return "2021-02-19 13:59:25 +0100";
 }
 std::string GitMetadata::CommitSubject() {
-    return ":construction: Add Andrew Hardin's scripts for embed git metadata";
+    return ":wrench: clang format";
 }
 std::string GitMetadata::CommitBody() {
     return "";
 }
 std::string GitMetadata::Describe() {
-    return "e4c44e70";
+    return "4a2bc8fc";
 }
 
