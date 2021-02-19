@@ -6,9 +6,9 @@
 #endif
 #include "spdlog/spdlog.h"
 
+#include "git.h"
 #include "io.h"
 #include "mpm.h"
-#include "git.h"
 
 int main(int argc, char** argv) {
 
