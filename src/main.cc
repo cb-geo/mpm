@@ -6,6 +6,7 @@
 #endif
 #include "spdlog/spdlog.h"
 
+#include "git.h"
 #include "io.h"
 #include "mpm.h"
 
@@ -34,6 +35,9 @@ int main(int argc, char** argv) {
 
     // Initialise logger
     auto console = spdlog::stdout_color_mt("main");
+
+    // Print git revision
+    console->info("git revision: {}", GitMetadata::CommitSHA1());
 
     // Create an IO object
     auto io = std::make_shared<mpm::IO>(argc, argv);
