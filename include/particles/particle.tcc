@@ -40,6 +40,11 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   this->mass_ = particle.mass;
   // Volume
   this->volume_ = particle.volume;
+  // Compute size of particle in each direction
+  const double length = std::pow(this->volume_, static_cast<double>(1. / Tdim));
+  // Set particle size as length on each side
+  this->size_.fill(length);
+
   // Mass Density
   this->mass_density_ = particle.mass / particle.volume;
   // Set local size of particle
