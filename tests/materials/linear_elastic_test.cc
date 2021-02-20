@@ -151,14 +151,10 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
   SECTION("LinearElastic check properties earthquake") {
     unsigned id = 0;
     jmaterial["earthquake"] = true;
-    jmaterial["layer_thickness"] = 10000;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic2D", std::move(id), jmaterial);
-
-    REQUIRE(material->template property<double>("layer_thickness") ==
-            Approx(jmaterial["layer_thickness"]).epsilon(Tolerance));
   }
 }
 

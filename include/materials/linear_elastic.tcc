@@ -28,12 +28,6 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
         // Calculate wave velocities
         p_wave_velocity_ = sqrt(constrained_modulus / density_);
         s_wave_velocity_ = sqrt(shear_modulus / density_);
-
-        // Calculate spring coefficients
-        layer_thickness_ =
-            material_properties.at("layer_thickness").template get<double>();
-        p_spring_coeff_ = constrained_modulus / layer_thickness_;
-        s_spring_coeff_ = shear_modulus / layer_thickness_;
       }
     }
 

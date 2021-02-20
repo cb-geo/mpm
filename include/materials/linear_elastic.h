@@ -81,12 +81,6 @@ class LinearElastic : public Material<Tdim> {
   double s_wave_velocity_{std::numeric_limits<double>::max()};
   //! P-Wave Velocity
   double p_wave_velocity_{std::numeric_limits<double>::max()};
-  //! Layer Thickness
-  double layer_thickness_{std::numeric_limits<double>::max()};
-  //! P Spring Coefficient
-  double p_spring_coeff_{std::numeric_limits<double>::max()};
-  //! S Spring Coefficient
-  double s_spring_coeff_{std::numeric_limits<double>::max()};
 };  // LinearElastic class
 }  // namespace mpm
 
