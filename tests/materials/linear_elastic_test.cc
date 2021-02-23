@@ -71,8 +71,6 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
             Approx(jmaterial["density"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("poisson_ratio") ==
-            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
@@ -150,11 +148,18 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
 
   SECTION("LinearElastic check properties earthquake") {
     unsigned id = 0;
-    jmaterial["earthquake"] = true;
+    jmaterial["p_wave_velocity"] = 116.023870223;
+    jmaterial["s_wave_velocity"] = 62.0173672946;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic2D", std::move(id), jmaterial);
+
+    // Get P-Wave and S-Wave Velocities
+    REQUIRE(material->template property<double>("p_wave_velocity") ==
+            Approx(jmaterial["p_wave_velocity"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("s_wave_velocity") ==
+            Approx(jmaterial["s_wave_velocity"]).epsilon(Tolerance));
   }
 }
 
