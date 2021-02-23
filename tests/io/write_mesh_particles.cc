@@ -105,8 +105,9 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
         {"output_steps", 5}}}};
 
   // Dump JSON as an input file to be read
+  std::string fname = (file_name + "-" + dimension + ".json").c_str();
   std::ofstream file;
-  file.open((file_name + "-" + dimension + ".json").c_str());
+  file.open(fname, std::ios_base::out);
   file << json_file.dump(2);
   file.close();
 
