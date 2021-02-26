@@ -861,9 +861,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
         // Determine the corrected acceleration
         VectorDim current_velocity = property_handle_->property(
             "current_velocities", prop_id_, *mitr, Tdim);
-        VectorDim corrected_acceleration =
-            (corrected_velocity - current_velocity) / dt;
-        property_handle_->assign_property("accelerations", prop_id_, *mitr,
+        VectorDim corrected_acceleration = corrections / dt;
+        property_handle_->update_property("accelerations", prop_id_, *mitr,
                                           corrected_acceleration, Tdim);
       }
       // Update current velocity
