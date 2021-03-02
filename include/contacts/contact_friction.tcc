@@ -42,7 +42,7 @@ inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics() {
   // Compute multimaterial normal unit vector
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
-                std::placeholders::_1));
+                std::placeholders::_1, normal_type_));
 }
 
 //! Compute contact forces

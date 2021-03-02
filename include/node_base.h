@@ -265,7 +265,10 @@ class NodeBase {
   virtual void compute_multimaterial_separation_vector() = 0;
 
   //! Compute multimaterial normal unit vector
-  virtual void compute_multimaterial_normal_unit_vector() = 0;
+  //! \param[in] normal_type Tag for the type of computation of the normal unit
+  //! vector
+  virtual void compute_multimaterial_normal_unit_vector(
+      std::string normal_type) = 0;
 
   //! Compute multimaterial velocity from mass and momentum
   virtual void compute_multimaterial_velocity() = 0;

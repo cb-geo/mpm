@@ -278,7 +278,10 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_separation_vector() override;
 
   //! Compute multimaterial normal unit vector
-  void compute_multimaterial_normal_unit_vector() override;
+  //! \param[in] normal_type Tag for the type of computation of the normal unit
+  //! vector
+  void compute_multimaterial_normal_unit_vector(
+      std::string normal_type) override;
 
   //! Compute multimaterial velocity from mass and momentum
   void compute_multimaterial_velocity() override;

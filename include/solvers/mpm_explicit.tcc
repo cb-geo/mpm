@@ -61,7 +61,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Interface
   if (analysis_.find("interface") != analysis_.end())
-    if (analysis_["interface"].find("interface") != analysis_.end())
+    if (analysis_["interface"].find("interface") !=
+        analysis_["interface"].end())
       interface_ = true;
 
   // Interface scheme

@@ -720,24 +720,27 @@ void mpm::Node<Tdim, Tdof,
 
 //! Compute multimaterial normal unit vector
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof,
-               Tnphases>::compute_multimaterial_normal_unit_vector() {
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
+    std::string normal_type) {
   node_mutex_.lock();
   // Iterate over all materials in the material_ids set to get the largest
   // domain gradient of all materials
   VectorDim largest_domain_gradient = VectorDim::Zero();
   double max_magnitude = 0;
   unsigned int material_id_largest = 0;
-  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
-    // Get the domain gradient of the current material
-    VectorDim current_domain_gradient =
-        property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
-    // Update the largest domain gradient if the current domain gradient is
-    // greater in magnitude
-    if (current_domain_gradient.norm() >= max_magnitude) {
-      max_magnitude = current_domain_gradient.norm();
-      largest_domain_gradient = current_domain_gradient;
-      material_id_largest = *mitr;
+  if (normal_type == "MVG") {
+    for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+         ++mitr) {
+      // Get the domain gradient of the current material
+      VectorDim current_domain_gradient =
+          property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+      // Update the largest domain gradient if the current domain gradient is
+      // greater in magnitude
+      if (current_domain_gradient.norm() >= max_magnitude) {
+        max_magnitude = current_domain_gradient.norm();
+        largest_domain_gradient = current_domain_gradient;
+        material_id_largest = *mitr;
+      }
     }
   }
 
@@ -746,11 +749,17 @@ void mpm::Node<Tdim, Tdof,
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // compute the normal unit vector
     VectorDim normal_unit_vector = VectorDim::Zero();
+    // use domain gradient if the type of normal computation is the default
+    if (normal_type == "default")
+      largest_domain_gradient =
+          property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+
+    // set normal unit vector to be the normalized domain gradient
     if (largest_domain_gradient.norm() > std::numeric_limits<double>::epsilon())
       normal_unit_vector = largest_domain_gradient.normalized();
 
     // change normal unit vector according to direction of the largest
-    if (material_id_largest != *mitr)
+    if (material_id_largest != *mitr && normal_type == "MVG")
       normal_unit_vector = -1 * normal_unit_vector;
 
     // assign nodal-multimaterial normal unit vector to property pool
