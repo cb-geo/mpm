@@ -12,8 +12,8 @@ template <unsigned Tdim>
 class ContactFriction : public Contact<Tdim> {
  public:
   //! Default constructor with mesh class
-  ContactFriction(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
-                  double friction);
+  ContactFriction(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double friction,
+                  std::string normal_type);
 
   //! Intialize
   virtual inline void initialise() override;
@@ -46,6 +46,8 @@ class ContactFriction : public Contact<Tdim> {
   using mpm::Contact<Tdim>::mesh_;
   //! Coefficient of friction
   double friction_{.0};
+  //! Type of normal detection
+  std::string normal_type_{"default"};
 };  // Contactfriction class
 }  // namespace mpm
 

@@ -60,14 +60,17 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
   // Interface
-  if (analysis_.find("interface") != analysis_.end()) {
-    interface_ = true;
-  }
+  if (analysis_.find("interface") != analysis_.end())
+    if (analysis_["interface"].find("interface") != analysis_.end())
+      interface_ = true;
 
   // Interface scheme
   if (interface_) {
     double friction = analysis_["interface"]["friction"].template get<double>();
-    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_, friction);
+    std::string normal_type =
+        analysis_["interface"]["normal_type"].template get<std::string>();
+    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_, friction,
+                                                            normal_type);
   } else {
     contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
   }
