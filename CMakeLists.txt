@@ -173,63 +173,63 @@ SET(mpm_src
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
 
 # Unit test
-if(MPM_BUILD_TESTING)
-  SET(test_src
-    ${mpm_SOURCE_DIR}/tests/test_main.cc
-    ${mpm_SOURCE_DIR}/tests/cell_test.cc
-    ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
+#if(MPM_BUILD_TESTING)
+#  SET(test_src
+#    ${mpm_SOURCE_DIR}/tests/test_main.cc
+#    ${mpm_SOURCE_DIR}/tests/cell_test.cc
+#    ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
 #    ${mpm_SOURCE_DIR}/tests/contact_test.cc
-    ${mpm_SOURCE_DIR}/tests/factory_test.cc
-    ${mpm_SOURCE_DIR}/tests/geometry_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_gimp_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
-    ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
-    ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
-    ${mpm_SOURCE_DIR}/tests/graph_test.cc
+#    ${mpm_SOURCE_DIR}/tests/factory_test.cc
+#    ${mpm_SOURCE_DIR}/tests/geometry_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_element_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_gimp_element_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
+#    ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
+#    ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
+#    ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
+#    ${mpm_SOURCE_DIR}/tests/graph_test.cc
 #    ${mpm_SOURCE_DIR}/tests/interface_test.cc
-    ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
-    ${mpm_SOURCE_DIR}/tests/io/io_test.cc
-    ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
-    ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
-    ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
-    ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
-    ${mpm_SOURCE_DIR}/tests/materials/linear_elastic_test.cc
-    ${mpm_SOURCE_DIR}/tests/materials/modified_cam_clay_test.cc
-    ${mpm_SOURCE_DIR}/tests/materials/mohr_coulomb_test.cc
-    ${mpm_SOURCE_DIR}/tests/materials/newtonian_test.cc
-    ${mpm_SOURCE_DIR}/tests/materials/norsand_test.cc
-    ${mpm_SOURCE_DIR}/tests/materials/material_utility_test.cc
-    ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
-    ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
-    ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
-    ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
-    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
-    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
-    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
+#    ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
+#    ${mpm_SOURCE_DIR}/tests/io/io_test.cc
+#    ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
+#    ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
+#    ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/linear_elastic_test.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/modified_cam_clay_test.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/mohr_coulomb_test.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/newtonian_test.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/norsand_test.cc
+#    ${mpm_SOURCE_DIR}/tests/materials/material_utility_test.cc
+#    ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
+#    ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
+#    ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
+#    ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
+#    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
+#    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
+#    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
+#    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
 #    ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
-    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_map_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_serialize_deserialize_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
-  )
-  add_executable(mpmtest ${mpm_src} ${test_src})
-  add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
-  enable_testing()
+#    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
+#    ${mpm_SOURCE_DIR}/tests/node_map_test.cc
+#    ${mpm_SOURCE_DIR}/tests/node_test.cc
+#    ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
+#    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
+#    ${mpm_SOURCE_DIR}/tests/particle_serialize_deserialize_test.cc
+#    ${mpm_SOURCE_DIR}/tests/particle_test.cc
+#    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
+#    ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
+#    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
+#  )
+#  add_executable(mpmtest ${mpm_src} ${test_src})
+#  add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+#  enable_testing()
 
-endif()
+#endif()
 
 # Coverage
 find_package(codecov)
