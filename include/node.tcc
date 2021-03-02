@@ -722,19 +722,36 @@ void mpm::Node<Tdim, Tdof,
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_normal_unit_vector() {
-  // Iterate over all materials in the material_ids set
   node_mutex_.lock();
+  // Iterate over all materials in the material_ids set to get the largest
+  // domain gradient of all materials
+  VectorDim largest_domain_gradient = VectorDim::Zero();
+  double max_magnitude = 0;
+  unsigned int material_id_largest = 0;
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
-    // calculte the normal unit vector
-    VectorDim domain_gradient =
+    // Get the domain gradient of the current material
+    VectorDim current_domain_gradient =
         property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
-    VectorDim normal_unit_vector = VectorDim::Zero();
-    if (domain_gradient.norm() > std::numeric_limits<double>::epsilon())
-      normal_unit_vector = domain_gradient.normalized();
+    // Update the largest domain gradient if the current domain gradient is
+    // greater in magnitude
+    if (current_domain_gradient.norm() >= max_magnitude) {
+      max_magnitude = current_domain_gradient.norm();
+      largest_domain_gradient = current_domain_gradient;
+      material_id_largest = *mitr;
+    }
+  }
 
-    // Necessarily make the normal unit vector parallel to interface
-    normal_unit_vector << 0.0, 1.0;
-    if (*mitr == 0) normal_unit_vector = normal_unit_vector * -1;
+  // Iterate over all materials in the material_ids set to assign the computed
+  // normal unit vector
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // compute the normal unit vector
+    VectorDim normal_unit_vector = VectorDim::Zero();
+    if (largest_domain_gradient.norm() > std::numeric_limits<double>::epsilon())
+      normal_unit_vector = largest_domain_gradient.normalized();
+
+    // change normal unit vector according to direction of the largest
+    if (material_id_largest != *mitr)
+      normal_unit_vector = -1 * normal_unit_vector;
 
     // assign nodal-multimaterial normal unit vector to property pool
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
