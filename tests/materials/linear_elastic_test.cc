@@ -148,18 +148,16 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
 
   SECTION("LinearElastic check properties earthquake") {
     unsigned id = 0;
-    jmaterial["p_wave_velocity"] = 116.023870223;
-    jmaterial["s_wave_velocity"] = 62.0173672946;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic2D", std::move(id), jmaterial);
 
     // Get P-Wave and S-Wave Velocities
-    REQUIRE(material->template property<double>("p_wave_velocity") ==
-            Approx(jmaterial["p_wave_velocity"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("s_wave_velocity") ==
-            Approx(jmaterial["s_wave_velocity"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("pwave_velocity") ==
+            Approx(116.023870223).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("swave_velocity") ==
+            Approx(62.0173672946).epsilon(Tolerance));
   }
 }
 
@@ -302,5 +300,19 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(7.69230769230769e+01).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(1.15384615384615e+02).epsilon(Tolerance));
+  }
+
+  SECTION("LinearElastic check properties earthquake") {
+    unsigned id = 0;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(id), jmaterial);
+
+    // Get P-Wave and S-Wave Velocities
+    REQUIRE(material->template property<double>("pwave_velocity") ==
+            Approx(116.023870223).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("swave_velocity") ==
+            Approx(62.0173672946).epsilon(Tolerance));
   }
 }

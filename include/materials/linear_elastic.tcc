@@ -20,10 +20,12 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
     double shear_modulus = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
 
     // Calculate wave velocities
-    p_wave_velocity_ = sqrt(constrained_modulus / density_);
-    s_wave_velocity_ = sqrt(shear_modulus / density_);
+    vp_ = sqrt(constrained_modulus / density_);
+    vs_ = sqrt(shear_modulus / density_);
 
     properties_ = material_properties;
+    properties_["pwave_velocity"] = vp_;
+    properties_["swave_velocity"] = vs_;
 
     // Set elastic tensor
     this->compute_elastic_tensor();
