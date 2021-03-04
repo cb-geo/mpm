@@ -34,6 +34,11 @@ inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics() {
       std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_velocity,
                 std::placeholders::_1));
 
+  // Map multimaterial domain from particles to nodes
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_domain_to_nodes,
+                std::placeholders::_1));
+
   // Map multimaterial domain gradients from particles to nodes
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::map_multimaterial_domain_gradients_to_nodes,

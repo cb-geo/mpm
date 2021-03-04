@@ -2000,6 +2000,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
                                        materials_.size());
     nodal_properties_->create_property("domain_gradients", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("domains", nodes_.size(),
+                                       materials_.size());
     nodal_properties_->create_property("normal_unit_vectors", nrows,
                                        materials_.size());
     nodal_properties_->create_property("internal_forces", nrows,
