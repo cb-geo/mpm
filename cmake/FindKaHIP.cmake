@@ -46,12 +46,12 @@ if (MPI_CXX_FOUND)
     DOC "Directory where the KaHIP header files are located"
     )
 
-  find_library(KAHIP_LIBRARY kahip
+  find_library(KAHIP_LIBRARY libkahip.a
     HINTS ${KAHIP_ROOT}/deploy $ENV{KAHIP_ROOT}/deploy /usr/local/KaHIP/deploy
     NO_DEFAULT_PATH
     DOC "Directory where the KaHIP library is located"
-  )
-
+    )
+  
   find_library(KAHIP_LIBRARY kahip
     DOC "Directory where the KaHIP library is located"
   )

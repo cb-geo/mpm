@@ -92,6 +92,13 @@ class MPMBase : public MPM {
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
 
+  //! Particle entity sets
+  //! \param[in] check Check duplicates
+  void particle_entity_sets(bool check);
+
+  //! Particle velocity constraints
+  void particle_velocity_constraints();
+
  private:
   //! Return if a mesh will be isoparametric or not
   //! \retval isoparametric Status of mesh type
@@ -137,24 +144,12 @@ class MPMBase : public MPM {
   void particles_volumes(const Json& mesh_prop,
                          const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
-  //! Particle velocity constraints
-  //! \param[in] mesh_prop Mesh properties
-  //! \param[in] particle_io Particle IO handle
-  void particle_velocity_constraints(
-      const Json& mesh_prop,
-      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
-
   //! Particles stresses
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] particle_io Particle IO handle
   void particles_stresses(
       const Json& mesh_prop,
       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
-
-  //! Particle entity sets
-  //! \param[in] mesh_prop Mesh properties
-  //! \param[in] check Check duplicates
-  void particle_entity_sets(const Json& mesh_prop, bool check);
 
   //! Initialise damping
   //! \param[in] damping_props Damping properties

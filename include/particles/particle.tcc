@@ -40,6 +40,11 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   this->mass_ = particle.mass;
   // Volume
   this->volume_ = particle.volume;
+  // Compute size of particle in each direction
+  const double length = std::pow(this->volume_, static_cast<double>(1. / Tdim));
+  // Set particle size as length on each side
+  this->size_.fill(length);
+
   // Mass Density
   this->mass_density_ = particle.mass / particle.volume;
   // Set local size of particle
@@ -1223,6 +1228,9 @@ void mpm::Particle<Tdim>::deserialize(
   // volume
   MPI_Unpack(data_ptr, data.size(), &position, &volume_, 1, MPI_DOUBLE,
              MPI_COMM_WORLD);
+  // mass density
+  this->mass_density_ = mass_ / volume_;
+
   // pressure
   double pressure;
   MPI_Unpack(data_ptr, data.size(), &position, &pressure, 1, MPI_DOUBLE,
@@ -1274,7 +1282,7 @@ void mpm::Particle<Tdim>::deserialize(
   if (nstate_vars > 0) {
     std::vector<double> svars;
     svars.reserve(nstate_vars);
-    MPI_Unpack(data_ptr, data.size(), &position, &svars, nstate_vars,
+    MPI_Unpack(data_ptr, data.size(), &position, &svars[0], nstate_vars,
                MPI_DOUBLE, MPI_COMM_WORLD);
 
     // Reinitialize state variables

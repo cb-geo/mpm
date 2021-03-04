@@ -6,6 +6,7 @@
 #endif
 #include "spdlog/spdlog.h"
 
+#include "git.h"
 #include "io.h"
 #include "mpm.h"
 
@@ -19,6 +20,13 @@ int main(int argc, char** argv) {
   // Get number of MPI ranks
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  // Allocate enough space to issue the buffered send
+  int mpi_buffer_size = 2000000000;
+  void* mpi_buffer = malloc(mpi_buffer_size);
+  // Pass the buffer allocated to MPI so it uses it when we issue MPI_Bsend
+  MPI_Buffer_attach(mpi_buffer, mpi_buffer_size);
+
 #endif
 
   try {
@@ -27,6 +35,9 @@ int main(int argc, char** argv) {
 
     // Initialise logger
     auto console = spdlog::stdout_color_mt("main");
+
+    // Print git revision
+    console->info("git revision: {}", GitMetadata::CommitSHA1());
 
     // Create an IO object
     auto io = std::make_shared<mpm::IO>(argc, argv);
@@ -50,12 +61,16 @@ int main(int argc, char** argv) {
   } catch (std::exception& exception) {
     std::cerr << "MPM main: " << exception.what() << std::endl;
 #ifdef USE_MPI
+    free(mpi_buffer);
+    MPI_Buffer_detach(&mpi_buffer, &mpi_buffer_size);
     MPI_Abort(MPI_COMM_WORLD, 1);
 #endif
     std::terminate();
   }
 
 #ifdef USE_MPI
+  free(mpi_buffer);
+  MPI_Buffer_detach(&mpi_buffer, &mpi_buffer_size);
   MPI_Finalize();
 #endif
 }

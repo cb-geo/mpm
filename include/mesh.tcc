@@ -848,15 +848,15 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
 
         // Send number of particles to receiver rank
         unsigned nparticles = cell->nparticles();
-        MPI_Isend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0, MPI_COMM_WORLD,
-                  &send_requests[nsend_requests]);
+        MPI_Ibsend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0,
+                   MPI_COMM_WORLD, &send_requests[nsend_requests]);
 
         auto particle_ids = cell->particles();
         for (auto& id : particle_ids) {
           // Create a vector of serialized particle
           std::vector<uint8_t> buffer = map_particles_[id]->serialize();
-          MPI_Isend(buffer.data(), buffer.size(), MPI_UINT8_T, cell->rank(), 0,
-                    MPI_COMM_WORLD, &send_particle_requests[np]);
+          MPI_Ibsend(buffer.data(), buffer.size(), MPI_UINT8_T, cell->rank(), 0,
+                     MPI_COMM_WORLD, &send_particle_requests[np]);
           ++np;
 
           // Particles to be removed from the current rank
@@ -946,6 +946,49 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
       }
     }
   }
+#endif
+}
+
+//! Resume cell ranks and partitioned domain
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
+  // Get MPI rank
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  const unsigned rank_max = std::numeric_limits<unsigned>::max();
+  const unsigned ncells = this->ncells();
+  // Vector of cell ranks
+  std::vector<int> cell_ranks;
+  cell_ranks.resize(ncells);
+  // Fetch MPI rank if the cell has particles
+  unsigned i = 0;
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int cell_rank = 0;
+    if ((*citr)->nparticles() > 0) cell_rank = mpi_rank;
+    cell_ranks.at(i) = cell_rank;
+    ++i;
+  }
+
+  // MPI Receive cell ranks
+  std::vector<int> recv_ranks;
+  recv_ranks.resize(ncells);
+  MPI_Allreduce(cell_ranks.data(), recv_ranks.data(), ncells, MPI_INT, MPI_SUM,
+                MPI_COMM_WORLD);
+
+  // Assign MPI rank
+  unsigned j = 0;
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int recv_rank = recv_ranks.at(j);
+    (*citr)->rank(recv_rank);
+    ++j;
+  }
+
+  // Identify shared nodes across MPI domains
+  this->find_domain_shared_nodes();
+  // Identify ghost boundary cells
+  this->find_ghost_boundary_cells();
+
 #endif
 }
 
@@ -1498,36 +1541,38 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
                  mpm::hdf5::particle::dst_offset,
                  mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
-  // Vector of particles
-  Vector<ParticleBase<Tdim>> particles;
+  // Particle type
+  const std::string particle_type = (Tdim == 2) ? "P2D" : "P3D";
 
-  // Clear map of particles
-  map_particles_.clear();
+  // Iterate over all HDF5 particles
+  for (unsigned i = 0; i < nrecords; ++i) {
+    HDF5Particle pod_particle = dst_buf[i];
+    // Get particle's material from list of materials
+    auto material = materials_.at(pod_particle.material_id);
+    // Particle id
+    mpm::Index pid = pod_particle.id;
+    // Initialise coordinates
+    Eigen::Matrix<double, Tdim, 1> coords;
+    coords.setZero();
 
-  unsigned i = 0;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    if (i < nrecords) {
-      HDF5Particle particle = dst_buf[i];
-      // Get particle's material from list of materials
-      auto material = materials_.at(particle.material_id);
-      // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, material);
-      // Add particle to map
-      map_particles_.insert(particle.id, *pitr);
-      particles.add(*pitr);
-      ++i;
-    }
+    // Create particle
+    auto particle =
+        Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                const Eigen::Matrix<double, Tdim, 1>&>::instance()
+            ->create(particle_type, static_cast<mpm::Index>(pid), coords);
+
+    // Initialise particle with HDF5 data
+    particle->initialise_particle(pod_particle, material);
+
+    // Add particle to mesh and check
+    bool insert_status = this->add_particle(particle, false);
+
+    // If insertion is successful
+    if (!insert_status)
+      throw std::runtime_error("Addition of particle to mesh failed!");
   }
   // close the file
   H5Fclose(file_id);
-
-  // Overwrite particles container
-  this->particles_ = particles;
-
-  // Remove associated cell for the particle
-  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
-    (*citr)->clear_particle_ids();
-
   return true;
 }
 
