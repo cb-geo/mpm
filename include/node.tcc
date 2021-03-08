@@ -751,7 +751,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
          ++mitr) {
       const Eigen::Matrix<double, 1, 1> current_domain =
           property_handle_->property("domains", prop_id_, *mitr);
-      total_domain += current_domain(0,0);
+      total_domain += current_domain(0, 0);
     }
   }
 
@@ -769,7 +769,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
       for (auto mitr_other = material_ids_.begin();
            mitr_other != material_ids_.end(); ++mitr_other) {
         const VectorDim current_domain_gradient = property_handle_->property(
-          "domain_gradients", prop_id_, *mitr_other, Tdim);
+            "domain_gradients", prop_id_, *mitr_other, Tdim);
         const Eigen::Matrix<double, 1, 1> current_domain =
             property_handle_->property("domains", prop_id_, *mitr_other);
         if (*mitr == *mitr_other)
