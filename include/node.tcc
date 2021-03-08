@@ -724,7 +724,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
     std::string normal_type) {
   node_mutex_.lock();
   // Iterate over all materials in the material_ids set to get the largest
-  // domain gradient of all materials
+  // domain gradient of all materials if the normal type used is MVG
   VectorDim largest_domain_gradient = VectorDim::Zero();
   double max_magnitude = 0;
   unsigned int material_id_largest = 0;
@@ -744,15 +744,45 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
     }
   }
 
+  // Compute total domain if the normal type used is AVG
+  double total_domain = 0;
+  if (normal_type == "AVG") {
+    for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+         ++mitr) {
+      const Eigen::Matrix<double, 1, 1> current_domain =
+          property_handle_->property("domains", prop_id_, *mitr);
+      total_domain += current_domain(0,0);
+    }
+  }
+
   // Iterate over all materials in the material_ids set to assign the computed
   // normal unit vector
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // compute the normal unit vector
     VectorDim normal_unit_vector = VectorDim::Zero();
     // use domain gradient if the type of normal computation is the default
-    if (normal_type == "default")
+    if (normal_type == "default") {
       largest_domain_gradient =
           property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+    } else if (normal_type == "AVG") {
+      largest_domain_gradient = VectorDim::Zero();
+      for (auto mitr_other = material_ids_.begin();
+           mitr_other != material_ids_.end(); ++mitr_other) {
+        const VectorDim current_domain_gradient = property_handle_->property(
+          "domain_gradients", prop_id_, *mitr_other, Tdim);
+        const Eigen::Matrix<double, 1, 1> current_domain =
+            property_handle_->property("domains", prop_id_, *mitr_other);
+        if (*mitr == *mitr_other)
+          largest_domain_gradient =
+              largest_domain_gradient +
+              current_domain_gradient * current_domain(0, 0);
+        else
+          largest_domain_gradient =
+              largest_domain_gradient -
+              current_domain_gradient * current_domain(0, 0);
+      }
+      largest_domain_gradient = largest_domain_gradient / total_domain;
+    }
 
     // set normal unit vector to be the normalized domain gradient
     if (largest_domain_gradient.norm() > std::numeric_limits<double>::epsilon())
