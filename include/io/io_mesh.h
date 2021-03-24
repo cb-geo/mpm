@@ -98,6 +98,12 @@ class IOMesh {
       read_friction_constraints(
           const std::string& friction_constraints_file) = 0;
 
+  //! Read absorbing constraints file
+  //! \param[in] absorbing_constraints_files file name with tractions
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double, double, double>>
+      read_absorbing_constraints(
+          const std::string& absorbing_constraints_file) = 0;
+
   //! Read forces file
   //! \param[in] forces_files file name with nodal concentrated force
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(

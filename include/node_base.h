@@ -205,6 +205,19 @@ class NodeBase {
   //! \param[in] dt Time-step
   virtual void apply_friction_constraints(double dt) = 0;
 
+  //! Assign absorbing constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of absorbing constraint
+  //! \param[in] delta Virtual viscous layer thickness
+  //! \param[in] a Equation constant
+  //! \param[in] a Equation constant
+  //! \param[in] h_min Characteristic Length
+  virtual bool assign_absorbing_constraint(unsigned dir, double delta, double a,
+                                           double b, double h_min) = 0;
+
+  //! Apply absorbing_constraint
+  virtual void apply_absorbing_constraint() = 0;
+
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
   virtual void assign_rotation_matrix(

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "absorbing_constraint.h"
 #include "friction_constraint.h"
 #include "logger.h"
 #include "mesh.h"
@@ -47,6 +48,19 @@ class Constraints {
   bool assign_nodal_friction_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
           friction_constraints);
+
+  //! Assign nodal absorbing constraints
+  //! \param[in] setid Node set id
+  //! \param[in] absorbing_constraints Constraint at node, dir, delta, a, b
+  bool assign_nodal_absorbing_constraint(
+      int nset_id,
+      const std::shared_ptr<mpm::AbsorbingConstraint>& aconstraints);
+
+  //! Assign absorbing constraints to nodes
+  //! \param[in] absorbing_constraints Constraint at node, dir, delta, a, and b
+  bool assign_nodal_absorbing_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double, double,
+                                   double>>& absorbing_constraints);
 
  private:
   //! Mesh object

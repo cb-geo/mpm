@@ -345,6 +345,78 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     }
   }
 }
+//! Assign absorbing constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_absorbing_constraint(
+    unsigned dir, double delta, double a, double b, double h_min) {
+  bool status = true;
+  try {
+    assert(dir <= Tdim);
+    if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b)) {
+      this->absorbing_constraint_ = std::make_tuple(
+          static_cast<unsigned>(dir), static_cast<double>(delta),
+          static_cast<double>(a), static_cast<double>(b));
+    } else
+      throw std::runtime_error("Delta input is too small");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// !Apply absorbing constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint() {
+  // Normal direction
+  const unsigned dir = std::get<0>(this->absorbing_constraint_);
+
+  // Delta value
+  const double delta = std::get<1>(this->absorbing_constraint_);
+
+  // a coefficient
+  const double a = std::get<2>(this->absorbing_constraint_);
+
+  // b coefficient
+  const double b = std::get<3>(this->absorbing_constraint_);
+
+  // Get material id
+  auto mat_id = material_ids_.begin();
+
+  // Extract material properties and displacements
+  double pwave_v = this->property_handle_->property("pwave_velocity", prop_id_,
+                                                    *mat_id)(0, 0);
+  double swave_v = this->property_handle_->property("swave_velocity", prop_id_,
+                                                    *mat_id)(0, 0);
+  double density =
+      this->property_handle_->property("density", prop_id_, *mat_id)(0, 0);
+  const Eigen::Matrix<double, Tdim, 1> material_displacement =
+      this->property_handle_->property("displacements", prop_id_, *mat_id,
+                                       Tdim);
+
+  // Wave velocity Eigen Matrix
+  Eigen::Matrix<double, Tdim, 1> wave_velocity =
+      Eigen::MatrixXd::Constant(Tdim, 1, b * swave_v);
+  wave_velocity(dir, 0) = a * pwave_v;
+
+  // Spring constant Eigen matrix
+  double k_s = (density * pow(swave_v, 2)) / delta;
+  double k_p = (density * pow(pwave_v, 2)) / delta;
+  Eigen::Matrix<double, Tdim, 1> spring_constant =
+      Eigen::MatrixXd::Constant(Tdim, 1, k_s);
+  spring_constant(dir, 0) = k_p;
+
+  // Iterate through each phase
+  for (unsigned phase = 0; phase < Tnphases; ++phase) {
+    // Calculate Aborbing Traction
+    Eigen::Matrix<double, Tdim, 1> absorbing_traction_ =
+        this->velocity_.col(phase).cwiseProduct(wave_velocity) * density +
+        material_displacement.cwiseProduct(spring_constant);
+
+    // Update external force
+    this->update_external_force(true, phase, -absorbing_traction_);
+  }
+}
 
 //! Assign friction constraint
 //! Constrain directions can take values between 0 and Dim * Nphases

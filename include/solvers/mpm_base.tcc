@@ -236,6 +236,9 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
   // Read and assign friction constraints
   this->nodal_frictional_constraints(mesh_props, mesh_io);
 
+  // Read and assign absorbing constraintes
+  this->nodal_absorbing_constraints(mesh_props, mesh_io);
+
   // Initialise cell
   auto cells_begin = std::chrono::steady_clock::now();
   // Shape function name
@@ -937,6 +940,62 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
   }
 }
 
+// Nodal absorbing constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign absorbing constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("absorbing_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      // Iterate over velocity constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["absorbing_constraints"]) {
+        // Absorbing constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+          std::string absorbing_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool absorbing_constraints =
+              constraints_->assign_nodal_absorbing_constraints(
+                  mesh_io->read_absorbing_constraints(
+                      io_->file_name(absorbing_constraints_file)));
+          if (!absorbing_constraints)
+            throw std::runtime_error(
+                "Absorbing constraints are not properly assigned");
+
+        } else {
+
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Direction
+          unsigned dir = constraints.at("dir").template get<unsigned>();
+          // Delta
+          double delta = constraints.at("delta").template get<double>();
+          // a
+          double a = constraints.at("a").template get<double>();
+          // b
+          double b = constraints.at("b").template get<double>();
+          // Add absorbing constraint to mesh
+          auto absorbing_constraint =
+              std::make_shared<mpm::AbsorbingConstraint>(nset_id, dir, delta, a,
+                                                         b);
+          bool absorbing_constraints =
+              constraints_->assign_nodal_absorbing_constraint(
+                  nset_id, absorbing_constraint);
+          if (!absorbing_constraints)
+            throw std::runtime_error(
+                "Nodal absorbing constraint is not properly assigned");
+        }
+      }
+    } else
+      throw std::runtime_error("Absorbing constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Absorbing conditions are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
 //! Cell entity sets
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::cell_entity_sets(const Json& mesh_props,
