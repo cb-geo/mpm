@@ -106,26 +106,27 @@ bool mpm::Constraints<Tdim>::assign_nodal_friction_constraints(
   return status;
 }
 
-//! Assign absorbing constraints to nodes
+//! Apply absorbing constraints to nodes
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
-    int nset_id, const std::shared_ptr<mpm::AbsorbingConstraint>& aconstraint) {
+    int nset_id,
+    const std::shared_ptr<mpm::AbsorbingConstraint>& absorbing_constraint) {
   bool status = true;
   try {
-    int set_id = aconstraint->setid();
+    int set_id = absorbing_constraint->setid();
     auto nset = mesh_->nodes(set_id);
     if (nset.size() == 0)
       throw std::runtime_error(
-          "Node set is empty for assignment of absorbing constraints");
-    unsigned dir = aconstraint->dir();
-    double delta = aconstraint->delta();
-    double a = aconstraint->a();
-    double b = aconstraint->b();
-    double h_min = 1.0;  // mesh_->cells()->mean_length_;
+          "Node set is empty for application of absorbing constraints");
+    unsigned dir = absorbing_constraint->dir();
+    double delta = absorbing_constraint->delta();
+    double h_min = absorbing_constraint->h_min();
+    double a = absorbing_constraint->a();
+    double b = absorbing_constraint->b();
     for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
-      if (!(*nitr)->assign_absorbing_constraint(dir, delta, a, b, h_min))
+      if (!(*nitr)->apply_absorbing_constraint(dir, delta, a, b, h_min))
         throw std::runtime_error(
-            "Failed to initialise absorbing constraint at node");
+            "Failed to apply absorbing constraint at node");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -137,8 +138,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
 //! Assign absorbing constraints to nodes
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, double, double, double>>&
-        absorbing_constraints) {
+    const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
+                                 double>>& absorbing_constraints) {
   bool status = true;
   try {
     for (const auto& absorbing_constraint : absorbing_constraints) {
@@ -148,16 +149,16 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       unsigned dir = std::get<1>(absorbing_constraint);
       // Delta
       double delta = std::get<2>(absorbing_constraint);
+      // h_min
+      double h_min = std::get<3>(absorbing_constraint);
       // a
-      double a = std::get<3>(absorbing_constraint);
+      double a = std::get<4>(absorbing_constraint);
       // b
-      double b = std::get<4>(absorbing_constraint);
-      // Cell Height
-      double h_min = 1.0;  // mesh_->cells()->mean_length_;
+      double b = std::get<5>(absorbing_constraint);
 
       // Apply constraint
-      if (!mesh_->node(nid)->assign_absorbing_constraint(dir, delta, a, b,
-                                                         h_min))
+      if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, a, b,
+                                                        h_min))
         throw std::runtime_error(
             "Nodal absorbing constraints assignment failed");
     }

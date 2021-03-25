@@ -86,12 +86,6 @@ class IOMeshAscii : public IOMesh<Tdim> {
       read_friction_constraints(
           const std::string& friction_constraints_file) override;
 
-  //! Read absorping constraints file
-  //! \param[in] absorbing_constraints_files file name with tractions
-  std::vector<std::tuple<mpm::Index, unsigned, double, double, double>>
-      read_absorbing_constraints(
-          const std::string& absorbing_constraints_file) override;
-
   //! Read traction file
   //! \param[in] forces_files file name with nodal concentrated force
   std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(

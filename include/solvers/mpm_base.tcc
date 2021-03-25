@@ -949,23 +949,9 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
         mesh_props["boundary_conditions"].find("absorbing_constraints") !=
             mesh_props["boundary_conditions"].end()) {
-      // Iterate over velocity constraints
+      // Iterate over absorbing constraints
       for (const auto& constraints :
            mesh_props["boundary_conditions"]["absorbing_constraints"]) {
-        // Absorbing constraints are specified in a file
-        if (constraints.find("file") != constraints.end()) {
-          std::string absorbing_constraints_file =
-              constraints.at("file").template get<std::string>();
-          bool absorbing_constraints =
-              constraints_->assign_nodal_absorbing_constraints(
-                  mesh_io->read_absorbing_constraints(
-                      io_->file_name(absorbing_constraints_file)));
-          if (!absorbing_constraints)
-            throw std::runtime_error(
-                "Absorbing constraints are not properly assigned");
-
-        } else {
-
           // Set id
           int nset_id = constraints.at("nset_id").template get<int>();
           // Direction
@@ -986,7 +972,6 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
           if (!absorbing_constraints)
             throw std::runtime_error(
                 "Nodal absorbing constraint is not properly assigned");
-        }
       }
     } else
       throw std::runtime_error("Absorbing constraints JSON not found");

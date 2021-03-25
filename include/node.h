@@ -213,18 +213,15 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Time-step
   void apply_friction_constraints(double dt) override;
 
-  //! Assign absorbing constraint
+  //! Apply absorbing constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of absorbing constraint
   //! \param[in] delta Virtual viscous layer thickness
   //! \param[in] a Equation constant
   //! \param[in] a Equation constant
   //! \param[in] h_min Characteristic Length
-  bool assign_absorbing_constraint(unsigned dir, double delta, double a,
-                                   double b, double h_min) override;
-
-  //! Apply absorbing_constraint
-  void apply_absorbing_constraint() override;
+  bool apply_absorbing_constraint(unsigned dir, double delta, double a,
+                                  double b, double h_min) override;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
@@ -319,10 +316,6 @@ class Node : public NodeBase<Tdim> {
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_boundary_constraints_{false};
-  //! Absorbing constraints
-  std::tuple<unsigned, double, double, double> absorbing_constraint_;
-  //! Absorbing traction
-  Eigen::Matrix<double, Tdim, 1> absorbing_traction_;
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;

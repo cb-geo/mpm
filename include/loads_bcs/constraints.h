@@ -51,15 +51,17 @@ class Constraints {
 
   //! Assign nodal absorbing constraints
   //! \param[in] setid Node set id
-  //! \param[in] absorbing_constraints Constraint at node, dir, delta, a, b
+  //! \param[in] absorbing_constraints Constraint at node, dir, delta, h_min, a,
+  //! b
   bool assign_nodal_absorbing_constraint(
       int nset_id,
-      const std::shared_ptr<mpm::AbsorbingConstraint>& aconstraints);
+      const std::shared_ptr<mpm::AbsorbingConstraint>& absorbing_constraints);
 
   //! Assign absorbing constraints to nodes
-  //! \param[in] absorbing_constraints Constraint at node, dir, delta, a, and b
+  //! \param[in] absorbing_constraints Constraint at node, dir, delta, h_min, a,
+  //! and b
   bool assign_nodal_absorbing_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double, double,
+      const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
                                    double>>& absorbing_constraints);
 
  private:
