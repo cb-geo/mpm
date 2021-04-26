@@ -48,6 +48,11 @@ inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics() {
   mesh_->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
                 std::placeholders::_1, normal_type_));
+
+  // Map multimaterial normal traction to nodes
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::map_multimaterial_normal_traction_to_nodes,
+      std::placeholders::_1));
 }
 
 //! Compute contact forces

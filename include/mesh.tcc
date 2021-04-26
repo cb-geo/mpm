@@ -2004,6 +2004,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
                                        materials_.size());
     nodal_properties_->create_property("normal_unit_vectors", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("normal_tractions", nodes_.size(),
+                                       materials_.size());
     nodal_properties_->create_property("internal_forces", nrows,
                                        materials_.size());
     nodal_properties_->create_property("external_forces", nrows,
