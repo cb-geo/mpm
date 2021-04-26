@@ -152,6 +152,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Map multimaterial domain gradients to nodes
   void map_multimaterial_domain_gradients_to_nodes() noexcept override;
 
+  //! Map multimaterial normal traction to nodes
+  void map_multimaterial_normal_traction_to_nodes() noexcept override;
+
   //! Map multimaterial body force
   //! \param[in] pgravity Gravity
   void map_multimaterial_body_force(

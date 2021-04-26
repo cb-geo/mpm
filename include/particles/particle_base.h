@@ -162,6 +162,9 @@ class ParticleBase {
   //! Map multimaterial domain gradients to nodes
   virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
 
+  //! Map multimaterial normal traction to nodes
+  virtual void map_multimaterial_normal_traction_to_nodes() noexcept = 0;
+
   //! Map multimaterial internal force
   virtual void map_multimaterial_internal_force() noexcept = 0;
 

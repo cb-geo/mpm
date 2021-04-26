@@ -596,6 +596,55 @@ void mpm::Particle<
   }
 }
 
+//! Map multimaterial normal traction to nodes
+template <>
+inline void
+    mpm::Particle<2>::map_multimaterial_normal_traction_to_nodes() noexcept {
+  // Compute this particle's traction normal to the contact and map it to the
+  // nodes (stored in the nodal property pool
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    Eigen::Matrix<double, 2, 1> normal =
+        nodes_[i]->property("normal_unit_vectors", this->material_id(), 2);
+
+    // Compute the traction as normal dot stress dot normal
+    // t = n . sigma . n
+    Eigen::Matrix<double, 1, 1> traction = Eigen::Matrix<double, 1, 1>::Zero();
+    traction(0, 0) = (normal(0, 0) * normal(0, 0) * this->stress_(0, 0) +
+                      normal(1, 0) * normal(1, 0) * this->stress_(1, 0) +
+                      2 * normal(0, 0) * normal(1, 0) * this->stress_(3, 0));
+
+    // Update normal traction property at nodes
+    nodes_[i]->update_property(true, "normal_tractions", traction,
+                               this->material_id(), 1);
+  }
+}
+
+//! Map multimaterial normal traction to nodes
+template <>
+inline void
+    mpm::Particle<3>::map_multimaterial_normal_traction_to_nodes() noexcept {
+  // Compute this particle's traction normal to the contact and map it to the
+  // nodes (stored in the nodal property pool
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    Eigen::Matrix<double, 3, 1> normal =
+        nodes_[i]->property("normal_unit_vectors", this->material_id(), 3);
+
+    // Compute the traction as normal dot stress dot normal
+    // t = n . sigma . n
+    Eigen::Matrix<double, 1, 1> traction = Eigen::Matrix<double, 1, 1>::Zero();
+    traction(0, 0) = (normal(0, 0) * normal(0, 0) * this->stress_(0, 0) +
+                      normal(1, 0) * normal(1, 0) * this->stress_(1, 0) +
+                      normal(2, 0) * normal(2, 0) * this->stress_(2, 0) +
+                      2 * (normal(0, 0) * normal(1, 0) * this->stress_(3, 0) +
+                           normal(1, 0) * normal(2, 0) * this->stress_(4, 0) +
+                           normal(0, 0) * normal(2, 0) * this->stress_(5, 0)));
+
+    // Update normal traction property at nodes
+    nodes_[i]->update_property(true, "normal_tractions", traction,
+                               this->material_id(), 1);
+  }
+}
+
 //! Map multimaterial body forces
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_body_force(
