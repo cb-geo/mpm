@@ -278,7 +278,7 @@ class NodeBase {
 
   //! Apply concentrated force to the nodes in the multimaterial environment
   //! \param[in] phase Index corresponding to the phase
-  //! \param[in] current time
+  //! \param[in] current_time Current instant of time
   virtual void apply_multimaterial_concentrated_force(unsigned phase,
                                                       double current_time) = 0;
 
