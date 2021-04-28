@@ -822,9 +822,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
       // property pool
       property_handle_->assign_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
-      // property_handle_->assign_property("current_velocities", prop_id_,
-      // *mitr, velocity,
-      //                                  Tdim);
+      property_handle_->assign_property("current_velocities", prop_id_, *mitr,
+                                        velocity, Tdim);
     }
   }
   node_mutex_.unlock();
@@ -878,7 +877,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
           "relative_velocities", prop_id_, *mitr, Tdim);
       double velocity_normal = relative_velocity.dot(normal_unit_vector);
       velocity_normal =
-          (abs(velocity_normal) < tolerance) ? 0.0 : velocity_normal;
+          (std::abs(velocity_normal) < tolerance) ? 0.0 : velocity_normal;
 
       // Get current velocity
       VectorDim corrected_velocity =
@@ -886,24 +885,61 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
 
       // Check if the material is approaching the other materials (v_norm > 0)
       if (velocity_normal > 0) {
-        // Determine the friction coefficient to apply tangent correction
-        double cross_product =
-            relative_velocity(0, 0) * normal_unit_vector(1, 0) -
-            relative_velocity(1, 0) * normal_unit_vector(0, 0);
-        double mu =
-            std::min(friction, std::abs(cross_product) / velocity_normal);
+        // Compute corrections according to number of dimensions
+        VectorDim corrections = VectorDim::Zero();
+        if (Tdim == 2) {
+          // Determine the friction coefficient to apply tangent correction
+          double cross_product =
+              relative_velocity(0, 0) * normal_unit_vector(1, 0) -
+              relative_velocity(1, 0) * normal_unit_vector(0, 0);
+          double mu =
+              std::min(friction, std::abs(cross_product) / velocity_normal);
 
-        // Compute normal and tangential correction
-        VectorDim normal_correction = -velocity_normal * normal_unit_vector;
-        VectorDim tangent_correction = VectorDim::Zero();
-        tangent_correction(0, 0) = normal_unit_vector(1, 0) * cross_product;
-        tangent_correction(1, 0) = -normal_unit_vector(0, 0) * cross_product;
-        tangent_correction = -mu * velocity_normal / std::abs(cross_product) *
-                             tangent_correction;
+          // Compute the normal and tangential corrections
+          VectorDim normal_correction = -velocity_normal * normal_unit_vector;
+          VectorDim tangent_correction = VectorDim::Zero();
+          tangent_correction(0, 0) = normal_unit_vector(1, 0) * cross_product;
+          tangent_correction(1, 0) = -normal_unit_vector(0, 0) * cross_product;
+          tangent_correction = -mu * velocity_normal / std::abs(cross_product) *
+                               tangent_correction;
 
-        // Update the velocity with the computed corrections
-        VectorDim corrections = normal_correction + tangent_correction;
-        corrected_velocity = corrected_velocity + corrections;
+          // Update the velocity with the computed corrections
+          corrections = normal_correction + tangent_correction;
+          corrected_velocity = corrected_velocity + corrections;
+        } else if (Tdim == 3) {
+          // Determine the friction coefficient to apply tangent correction
+          VectorDim cross_product = VectorDim::Zero();
+          cross_product(0, 0) =
+              relative_velocity(1, 0) * normal_unit_vector(2, 0) -
+              relative_velocity(2, 0) * normal_unit_vector(1, 0);
+          cross_product(1, 0) =
+              relative_velocity(2, 0) * normal_unit_vector(0, 0) -
+              relative_velocity(0, 0) * normal_unit_vector(2, 0);
+          cross_product(2, 0) =
+              relative_velocity(0, 0) * normal_unit_vector(1, 0) -
+              relative_velocity(1, 0) * normal_unit_vector(0, 0);
+          double mu =
+              std::min(friction, cross_product.norm() / velocity_normal);
+
+          // Compute the normal and tangential corrections
+          VectorDim normal_correction = -velocity_normal * normal_unit_vector;
+          VectorDim tangent_correction = VectorDim::Zero();
+          tangent_correction(0, 0) =
+              normal_unit_vector(1, 0) * cross_product(2, 0) -
+              normal_unit_vector(2, 0) * cross_product(1, 0);
+          tangent_correction(1, 0) =
+              normal_unit_vector(2, 0) * cross_product(0, 0) -
+              normal_unit_vector(0, 0) * cross_product(2, 0);
+          tangent_correction(2, 0) =
+              normal_unit_vector(0, 0) * cross_product(1, 0) -
+              normal_unit_vector(1, 0) * cross_product(0, 0);
+          tangent_correction =
+              -velocity_normal * mu * tangent_correction / cross_product.norm();
+
+          // Update the velocity with the computed corrections
+          corrections = normal_correction + tangent_correction;
+          corrected_velocity = corrected_velocity + corrections;
+        }
 
         // Approximate small values to 0
         for (int i = 0; i < Tdim; ++i)
