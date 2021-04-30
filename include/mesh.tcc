@@ -2092,8 +2092,7 @@ void mpm::Mesh<Tdim>::compute_rigid_body_acceleration() {
       // Compute the rigid body acceleration
       VectorDim rigid_acceleration = VectorDim::Zero();
       if (rigid_mass > 0.0)
-        rigid_acceleration =
-            (external_forces - internal_forces) / rigid_mass;
+        rigid_acceleration = (external_forces - internal_forces) / rigid_mass;
 
       // Set acceleration to zero in the directions in which the rigid body was
       // constrained

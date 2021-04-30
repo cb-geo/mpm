@@ -55,9 +55,9 @@ inline void mpm::ContactFriction<Tdim>::compute_nodal_kinematics() {
       std::placeholders::_1));
 
   // Map multimaterial rigid constraint
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::map_multimaterial_rigid_constraint,
-      std::placeholders::_1));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_rigid_constraint,
+                std::placeholders::_1));
 }
 
 //! Compute contact forces
@@ -93,7 +93,7 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
 
   // Compute the rigid body accelerations
   mesh_->compute_rigid_body_acceleration();
-  
+
   // Iterate over each node to compute the acceleration and velocity of each
   // material
   mesh_->iterate_over_nodes(

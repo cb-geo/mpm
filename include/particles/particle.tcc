@@ -647,8 +647,9 @@ inline void
 
 //! Map multimaterial rigid constraint
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_multimaterial_rigid_constraint() noexcept{
-  // Iterate over all nodes and set constraint to 1.0 if this particle's velocity is constrained
+void mpm::Particle<Tdim>::map_multimaterial_rigid_constraint() noexcept {
+  // Iterate over all nodes and set constraint to 1.0 if this particle's
+  // velocity is constrained
   if (this->constrained_) {
     for (unsigned i = 0; i < nodes_.size(); ++i) {
       Eigen::Matrix<double, 1, 1> rigid_constraint;
