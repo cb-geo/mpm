@@ -5,6 +5,7 @@
 #include "mohr_coulomb.h"
 #include "newtonian.h"
 #include "norsand.h"
+#include "rigid.h"
 
 // Bingham 2D
 static Register<mpm::Material<2>, mpm::Bingham<2>, unsigned, const Json&>
@@ -55,3 +56,11 @@ static Register<mpm::Material<2>, mpm::NorSand<2>, unsigned, const Json&>
 // Norsand 3D
 static Register<mpm::Material<3>, mpm::NorSand<3>, unsigned, const Json&>
     nor_sand_3d("NorSand3D");
+
+// Rigid 2D
+static Register<mpm::Material<2>, mpm::Rigid<2>, unsigned, const Json&>
+    rigid_2d("Rigid2D");
+
+// Rigid 3D
+static Register<mpm::Material<3>, mpm::Rigid<3>, unsigned, const Json&>
+    rigid_3d("Rigid3D");
