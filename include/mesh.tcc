@@ -2017,6 +2017,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
                                        materials_.size());
     nodal_properties_->create_property("relative_velocities", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("rigid_constraints", nodes_.size(),
+                                       materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node
     // and assign its node id as the prop id in the nodal property data pool
@@ -2032,4 +2034,84 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::initialise_nodal_properties() {
   // Call initialise_properties function from the nodal properties
   nodal_properties_->initialise_nodal_properties();
+}
+
+// Compute the nodal acceleration of rigid bodies
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_rigid_body_acceleration() {
+  // Iterate over all materials
+  for (auto mitr = materials_.begin(); mitr != materials_.end(); ++mitr) {
+    // If material is Rigid, proceed into computing its acceleration
+    std::string material_type =
+        (mitr->second)->template property<std::string>(std::string("type"));
+    if (material_type == "Rigid2D" || material_type == "Rigid3D") {
+      // Get material id of the rigid body
+      unsigned material_id =
+          (mitr->second)->template property<unsigned>(std::string("id"));
+
+      // Initialize the external forces and mass at the rigid body
+      double rigid_mass = 0.0;
+      VectorDim external_forces = VectorDim::Zero();
+
+      // Initialize the internal forces at contact interfaces
+      VectorDim internal_forces = VectorDim::Zero();
+
+      // Initialize a constrained status variable to store the constrained
+      // condition of the rigid body in each of the three cartesian directions
+      std::vector<bool> constrained = {false, false, false};
+
+      // Iterate over all nodes
+      for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+        // Check if the rigid material id has been mapped to the node
+        std::set<unsigned> material_ids = (*nitr)->material_ids();
+        if (material_ids.find(material_id) != material_ids.end()) {
+          // Add mass and external force of rigid body at this node to the total
+          // amount
+          rigid_mass += (*nitr)->property("masses", material_id)(0, 0);
+          external_forces =
+              external_forces +
+              (*nitr)->property("external_forces", material_id, Tdim);
+
+          // Iterate over all materials and add their internal force to the
+          // total amount. The rigid body should have zero internal force by its
+          // definition. Non-zero internal force of another body indicate
+          // contact between itself and the rigid body of this iteration
+          for (auto mitr = material_ids.begin(); mitr != material_ids.end();
+               ++mitr) {
+            internal_forces = internal_forces +
+                              (*nitr)->property("internal_forces", *mitr, Tdim);
+          }
+
+          // Check if the rigid body is constrained at this node in any
+          // direction
+          for (unsigned itr = 0; itr < 3; ++itr)
+            constrained[itr] = (*nitr)->is_constrained(itr);
+        }
+      }
+
+      // Compute the rigid body acceleration
+      VectorDim rigid_acceleration = VectorDim::Zero();
+      if (rigid_mass > 0.0)
+        rigid_acceleration =
+            (external_forces - internal_forces) / rigid_mass;
+
+      // Set acceleration to zero in the directions in which the rigid body was
+      // constrained
+      for (unsigned itr = 0; itr < 3; ++itr)
+        if (constrained[itr] = true) rigid_acceleration(itr, 0) = 0.0;
+
+      // Iterate over all nodes
+      for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+        // Update rigid body's acceleration in the nodal property pool
+        (*nitr)->update_property(false, "accelerations", rigid_acceleration,
+                                 material_id, Tdim);
+
+        // Update the rigid body's constraints in the nodal property pool
+        Eigen::Matrix<double, 1, 1> rigid_constraint;
+        rigid_constraint(0, 0) = 2.0;
+        (*nitr)->update_property(false, "rigid_constraints", rigid_constraint,
+                                 material_id, 1);
+      }
+    }
+  }
 }

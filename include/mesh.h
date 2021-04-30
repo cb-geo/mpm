@@ -467,6 +467,9 @@ class Mesh {
   // Initialise the nodal properties' map
   void initialise_nodal_properties();
 
+  // Compute the nodal acceleration of rigid bodies
+  void compute_rigid_body_acceleration();
+
  private:
   // Read particles from file
   //! \param[in] pset_id Set ID of the particles
