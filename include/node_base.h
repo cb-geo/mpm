@@ -194,6 +194,10 @@ class NodeBase {
   //! \param[in] velocity Applied velocity constraint
   virtual bool assign_velocity_constraint(unsigned dir, double velocity) = 0;
 
+  //! Return if node is constrained in the given direction
+  //! \param[in] dir Direction of velocity constraint
+  virtual bool is_constrained(unsigned dir) = 0;
+
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 

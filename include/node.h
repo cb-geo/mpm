@@ -202,6 +202,12 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] velocity Applied velocity constraint
   bool assign_velocity_constraint(unsigned dir, double velocity) override;
 
+  //! Return if node is constrained in the given direction
+  //! \param[in] dir Direction of velocity constraint
+  bool is_constrained(unsigned dir) override {
+    return (velocity_constraints_.find(dir) != velocity_constraints_.end());
+  }
+
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
