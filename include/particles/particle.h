@@ -155,6 +155,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Map multimaterial normal traction to nodes
   void map_multimaterial_normal_traction_to_nodes() noexcept override;
 
+  //! Map multimaterial rigid constraint
+  void map_multimaterial_rigid_constraint() noexcept override;
+
   //! Map multimaterial body force
   //! \param[in] pgravity Gravity
   void map_multimaterial_body_force(

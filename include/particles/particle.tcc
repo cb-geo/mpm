@@ -645,6 +645,20 @@ inline void
   }
 }
 
+//! Map multimaterial rigid constraint
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_multimaterial_rigid_constraint() noexcept{
+  // Iterate over all nodes and set constraint to 1.0 if this particle's velocity is constrained
+  if (this->constrained_) {
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      Eigen::Matrix<double, 1, 1> rigid_constraint;
+      rigid_constraint(0, 0) = 1.0;
+      nodes_[i]->update_property(false, "rigid_constraints", rigid_constraint,
+                                 this->material_id(), Tdim);
+    }
+  }
+}
+
 //! Map multimaterial body forces
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_body_force(

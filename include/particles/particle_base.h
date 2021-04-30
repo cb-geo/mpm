@@ -168,6 +168,9 @@ class ParticleBase {
   //! Map multimaterial internal force
   virtual void map_multimaterial_internal_force() noexcept = 0;
 
+  //! Map multimaterial rigid constraint
+  virtual void map_multimaterial_rigid_constraint() noexcept = 0;
+
   //! Map multimaterial body force
   //! \param[in] pgravity Gravity
   virtual void map_multimaterial_body_force(
