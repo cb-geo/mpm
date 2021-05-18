@@ -307,23 +307,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
       VectorDim external_force =
           property_handle_->property("external_forces", prop_id_, *mitr, Tdim);
 
-      // Compute the acceleration of the current material. If the material has
-      // particle velocity constraints (rigid_constraint = 1), set material and
-      // CM acceleration to zero. If it the material is rigid (rigid_constraint
-      // = 2), set acceleration to be the same as that of the rigid body.
-      // Otherwise: acceleration = (unbalanced force / mass)
-      double rigid_constraint = property_handle_->property(
-          "rigid_constraints", prop_id_, *mitr)(0, 0);
-      VectorDim acceleration = VectorDim::Zero();
-      if (rigid_constraint == 1.0) {
-        this->acceleration_ = acceleration;
-      } else if (rigid_constraint == 2.0) {
-        acceleration =
-            property_handle_->property("accelerations", prop_id_, *mitr, Tdim);
-        if (material_ids_.size() > 1) this->acceleration_ = acceleration;
-      } else {
-        acceleration = (1 / mass) * (external_force + internal_force);
-      }
+      // Compute the acceleration and of the current material
+      // acceleration = (unbalanced force / mass)
+      VectorDim acceleration = (1 / mass) * (external_force + internal_force);
       property_handle_->assign_property("accelerations", prop_id_, *mitr,
                                         acceleration, Tdim);
 
@@ -331,12 +317,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
       VectorDim velocity = acceleration * dt;
       property_handle_->update_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
-
-      // If material has particles that are fixed or if rigid, update the
-      // velocity of the center of mass to that of the rigid's material
-      if (rigid_constraint > 0.0)
-        this->velocity_ =
-            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
 
       // Update current velocity if there is only one material
       if (material_ids_.size() == 1) {
@@ -672,12 +652,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     unsigned nprops) noexcept {
   // Update/assign property
   node_mutex_.lock();
-  if (update)
-    property_handle_->update_property(property, prop_id_, mat_id,
-                                      property_value, nprops);
-  else
-    property_handle_->assign_property(property, prop_id_, mat_id,
-                                      property_value, nprops);
+  property_handle_->update_property(property, prop_id_, mat_id, property_value,
+                                    nprops);
   node_mutex_.unlock();
 }
 
