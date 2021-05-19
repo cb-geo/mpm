@@ -726,6 +726,81 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
         }
+
+        SECTION("Check absorbing boundary") {
+          // Create a force vector
+          Eigen::Matrix<double, Dim, 1> force;
+          for (unsigned i = 0; i < force.size(); ++i) force(i) = 10. * (2 - i);
+          REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
+
+          // Assign volume to 100
+          double volume = 100.;
+          REQUIRE_NOTHROW(node->update_volume(false, Nphase, volume));
+          REQUIRE(node->volume(Nphase) == Approx(100.0).epsilon(Tolerance));
+
+          // Assign mass to 100
+          double mass = 100.;
+          REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
+          REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
+
+          // Compute velocity
+          double dt = 0.1;
+          REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
+
+          // Check velocity
+          Eigen::Matrix<double, Dim, 1> velocity = force / mass * dt;
+          for (unsigned i = 0; i < velocity.size(); ++i)
+            REQUIRE(node->velocity(Nphase)(i) ==
+                    Approx(velocity(i)).epsilon(Tolerance));
+
+          // Define nodal properties
+          Eigen::Matrix<double, 1, 1> density;
+          density(0) = mass / volume;
+          Eigen::Matrix<double, Dim, 1> wave_v;
+          for (double i = 0; i < wave_v.size(); ++i) wave_v(i) = 100 * (2 - i);
+          Eigen::Matrix<double, Dim, 1> displacements;
+          for (double i = 0; i < displacements.size(); ++i)
+            displacements(i) = 0.0001 * (2 - i);
+
+          // Define material id
+          unsigned mat_id = 0;
+          node->append_material_id(mat_id);
+
+          // Assign nodal properties
+          auto nodal_properties = std::make_shared<mpm::NodalProperties>();
+          nodal_properties->create_property("density", 1, 1);
+          nodal_properties->create_property("wave_velocities", Dim, 1);
+          nodal_properties->create_property("displacements", Dim, 1);
+          REQUIRE_NOTHROW(
+              node->initialise_property_handle(0, nodal_properties));
+          REQUIRE_NOTHROW(
+              node->update_property(false, "density", density, mat_id, 1));
+          REQUIRE_NOTHROW(node->update_property(false, "wave_velocities",
+                                                wave_v, mat_id, Dim));
+          REQUIRE_NOTHROW(node->update_property(false, "displacements",
+                                                displacements, mat_id, Dim));
+
+          // Check invalid direction
+          unsigned bad_dir = 4;
+          REQUIRE(node->apply_absorbing_constraint(bad_dir, 0, 1, 1, 1) ==
+                  false);
+
+          // Apply absorbing constraint
+          unsigned dir = 0;
+          REQUIRE(node->apply_absorbing_constraint(dir, 1, 1, 1, 1) == true);
+
+          // Calculation of absorbing force
+          double pwave_traction = -12.;
+          double swave_traction = -2.;
+          for (unsigned i = 0; i < Dim; ++i) {
+            if (i == dir)
+              REQUIRE(node->external_force(Nphase)(i) ==
+                      Approx(pwave_traction + force(i)).epsilon(Tolerance));
+            else
+              REQUIRE(node->external_force(Nphase)(i) ==
+                      Approx(swave_traction + force(i)).epsilon(Tolerance));
+          }
+        }
       }
     }
 

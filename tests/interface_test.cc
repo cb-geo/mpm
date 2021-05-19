@@ -44,6 +44,8 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                                     Nmaterials);
   nodal_properties->create_property("normal_unit_vectors", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("wave_velocities", Nnodes * Dim,
+                                    Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -204,6 +206,11 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   node2->compute_multimaterial_normal_unit_vector();
   node3->compute_multimaterial_normal_unit_vector();
 
+  // Map wave velocities to nodes
+  particle1->map_wave_velocities_to_nodes();
+  particle2->map_wave_velocities_to_nodes();
+  particle3->map_wave_velocities_to_nodes();
+
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
   masses << 0.96, 1.46,
@@ -283,6 +290,18 @@ TEST_CASE("Interface functions are checked", "[interface]") {
              0.89442719099992,  0.88491822238198;
   // clang-format on
 
+  Eigen::Matrix<double, 8, 2> wave_velocities;
+  // clang-format off
+  wave_velocities << 116.023870223, 2*116.023870223,
+                     62.0173672946, 2*62.0173672946,
+                     116.023870223, 2*116.023870223,
+                     62.0173672946, 2*62.0173672946,
+                     116.023870223, 2*116.023870223,
+                     62.0173672946, 2*62.0173672946,
+                     116.023870223, 2*116.023870223,
+                     62.0173672946, 2*62.0173672946;
+  // clang-format on
+
   // Check if nodal properties were properly mapped and computed
   for (int i = 0; i < Nnodes; ++i) {
     for (int j = 0; j < Nmaterials; ++j) {
@@ -304,6 +323,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
             Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
         REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
                     k, 0) == Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(
+            nodal_properties->property("wave_velocities", i, j, Dim)(k, 0) ==
+            Approx(wave_velocities(i * Dim + k, j)).epsilon(tolerance));
       }
       // Check if normal vector are also unit vectors
       REQUIRE(

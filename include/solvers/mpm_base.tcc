@@ -958,13 +958,15 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
           unsigned dir = constraints.at("dir").template get<unsigned>();
           // Delta
           double delta = constraints.at("delta").template get<double>();
+          // h_min
+          double h_min = constraints.at("h_min").template get<double>();          
           // a
           double a = constraints.at("a").template get<double>();
           // b
           double b = constraints.at("b").template get<double>();
           // Add absorbing constraint to mesh
           auto absorbing_constraint =
-              std::make_shared<mpm::AbsorbingConstraint>(nset_id, dir, delta, a,
+              std::make_shared<mpm::AbsorbingConstraint>(nset_id, dir, delta, h_min, a,
                                                          b);
           bool absorbing_constraints =
               constraints_->assign_nodal_absorbing_constraint(
