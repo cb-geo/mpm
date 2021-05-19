@@ -220,8 +220,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] a Equation constant
   //! \param[in] a Equation constant
   //! \param[in] h_min Characteristic Length
-  bool apply_absorbing_constraint(unsigned dir, double delta, double a,
-                                  double b, double h_min) override;
+  bool apply_absorbing_constraint(unsigned dir, double delta, double h_min,
+                                  double a, double b) override;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
