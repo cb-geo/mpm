@@ -308,8 +308,17 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
           property_handle_->property("external_forces", prop_id_, *mitr, Tdim);
 
       // Compute the acceleration and of the current material
+      // If particles' velocities are not constrained:
       // acceleration = (unbalanced force / mass)
-      VectorDim acceleration = (1 / mass) * (external_force + internal_force);
+      VectorDim acceleration = VectorDim::Zero();
+      Eigen::Matrix<double, 1, 1> rigid_constraint =
+          this->property("rigid_constraints", *mitr, 1);
+      if (rigid_constraint(0, 0) == 0.0) {
+        acceleration = (1 / mass) * (external_force + internal_force);
+      } else {
+        this->acceleration_ = acceleration;
+        this->velocity_ = this->property("velocities", *mitr, Tdim);
+      }
       property_handle_->assign_property("accelerations", prop_id_, *mitr,
                                         acceleration, Tdim);
 
@@ -317,14 +326,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
       VectorDim velocity = acceleration * dt;
       property_handle_->update_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
-
-      // Update current velocity if there is only one material
-      if (material_ids_.size() == 1) {
-        VectorDim current_velocity =
-            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
-        property_handle_->assign_property("current_velocities", prop_id_, *mitr,
-                                          current_velocity, Tdim);
-      }
 
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
@@ -411,9 +412,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_velocity_constraints() {
       for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
            ++mitr) {
         // Get veloocity and acceleration for current material
-        auto velocity =
+        VectorDim velocity =
             property_handle_->property("velocities", prop_id_, *mitr, Tdim);
-        auto acceleration =
+        VectorDim acceleration =
             property_handle_->property("accelerations", prop_id_, *mitr, Tdim);
 
         if (!generic_boundary_constraints_) {
@@ -652,8 +653,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     unsigned nprops) noexcept {
   // Update/assign property
   node_mutex_.lock();
-  property_handle_->update_property(property, prop_id_, mat_id, property_value,
-                                    nprops);
+  if (update)
+    property_handle_->update_property(property, prop_id_, mat_id,
+                                      property_value, nprops);
+  else
+    property_handle_->assign_property(property, prop_id_, mat_id,
+                                      property_value, nprops);
+
   node_mutex_.unlock();
 }
 
@@ -792,6 +798,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
     if (material_id_largest != *mitr && normal_type == "MVG")
       normal_unit_vector = -1 * normal_unit_vector;
 
+    // Check to see if normal unit vector is below threshold
+    const double tolerance = 1.0E-15;
+    for (int i = 0; i < Tdim; ++i) {
+      if (std::abs(normal_unit_vector(i, 0)) < tolerance)
+        normal_unit_vector(i, 0) = 0.0;
+    }
+
     // assign nodal-multimaterial normal unit vector to property pool
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
                                       normal_unit_vector, Tdim);
@@ -814,6 +827,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
       VectorDim momentum =
           property_handle_->property("momenta", prop_id_, *mitr, Tdim);
       VectorDim velocity = (1 / mass) * momentum;
+
+      // Check to see if velocity is below threshold
       for (int i = 0; i < Tdim; ++i) {
         if (std::abs(velocity(i, 0)) < tolerance) velocity(i, 0) = 0.0;
       }
@@ -822,6 +837,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
       // property pool
       property_handle_->assign_property("velocities", prop_id_, *mitr, velocity,
                                         Tdim);
+
+      // Apply velocity constraints, which also sets acceleration to 0
+      this->apply_contact_velocity_constraints();
+
+      // Assign current velocity
+      velocity = this->property("velocities", *mitr, Tdim);
       property_handle_->assign_property("current_velocities", prop_id_, *mitr,
                                         velocity, Tdim);
     }
@@ -885,8 +906,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
 
       // Check if the material is approaching the other materials (v_norm > 0)
       if (velocity_normal > 0) {
-        // Compute corrections according to number of dimensions
-        VectorDim corrections = VectorDim::Zero();
+        // Compute the normal correction
+        VectorDim normal_correction = -velocity_normal * normal_unit_vector;
+
+        // Compute the tangent correction
+        VectorDim tangent_correction = VectorDim::Zero();
         if (Tdim == 2) {
           // Determine the friction coefficient to apply tangent correction
           double cross_product =
@@ -895,17 +919,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
           double mu =
               std::min(friction, std::abs(cross_product) / velocity_normal);
 
-          // Compute the normal and tangential corrections
-          VectorDim normal_correction = -velocity_normal * normal_unit_vector;
-          VectorDim tangent_correction = VectorDim::Zero();
           tangent_correction(0, 0) = normal_unit_vector(1, 0) * cross_product;
           tangent_correction(1, 0) = -normal_unit_vector(0, 0) * cross_product;
           tangent_correction = -mu * velocity_normal / std::abs(cross_product) *
                                tangent_correction;
-
-          // Update the velocity with the computed corrections
-          corrections = normal_correction + tangent_correction;
-          corrected_velocity = corrected_velocity + corrections;
         } else if (Tdim == 3) {
           // Determine the friction coefficient to apply tangent correction
           VectorDim cross_product = VectorDim::Zero();
@@ -921,9 +938,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
           double mu =
               std::min(friction, cross_product.norm() / velocity_normal);
 
-          // Compute the normal and tangential corrections
-          VectorDim normal_correction = -velocity_normal * normal_unit_vector;
-          VectorDim tangent_correction = VectorDim::Zero();
           tangent_correction(0, 0) =
               normal_unit_vector(1, 0) * cross_product(2, 0) -
               normal_unit_vector(2, 0) * cross_product(1, 0);
@@ -935,11 +949,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
               normal_unit_vector(1, 0) * cross_product(0, 0);
           tangent_correction =
               -velocity_normal * mu * tangent_correction / cross_product.norm();
-
-          // Update the velocity with the computed corrections
-          corrections = normal_correction + tangent_correction;
-          corrected_velocity = corrected_velocity + corrections;
         }
+
+        // Update the velocity with the computed corrections
+        VectorDim corrections = normal_correction + tangent_correction;
+        corrected_velocity = corrected_velocity + corrections;
 
         // Approximate small values to 0
         for (int i = 0; i < Tdim; ++i)
@@ -957,9 +971,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
         property_handle_->update_property("accelerations", prop_id_, *mitr,
                                           corrected_acceleration, Tdim);
       }
-      // Update current velocity
-      property_handle_->assign_property("current_velocities", prop_id_, *mitr,
-                                        corrected_velocity, Tdim);
     }
   }
   node_mutex_.unlock();

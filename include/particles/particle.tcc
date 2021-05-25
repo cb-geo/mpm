@@ -655,7 +655,7 @@ void mpm::Particle<Tdim>::map_multimaterial_rigid_constraint() noexcept {
       Eigen::Matrix<double, 1, 1> rigid_constraint;
       rigid_constraint(0, 0) = 1.0;
       nodes_[i]->update_property(false, "rigid_constraints", rigid_constraint,
-                                 this->material_id(), 1);
+                                 this->material_id(0), 1);
     }
   }
 }
