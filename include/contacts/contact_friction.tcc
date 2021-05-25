@@ -91,9 +91,6 @@ inline void mpm::ContactFriction<Tdim>::compute_contact_forces(
 template <unsigned Tdim>
 inline void mpm::ContactFriction<Tdim>::compute_contact_kinematics(double dt) {
 
-  // Compute the rigid body accelerations
-  mesh_->compute_rigid_body_acceleration();
-
   // Iterate over each node to compute the acceleration and velocity of each
   // material
   mesh_->iterate_over_nodes(
