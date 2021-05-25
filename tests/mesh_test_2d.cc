@@ -1160,44 +1160,14 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           //! Constraints object
           auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
 
-          //! Required material information for nodes
-          // Initialise material models
-          mesh->initialise_material_models(materials);
-
-          // Check nodal properties creation
-          REQUIRE_NOTHROW(mesh->create_nodal_properties());
-
-          // Check nodal properties initialisation
-          REQUIRE_NOTHROW(mesh->initialise_nodal_properties());
-
-          // Update Relevant nodal properties
-          Eigen::Matrix<double, 1, 1> density;
-          density(0) = 1000;
-          Eigen::Matrix<double, Dim, 1> wave_v;
-          for (double i = 0; i < wave_v.size(); ++i) wave_v(i) = 100 * (2 - i);
-          Eigen::Matrix<double, Dim, 1> displacements;
-          for (double i = 0; i < displacements.size(); ++i)
-            displacements(i) = 0.0001 * (2 - i);
-
-          // Define material id
-          unsigned mat_id = 0;
-          mesh->node(0)->append_material_id(mat_id);
-
           // Assign nodal properties
           auto nodal_properties = std::make_shared<mpm::NodalProperties>();
           nodal_properties->create_property("density", 1, 1);
           nodal_properties->create_property("wave_velocities", Dim, 1);
           nodal_properties->create_property("displacements", Dim, 1);
           for (double i = 0; i < 4; ++i) {
-            REQUIRE_NOTHROW(mesh->node(i)->append_material_id(mat_id));
             REQUIRE_NOTHROW(
                 mesh->node(i)->initialise_property_handle(0, nodal_properties));
-            REQUIRE_NOTHROW(mesh->node(i)->update_property(false, "density",
-                                                           density, mat_id, 1));
-            REQUIRE_NOTHROW(mesh->node(i)->update_property(
-                false, "wave_velocities", wave_v, mat_id, Dim));
-            REQUIRE_NOTHROW(mesh->node(i)->update_property(
-                false, "displacements", displacements, mat_id, Dim));
           }
 
           int set_id = 0;
@@ -1215,7 +1185,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       set_id, absorbing_constraint) == true);
 
           set_id = 1;
-          dir = 0;
+          dir = 1;
           delta = 3;
           h_min = 12;
           a = 2;
@@ -1300,45 +1270,16 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           //! Constraints object
           auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
 
-          //! Required material information for nodes
-          // Initialise material models
-          mesh->initialise_material_models(materials);
-
-          // Check nodal properties creation
-          REQUIRE_NOTHROW(mesh->create_nodal_properties());
-
-          // Check nodal properties initialisation
-          REQUIRE_NOTHROW(mesh->initialise_nodal_properties());
-
-          // Update Relevant nodal properties
-          Eigen::Matrix<double, 1, 1> density;
-          density(0) = 1000;
-          Eigen::Matrix<double, Dim, 1> wave_v;
-          for (double i = 0; i < wave_v.size(); ++i) wave_v(i) = 100 * (2 - i);
-          Eigen::Matrix<double, Dim, 1> displacements;
-          for (double i = 0; i < displacements.size(); ++i)
-            displacements(i) = 0.0001 * (2 - i);
-
-          // Define material id
-          unsigned mat_id = 0;
-          mesh->node(0)->append_material_id(mat_id);
-
           // Assign nodal properties
           auto nodal_properties = std::make_shared<mpm::NodalProperties>();
           nodal_properties->create_property("density", 1, 1);
           nodal_properties->create_property("wave_velocities", Dim, 1);
           nodal_properties->create_property("displacements", Dim, 1);
           for (double i = 0; i < 4; ++i) {
-            REQUIRE_NOTHROW(mesh->node(i)->append_material_id(mat_id));
             REQUIRE_NOTHROW(
                 mesh->node(i)->initialise_property_handle(0, nodal_properties));
-            REQUIRE_NOTHROW(mesh->node(i)->update_property(false, "density",
-                                                           density, mat_id, 1));
-            REQUIRE_NOTHROW(mesh->node(i)->update_property(
-                false, "wave_velocities", wave_v, mat_id, Dim));
-            REQUIRE_NOTHROW(mesh->node(i)->update_property(
-                false, "displacements", displacements, mat_id, Dim));
           }
+
           // Constraint
           absorbing_constraints.emplace_back(std::make_tuple(0, 0, 1, 3, 2, 2));
           absorbing_constraints.emplace_back(std::make_tuple(1, 1, 2, 4, 1, 1));

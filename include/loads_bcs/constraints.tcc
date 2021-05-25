@@ -123,13 +123,14 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
     double h_min = absorbing_constraint->h_min();
     double a = absorbing_constraint->a();
     double b = absorbing_constraint->b();
-    assert(delta > h_min / (2 * a));
-    assert(delta > h_min / (2 * b));
-    for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
-      if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b))
-        throw std::runtime_error(
-            "Failed to apply absorbing constraint at node");
-    }
+    if (delta >= h_min / (2 * a) && delta >= h_min / (2 * b))
+      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+        if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b))
+          throw std::runtime_error(
+              "Failed to apply absorbing constraint at node");
+      }
+    else
+      throw std::runtime_error("Invalid value for delta");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -157,13 +158,14 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       double a = std::get<4>(absorbing_constraint);
       // b
       double b = std::get<5>(absorbing_constraint);
-      assert(delta > h_min / (2 * a));
-      assert(delta > h_min / (2 * b));
-      // Apply constraint
-      if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min, a,
-                                                        b))
-        throw std::runtime_error(
-            "Nodal absorbing constraints assignment failed");
+      if (delta >= h_min / (2 * a) && delta >= h_min / (2 * b)) {
+        // Apply constraint
+        if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min, a,
+                                                          b))
+          throw std::runtime_error(
+              "Nodal absorbing constraints assignment failed");
+      } else
+        throw std::runtime_error("Invalid value for delta");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
