@@ -123,8 +123,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
     double h_min = absorbing_constraint->h_min();
     double a = absorbing_constraint->a();
     double b = absorbing_constraint->b();
-    assert(delta <= h_min / (2 * a));
-    assert(delta <= h_min / (2 * b));
+    assert(delta > h_min / (2 * a));
+    assert(delta > h_min / (2 * b));
     for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
       if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b))
         throw std::runtime_error(

@@ -584,15 +584,21 @@ void mpm::Particle<
 
 //! Map linear elastic wave velocities to nodes
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_wave_velocities_to_nodes() noexcept{
-  // if (std::isnan(this->material())->template property<double>(std::string("pwave_velocity")) == false) {
-  Eigen::Matrix<double, Tdim, 1> wave_velocities; 
-  wave_velocities(0) = (this->material())->template property<double>(std::string("pwave_velocity"));
-  wave_velocities(1) = (this->material())->template property<double>(std::string("swave_velocity"));
+void mpm::Particle<Tdim>::map_wave_velocities_to_nodes() noexcept {
+  // if (std::isnan(this->material())->template
+  // property<double>(std::string("pwave_velocity")) == false) {
+  Eigen::Matrix<double, Tdim, 1> wave_velocities;
+  wave_velocities(0) =
+      (this->material())
+          ->template property<double>(std::string("pwave_velocity"));
+  wave_velocities(1) =
+      (this->material())
+          ->template property<double>(std::string("swave_velocity"));
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-      nodes_[i]->update_property(true, "wave_velocities", wave_velocities, this->material_id(), Tdim);
-  //}
-}
+    nodes_[i]->update_property(false, "wave_velocities", wave_velocities,
+                               this->material_id(), Tdim);
+    //}
+  }
 }
 
 // Compute strain rate of the particle

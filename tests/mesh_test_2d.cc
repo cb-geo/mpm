@@ -1150,6 +1150,105 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       set_id, friction_constraint) == false);
         }
 
+        SECTION("Check assign absorbing constraints") {
+          tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+          node_sets[0] = std::vector<mpm::Index>{0, 2};
+          node_sets[1] = std::vector<mpm::Index>{1, 3};
+
+          REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
+          //! Required material information for nodes
+          // Initialise material models
+          mesh->initialise_material_models(materials);
+
+          // Check nodal properties creation
+          REQUIRE_NOTHROW(mesh->create_nodal_properties());
+
+          // Check nodal properties initialisation
+          REQUIRE_NOTHROW(mesh->initialise_nodal_properties());
+
+          // Update Relevant nodal properties
+          Eigen::Matrix<double, 1, 1> density;
+          density(0) = 1000;
+          Eigen::Matrix<double, Dim, 1> wave_v;
+          for (double i = 0; i < wave_v.size(); ++i) wave_v(i) = 100 * (2 - i);
+          Eigen::Matrix<double, Dim, 1> displacements;
+          for (double i = 0; i < displacements.size(); ++i)
+            displacements(i) = 0.0001 * (2 - i);
+
+          // Define material id
+          unsigned mat_id = 0;
+          mesh->node(0)->append_material_id(mat_id);
+
+          // Assign nodal properties
+          auto nodal_properties = std::make_shared<mpm::NodalProperties>();
+          nodal_properties->create_property("density", 1, 1);
+          nodal_properties->create_property("wave_velocities", Dim, 1);
+          nodal_properties->create_property("displacements", Dim, 1);
+          for (double i = 0; i < 4; ++i) {
+            REQUIRE_NOTHROW(mesh->node(i)->append_material_id(mat_id));
+            REQUIRE_NOTHROW(
+                mesh->node(i)->initialise_property_handle(0, nodal_properties));
+            REQUIRE_NOTHROW(mesh->node(i)->update_property(false, "density",
+                                                           density, mat_id, 1));
+            REQUIRE_NOTHROW(mesh->node(i)->update_property(
+                false, "wave_velocities", wave_v, mat_id, Dim));
+            REQUIRE_NOTHROW(mesh->node(i)->update_property(
+                false, "displacements", displacements, mat_id, Dim));
+          }
+
+          int set_id = 0;
+          unsigned dir = 0;
+          double delta = 1;
+          double h_min = 1;
+          double a = 1;
+          double b = 1;
+
+          // Add absorbing constraint to mesh
+          auto absorbing_constraint =
+              std::make_shared<mpm::AbsorbingConstraint>(set_id, dir, delta,
+                                                         h_min, a, b);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == true);
+
+          set_id = 1;
+          dir = 0;
+          delta = 3;
+          h_min = 12;
+          a = 2;
+          b = 2;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == true);
+
+          // Add absorbing constraint to all nodes in mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == true);
+
+          // When constraints fail: invalid direction
+          dir = 3;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == false);
+
+          // When constraints fail: invalid delta
+          delta = 0;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == false);
+        }
+
         // Test assign velocity constraints to nodes
         SECTION("Check assign velocity constraints to nodes") {
           // Vector of particle coordinates
@@ -1190,6 +1289,74 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           friction_constraints.emplace_back(std::make_tuple(3, 2, -1, 0.0));
           REQUIRE(constraints->assign_nodal_friction_constraints(
                       friction_constraints) == false);
+        }
+
+        // Test assign absorbing constraints to nodes
+        SECTION("Check assign absorbing constraints to nodes") {
+          // Vector of particle coordinates
+          std::vector<
+              std::tuple<mpm::Index, unsigned, double, double, double, double>>
+              absorbing_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
+          //! Required material information for nodes
+          // Initialise material models
+          mesh->initialise_material_models(materials);
+
+          // Check nodal properties creation
+          REQUIRE_NOTHROW(mesh->create_nodal_properties());
+
+          // Check nodal properties initialisation
+          REQUIRE_NOTHROW(mesh->initialise_nodal_properties());
+
+          // Update Relevant nodal properties
+          Eigen::Matrix<double, 1, 1> density;
+          density(0) = 1000;
+          Eigen::Matrix<double, Dim, 1> wave_v;
+          for (double i = 0; i < wave_v.size(); ++i) wave_v(i) = 100 * (2 - i);
+          Eigen::Matrix<double, Dim, 1> displacements;
+          for (double i = 0; i < displacements.size(); ++i)
+            displacements(i) = 0.0001 * (2 - i);
+
+          // Define material id
+          unsigned mat_id = 0;
+          mesh->node(0)->append_material_id(mat_id);
+
+          // Assign nodal properties
+          auto nodal_properties = std::make_shared<mpm::NodalProperties>();
+          nodal_properties->create_property("density", 1, 1);
+          nodal_properties->create_property("wave_velocities", Dim, 1);
+          nodal_properties->create_property("displacements", Dim, 1);
+          for (double i = 0; i < 4; ++i) {
+            REQUIRE_NOTHROW(mesh->node(i)->append_material_id(mat_id));
+            REQUIRE_NOTHROW(
+                mesh->node(i)->initialise_property_handle(0, nodal_properties));
+            REQUIRE_NOTHROW(mesh->node(i)->update_property(false, "density",
+                                                           density, mat_id, 1));
+            REQUIRE_NOTHROW(mesh->node(i)->update_property(
+                false, "wave_velocities", wave_v, mat_id, Dim));
+            REQUIRE_NOTHROW(mesh->node(i)->update_property(
+                false, "displacements", displacements, mat_id, Dim));
+          }
+          // Constraint
+          absorbing_constraints.emplace_back(std::make_tuple(0, 0, 1, 3, 2, 2));
+          absorbing_constraints.emplace_back(std::make_tuple(1, 1, 2, 4, 1, 1));
+          absorbing_constraints.emplace_back(std::make_tuple(2, 0, 1, 1, 1, 1));
+          absorbing_constraints.emplace_back(std::make_tuple(3, 1, 3, 2, 3, 3));
+
+          // REQUIRE(constraints->assign_nodal_absorbing_constraints(absorbing_constraints)
+          // == true);
+
+          // When constraints fail: invalid direction
+          absorbing_constraints.emplace_back(std::make_tuple(3, 2, 3, 2, 3, 3));
+          // REQUIRE(constraints->assign_nodal_absorbing_constraints(absorbing_constraints)
+          // == false);
+
+          // When constraints fail: invalid delta
+          absorbing_constraints.emplace_back(std::make_tuple(3, 1, 1, 3, 1, 1));
+          // REQUIRE(constraints->assign_nodal_absorbing_constraints(absorbing_constraints)
+          // == false);
         }
 
         // Test assign nodes concentrated_forces

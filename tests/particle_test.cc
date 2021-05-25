@@ -824,8 +824,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
-    // jmaterial["pwave_velocity"] = 116.023870223;
-    // jmaterial["swave_velocity"] = 62.0173672946;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
