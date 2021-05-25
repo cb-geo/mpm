@@ -353,7 +353,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
   bool status = true;
   try {
 
-    if (dir > Tdim) {
+    if (dir >= Tdim) {
       throw std::runtime_error("Direction is out of bounds");
       status = false;
     }

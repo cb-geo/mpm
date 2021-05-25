@@ -157,7 +157,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       double a = std::get<4>(absorbing_constraint);
       // b
       double b = std::get<5>(absorbing_constraint);
-
+      assert(delta > h_min / (2 * a));
+      assert(delta > h_min / (2 * b));
       // Apply constraint
       if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min, a,
                                                         b))

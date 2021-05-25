@@ -1345,18 +1345,18 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           absorbing_constraints.emplace_back(std::make_tuple(2, 0, 1, 1, 1, 1));
           absorbing_constraints.emplace_back(std::make_tuple(3, 1, 3, 2, 3, 3));
 
-          // REQUIRE(constraints->assign_nodal_absorbing_constraints(absorbing_constraints)
-          // == true);
+          REQUIRE(constraints->assign_nodal_absorbing_constraints(
+                      absorbing_constraints) == true);
 
           // When constraints fail: invalid direction
           absorbing_constraints.emplace_back(std::make_tuple(3, 2, 3, 2, 3, 3));
-          // REQUIRE(constraints->assign_nodal_absorbing_constraints(absorbing_constraints)
-          // == false);
+          REQUIRE(constraints->assign_nodal_absorbing_constraints(
+                      absorbing_constraints) == false);
 
           // When constraints fail: invalid delta
           absorbing_constraints.emplace_back(std::make_tuple(3, 1, 1, 3, 1, 1));
-          // REQUIRE(constraints->assign_nodal_absorbing_constraints(absorbing_constraints)
-          // == false);
+          REQUIRE(constraints->assign_nodal_absorbing_constraints(
+                      absorbing_constraints) == false);
         }
 
         // Test assign nodes concentrated_forces
