@@ -213,6 +213,16 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Time-step
   void apply_friction_constraints(double dt) override;
 
+  //! Apply absorbing constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of absorbing constraint
+  //! \param[in] delta Virtual viscous layer thickness
+  //! \param[in] a Equation constant
+  //! \param[in] a Equation constant
+  //! \param[in] h_min Characteristic Length
+  bool apply_absorbing_constraint(unsigned dir, double delta, double h_min,
+                                  double a, double b) override;
+
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
   void assign_rotation_matrix(

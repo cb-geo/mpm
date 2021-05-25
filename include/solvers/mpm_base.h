@@ -127,6 +127,12 @@ class MPMBase : public MPM {
   void nodal_frictional_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
 
+  //! Nodal absorbing constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_absorbing_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
   //! Cell entity sets
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] check Check duplicates
