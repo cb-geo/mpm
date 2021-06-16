@@ -337,7 +337,7 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
-      // Try to read constrtaints from a non-existant file
+      // Try to read forces from a non-existant file
       auto forces = read_mesh->read_forces("forces-missing.txt");
       // Check number of forces
       REQUIRE(forces.size() == 0);
