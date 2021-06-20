@@ -1330,7 +1330,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                 std::make_shared<mpm::AccelerationConstraint>(set_id, mfunction,
                                                               dir, constraint);
             REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+                        set_id, acceleration_constraint) == false);
 
             // Update acceleration constraints
             REQUIRE_NOTHROW(mesh->update_nodal_acceleration_constraints(0.5));
