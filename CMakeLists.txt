@@ -176,6 +176,7 @@ add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
 if(MPM_BUILD_TESTING)
   SET(test_src
     ${mpm_SOURCE_DIR}/tests/test_main.cc
+    ${mpm_SOURCE_DIR}/tests/acceleration_constraint_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/contact_test.cc
