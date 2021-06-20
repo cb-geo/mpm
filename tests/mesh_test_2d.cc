@@ -1104,6 +1104,53 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == false);
         }
+        // Test assign acceleration constraints to nodes
+        SECTION("Check assign acceleration constraints to nodes") {
+          tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+          node_sets[0] = std::vector<mpm::Index>{0, 2};
+          node_sets[1] = std::vector<mpm::Index>{1, 3};
+
+          REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
+          int set_id = 0;
+          int dir = 0;
+          double constraint = 10.5;
+          // Add acceleration constraint to mesh
+          auto acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
+
+          set_id = 1;
+          dir = 1;
+          constraint = -12.5;
+          // Add acceleration constraint to mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
+
+          // Add acceleration constraint to all nodes in mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(-1, nullptr, dir,
+                                                            constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
+
+          // When constraints fail
+          dir = 2;
+          // Add acceleration constraint to mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == false);
+        }
 
         SECTION("Check assign friction constraints to nodes") {
           tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
@@ -1169,6 +1216,27 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           velocity_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
           REQUIRE(constraints->assign_nodal_velocity_constraints(
                       velocity_constraints) == false);
+        }
+
+        // Test assign acceleration constraints to nodes
+        SECTION("Check assign acceleration constraints to nodes") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              acceleration_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+          // Constraint
+          acceleration_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+          acceleration_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+          acceleration_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
+          acceleration_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(constraints->assign_nodal_acceleration_constraints(
+                      acceleration_constraints) == true);
+          // When constraints fail
+          acceleration_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
+          REQUIRE(constraints->assign_nodal_acceleration_constraints(
+                      acceleration_constraints) == false);
         }
 
         // Test assign friction constraints to nodes
