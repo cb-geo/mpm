@@ -198,8 +198,25 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] velocity Applied velocity constraint
   bool assign_velocity_constraint(unsigned dir, double velocity) override;
 
+  //! Assign acceleration constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of acceleration constraint
+  //! \param[in] acceleration Applied acceleration constraint
+  bool assign_acceleration_constraint(unsigned dir,
+                                      double acceleration) override;
+
+  //! Update acceleration constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of acceleration constraint
+  //! \param[in] acceleration Applied acceleration constraint
+  void update_acceleration_constraint(unsigned dir,
+                                      double acceleration) override;
+
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
+
+  //! Apply acceleration constraints
+  void apply_acceleration_constraints() override;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -299,6 +316,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Acceleration constraints
+  std::map<unsigned, double> acceleration_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node
