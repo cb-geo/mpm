@@ -62,9 +62,10 @@ class MPMScheme {
   //! \param[in] phase Phase of particle
   //! \param[in] damping_type Type of damping
   //! \param[in] damping_factor Value of critical damping
+  //! \param[in] step Number of step in solver
   virtual inline void compute_particle_kinematics(
       bool velocity_update, unsigned phase, const std::string& damping_type,
-      double damping_factor);
+      double damping_factor, unsigned step);
 
   //! Compute particle location
   //! \param[in] locate_particles Flag to enable locate particles, if set to

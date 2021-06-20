@@ -172,7 +172,10 @@ inline void mpm::MPMScheme<Tdim>::compute_forces(
 template <unsigned Tdim>
 inline void mpm::MPMScheme<Tdim>::compute_particle_kinematics(
     bool velocity_update, unsigned phase, const std::string& damping_type,
-    double damping_factor) {
+    double damping_factor, unsigned step) {
+
+  // Update nodal acceleration constraints
+  mesh_->update_nodal_acceleration_constraints(step * dt_);
 
   // Check if damping has been specified and accordingly Iterate over
   // active nodes to compute acceleratation and velocity
