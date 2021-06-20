@@ -339,9 +339,21 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration_constraint(
 
 //! Update acceleration constraint
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration_constraint(
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration_constraint(
     unsigned dir, double acceleration) {
-  acceleration_constraints_.find(dir)->second = acceleration;
+  bool status = true;
+  try {
+    // Check if an acceleration constraint was assigned to dir
+    if (acceleration_constraints_.find(dir) != acceleration_constraints_.end())
+      acceleration_constraints_.find(dir)->second = acceleration;
+    else
+      throw std::runtime_error("Acceleration constraint direction is invalid");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }
 
 //! Apply velocity constraints

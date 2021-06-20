@@ -209,7 +209,7 @@ class Node : public NodeBase<Tdim> {
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of acceleration constraint
   //! \param[in] acceleration Applied acceleration constraint
-  void update_acceleration_constraint(unsigned dir,
+  bool update_acceleration_constraint(unsigned dir,
                                       double acceleration) override;
 
   //! Apply velocity constraints

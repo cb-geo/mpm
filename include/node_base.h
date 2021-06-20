@@ -201,7 +201,7 @@ class NodeBase {
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of acceleration constraint
   //! \param[in] acceleration Applied acceleration constraint
-  virtual void update_acceleration_constraint(unsigned dir,
+  virtual bool update_acceleration_constraint(unsigned dir,
                                               double acceleration) = 0;
 
   //! Apply velocity constraints
