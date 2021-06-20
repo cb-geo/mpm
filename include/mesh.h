@@ -24,6 +24,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
+#include "acceleration_constraint.h"
 #include "cell.h"
 #include "factory.h"
 #include "friction_constraint.h"
@@ -113,6 +114,12 @@ class Mesh {
   //! \tparam Tpred Predicate
   template <typename Toper, typename Tpred>
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
+
+  //! Iterate over node set
+  //! \tparam Toper Callable object typically a baseclass functor
+  //! \param[in] set_id particle set id
+  template <typename Toper>
+  void iterate_over_node_set(int set_id, Toper oper);
 
   //! Return a vector of nodes
   //! \param[in] set_id Set of id of nodes (-1 for all nodes)
@@ -308,13 +315,25 @@ class Mesh {
   //! \param[in] current_time Current time
   void apply_traction_on_particles(double current_time);
 
-  //! Create particle velocity constraints tractions
+  //! Create nodal acceleration constraints
   //! \param[in] setid Node set id
+  //! \param[in] constraint Acceleration constraint
+  bool create_nodal_acceleration_constraint(
+      int set_id,
+      const std::shared_ptr<mpm::AccelerationConstraint>& constraint);
+
+  //! Create particle velocity constraints
+  //! \param[in] setid Node set id
+  //! \param[in] constraint Velocity constraint
   bool create_particle_velocity_constraint(
       int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
 
   //! Apply particles velocity constraints
   void apply_particle_velocity_constraints();
+
+  //! Update nodal acceleration constraints
+  //! \param[in] current_time Current time
+  void update_nodal_acceleration_constraints(double current_time);
 
   //! Assign nodal concentrated force
   //! \param[in] nodal_forces Force at dir on nodes
@@ -519,6 +538,9 @@ class Mesh {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Loading (Particle tractions)
   std::vector<std::shared_ptr<mpm::Traction>> particle_tractions_;
+  //! Nodal acceleration constraints
+  std::vector<std::shared_ptr<mpm::AccelerationConstraint>>
+      nodal_acceleration_constraints_;
   //! Particle velocity constraints
   std::vector<std::shared_ptr<mpm::VelocityConstraint>>
       particle_velocity_constraints_;
