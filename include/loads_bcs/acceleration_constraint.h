@@ -1,6 +1,12 @@
 #ifndef MPM_ACCELERATION_CONSTRAINT_H_
 #define MPM_ACCELERATION_CONSTRAINT_H_
 
+//! Alias for JSON
+#include "json.hpp"
+using Json = nlohmann::json;
+
+#include "function_base.h"
+
 namespace mpm {
 
 //! AccelerationConstraint class to store acceleration constraint on a set
