@@ -477,7 +477,9 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
 
-      // Apply acceleraiton constraints
+      // Update acceleration constraints before assignement
+      REQUIRE(node->update_acceleration_constraint(0, 1.5) == false);
+      // Apply acceleration constraints
       REQUIRE(node->assign_acceleration_constraint(0, 10.5) == true);
       // Check out of bounds condition
       REQUIRE(node->assign_acceleration_constraint(1, 12.5) == false);
@@ -487,6 +489,20 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
       // Check apply constraints
       acceleration << 10.5;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Update acceleration constraints
+      REQUIRE(node->update_acceleration_constraint(0, 3.5) == true);
+      // Check out of bounds condition
+      REQUIRE(node->update_acceleration_constraint(1, 12.5) == false);
+
+      // Apply acceleration constraints
+      node->apply_acceleration_constraints();
+
+      // Check updated constraints
+      acceleration << 3.5;
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
@@ -1117,6 +1133,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       }
 
       SECTION("Check Cartesian acceleration constraints") {
+        // Update acceleration constraints before any assignement
+        REQUIRE(node->update_acceleration_constraint(0, 4.5) == false);
         // Apply acceleration constraints
         REQUIRE(node->assign_acceleration_constraint(0, -12.5) == true);
         REQUIRE(node->assign_acceleration_constraint(1, 4.1) == true);
@@ -1128,6 +1146,21 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
         // Check apply constraints
         acceleration << -12.5, 4.1;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Update acceleration constraints
+        REQUIRE(node->update_acceleration_constraint(0, 4.5) == true);
+        REQUIRE(node->update_acceleration_constraint(1, 1.9) == true);
+        // Check out of bounds condition
+        REQUIRE(node->update_acceleration_constraint(2, 0.) == false);
+
+        // Apply constraints
+        node->apply_acceleration_constraints();
+
+        // Check updated constraints
+        acceleration << 4.5, 1.9;
         for (unsigned i = 0; i < acceleration.size(); ++i)
           REQUIRE(node->acceleration(Nphase)(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
@@ -1775,6 +1808,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       }
 
       SECTION("Check Cartesian acceleration constraints") {
+        // Update acceleration constraints before assignement
+        REQUIRE(node->update_acceleration_constraint(0, 2.1) == false);
         // Apply acceleration constraints
         REQUIRE(node->assign_acceleration_constraint(0, 10.5) == true);
         REQUIRE(node->assign_acceleration_constraint(1, -12.5) == true);
@@ -1787,6 +1822,22 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
         // Check apply constraints
         acceleration << 10.5, -12.5, -7.5;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Update acceleration constraints
+        REQUIRE(node->update_acceleration_constraint(0, 2.1) == true);
+        REQUIRE(node->update_acceleration_constraint(1, -3.0) == true);
+        REQUIRE(node->update_acceleration_constraint(2, 4.6) == true);
+        // Check out of bounds condition
+        REQUIRE(node->update_acceleration_constraint(4, 0.) == false);
+
+        // Apply constraints
+        node->apply_acceleration_constraints();
+
+        // Check updated constraints
+        acceleration << 2.1, -3.0, 4.6;
         for (unsigned i = 0; i < acceleration.size(); ++i)
           REQUIRE(node->acceleration(Nphase)(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
