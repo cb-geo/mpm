@@ -1105,125 +1105,138 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       set_id, velocity_constraint) == false);
         }
         // Test assign acceleration constraints to nodes
-        SECTION("Check assign acceleration constraints to nodes") {
+        SECTION("Check assign constant acceleration constraints to nodes") {
           tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
           node_sets[0] = std::vector<mpm::Index>{0, 2};
           node_sets[1] = std::vector<mpm::Index>{1, 3};
 
           REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
-          SECTION("Check creation of constant nodal acceleration constraints") {
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
 
-            //! Constraints object
-            auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+          int set_id = 0;
+          int dir = 0;
+          double constraint = 10.5;
+          // Add acceleration constraint to mesh
+          auto acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            int set_id = 0;
-            int dir = 0;
-            double constraint = 10.5;
-            // Add acceleration constraint to mesh
-            auto acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
-                                                              dir, constraint);
-            REQUIRE(constraints->assign_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          set_id = 1;
+          dir = 1;
+          constraint = -12.5;
+          // Add acceleration constraint to mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            set_id = 1;
-            dir = 1;
-            constraint = -12.5;
-            // Add acceleration constraint to mesh
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
-                                                              dir, constraint);
-            REQUIRE(constraints->assign_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          // Add acceleration constraint to all nodes in mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(-1, nullptr, dir,
+                                                            constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            // Add acceleration constraint to all nodes in mesh
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(-1, nullptr, dir,
-                                                              constraint);
-            REQUIRE(constraints->assign_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          // When constraints fail
+          dir = 2;
+          // Add acceleration constraint to mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(constraints->assign_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == false);
 
-            // When constraints fail
-            dir = 2;
-            // Add acceleration constraint to mesh
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
-                                                              dir, constraint);
-            REQUIRE(constraints->assign_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == false);
+          dir = 1;
+          // Create acceleration constraint from mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            // Create acceleration constraint from mesh
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
-                                                              dir, constraint);
-            REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          // Create acceleration constraint to all nodes in mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(-1, nullptr, dir,
+                                                            constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            // Create acceleration constraint to all nodes in mesh
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(-1, nullptr, dir,
-                                                              constraint);
-            REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          // Failed attempt to create acceleration constraint with
+          // non-existing set id
+          set_id = 2;
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == false);
 
-            // Failed attempt to create acceleration constraint with
-            // non-existing set id
-            set_id = 2;
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
-                                                              dir, constraint);
-            REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == false);
-          }
+          // Failed attempt to create acceleration constraint with
+          // out of bounds direction
+          set_id = 0;
+          dir = 3;
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, nullptr,
+                                                            dir, constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == false);
+        }
 
-          SECTION("Check creation of varying nodal acceleration constraints") {
+        SECTION("Check assign varying acceleration constraints to nodes") {
+          tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+          node_sets[0] = std::vector<mpm::Index>{0, 2};
+          node_sets[1] = std::vector<mpm::Index>{1, 3};
 
-            //! Constraints object
-            auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+          REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
-            int set_id = 0;
-            int dir = 0;
-            double constraint = 10.5;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
 
-            // Json property
-            Json jfunctionproperties;
-            jfunctionproperties["id"] = 0;
-            std::vector<double> x_values{{0.0, 0.5, 1.0}};
-            std::vector<double> fx_values{{0.0, 1.0, 1.0}};
-            jfunctionproperties["xvalues"] = x_values;
-            jfunctionproperties["fxvalues"] = fx_values;
+          int set_id = 0;
+          int dir = 0;
+          double constraint = 10.5;
 
-            // math function
-            std::shared_ptr<mpm::FunctionBase> mfunction =
-                std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
+          // Json property
+          Json jfunctionproperties;
+          jfunctionproperties["id"] = 0;
+          std::vector<double> x_values{{0.0, 0.5, 1.0}};
+          std::vector<double> fx_values{{0.0, 1.0, 1.0}};
+          jfunctionproperties["xvalues"] = x_values;
+          jfunctionproperties["fxvalues"] = fx_values;
 
-            // Add acceleration constraint to mesh
-            auto acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, mfunction,
-                                                              dir, constraint);
-            REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          // math function
+          std::shared_ptr<mpm::FunctionBase> mfunction =
+              std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
 
-            // Create acceleration constraint to all nodes in mesh
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(-1, mfunction,
-                                                              dir, constraint);
-            REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == true);
+          // Add acceleration constraint to mesh
+          auto acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, mfunction,
+                                                            dir, constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            // Failed attempt to create acceleration constraint with
-            // non-existing set id
-            set_id = 2;
-            acceleration_constraint =
-                std::make_shared<mpm::AccelerationConstraint>(set_id, mfunction,
-                                                              dir, constraint);
-            REQUIRE(mesh->create_nodal_acceleration_constraint(
-                        set_id, acceleration_constraint) == false);
+          // Create acceleration constraint to all nodes in mesh
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(-1, mfunction, dir,
+                                                            constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == true);
 
-            // Update acceleration constraints
-            REQUIRE_NOTHROW(mesh->update_nodal_acceleration_constraints(0.5));
-          }
+          // Failed attempt to create acceleration constraint with
+          // non-existing set id
+          set_id = 2;
+          acceleration_constraint =
+              std::make_shared<mpm::AccelerationConstraint>(set_id, mfunction,
+                                                            dir, constraint);
+          REQUIRE(mesh->create_nodal_acceleration_constraint(
+                      set_id, acceleration_constraint) == false);
+
+          // Update acceleration constraints
+          REQUIRE_NOTHROW(mesh->update_nodal_acceleration_constraints(0.5));
         }
 
         SECTION("Check assign friction constraints to nodes") {
