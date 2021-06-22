@@ -233,6 +233,9 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
   // Read and assign velocity constraints
   this->nodal_velocity_constraints(mesh_props, mesh_io);
 
+  // Read and assign acceleration constraints
+  this->nodal_acceleration_constraints(mesh_props, mesh_io);
+
   // Read and assign friction constraints
   this->nodal_frictional_constraints(mesh_props, mesh_io);
 
