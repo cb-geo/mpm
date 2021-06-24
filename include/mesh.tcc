@@ -1977,7 +1977,7 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
     // Compute number of rows in nodal properties for vector entities
     const unsigned nrows = nodes_.size() * Tdim;
     // Create pool data for each property in the nodal properties struct
-    // object. Properties must be named in the plural form
+    // object. Properties are named in plural form
     nodal_properties_->create_property("masses", nodes_.size(),
                                        materials_.size());
     nodal_properties_->create_property("momenta", nrows, materials_.size());
@@ -1989,7 +1989,22 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
                                        materials_.size());
     nodal_properties_->create_property("domain_gradients", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("domains", nodes_.size(),
+                                       materials_.size());
     nodal_properties_->create_property("normal_unit_vectors", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("normal_tractions", nodes_.size(),
+                                       materials_.size());
+    nodal_properties_->create_property("internal_forces", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("external_forces", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("current_velocities", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("velocities", nrows, materials_.size());
+    nodal_properties_->create_property("accelerations", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("relative_velocities", nrows,
                                        materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node

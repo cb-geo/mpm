@@ -76,6 +76,7 @@ void mpm::NodalProperties::initialise_nodal_properties() {
     // Iterate over all the columns (materials) of the property
     for (int mitr = 0; mitr < cols; ++mitr) {
       Eigen::MatrixXd zeroed_property = Eigen::MatrixXd::Zero(rows, 1);
+      // assign zeroed property using the number of rows as nprops
       this->assign_property(prop_itr->first, 0, mitr, zeroed_property, rows);
     }
   }
