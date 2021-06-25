@@ -40,6 +40,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   nodal_properties->create_property("displacements", Nnodes * Dim, Nmaterials);
   nodal_properties->create_property("separation_vectors", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("domains", Nnodes, Nmaterials);
   nodal_properties->create_property("domain_gradients", Nnodes * Dim,
                                     Nmaterials);
   nodal_properties->create_property("normal_unit_vectors", Nnodes * Dim,
@@ -147,14 +148,14 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle3->compute_shapefn();
 
   // Map multimaterial properties from the particles to the nodes
-  particle1->map_multimaterial_mass_momentum_to_nodes();
-  particle2->map_multimaterial_mass_momentum_to_nodes();
-  particle3->map_multimaterial_mass_momentum_to_nodes();
+  REQUIRE_NOTHROW(particle1->map_multimaterial_mass_momentum_to_nodes());
+  REQUIRE_NOTHROW(particle2->map_multimaterial_mass_momentum_to_nodes());
+  REQUIRE_NOTHROW(particle3->map_multimaterial_mass_momentum_to_nodes());
 
   // Map masses and momenta from particles to nodes
-  particle1->map_mass_momentum_to_nodes();
-  particle2->map_mass_momentum_to_nodes();
-  particle3->map_mass_momentum_to_nodes();
+  REQUIRE_NOTHROW(particle1->map_mass_momentum_to_nodes());
+  REQUIRE_NOTHROW(particle2->map_mass_momentum_to_nodes());
+  REQUIRE_NOTHROW(particle3->map_mass_momentum_to_nodes());
 
   // Compute velocities at nodes
   node0->compute_velocity();
@@ -164,17 +165,17 @@ TEST_CASE("Interface functions are checked", "[interface]") {
 
   // Append material ids to node
   for (unsigned i = 0; i < 2; ++i) {
-    node0->append_material_id(i);
-    node1->append_material_id(i);
-    node2->append_material_id(i);
-    node3->append_material_id(i);
+    REQUIRE_NOTHROW(node0->append_material_id(i));
+    REQUIRE_NOTHROW(node1->append_material_id(i));
+    REQUIRE_NOTHROW(node2->append_material_id(i));
+    REQUIRE_NOTHROW(node3->append_material_id(i));
   }
 
   // Compute multimaterial change in momentum
-  node0->compute_multimaterial_change_in_momentum();
-  node1->compute_multimaterial_change_in_momentum();
-  node2->compute_multimaterial_change_in_momentum();
-  node3->compute_multimaterial_change_in_momentum();
+  REQUIRE_NOTHROW(node0->compute_multimaterial_change_in_momentum());
+  REQUIRE_NOTHROW(node1->compute_multimaterial_change_in_momentum());
+  REQUIRE_NOTHROW(node2->compute_multimaterial_change_in_momentum());
+  REQUIRE_NOTHROW(node3->compute_multimaterial_change_in_momentum());
 
   // Compute displacements of next time step with dt = 0.05
   const double dt = 0.05;
@@ -183,26 +184,31 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle3->compute_updated_position(dt, true);
 
   // Map multimaterial displacements to nodes
-  particle1->map_multimaterial_displacements_to_nodes();
-  particle2->map_multimaterial_displacements_to_nodes();
-  particle3->map_multimaterial_displacements_to_nodes();
+  REQUIRE_NOTHROW(particle1->map_multimaterial_displacements_to_nodes());
+  REQUIRE_NOTHROW(particle2->map_multimaterial_displacements_to_nodes());
+  REQUIRE_NOTHROW(particle3->map_multimaterial_displacements_to_nodes());
 
   // Determine separation vectors
-  node0->compute_multimaterial_separation_vector();
-  node1->compute_multimaterial_separation_vector();
-  node2->compute_multimaterial_separation_vector();
-  node3->compute_multimaterial_separation_vector();
+  REQUIRE_NOTHROW(node0->compute_multimaterial_separation_vector());
+  REQUIRE_NOTHROW(node1->compute_multimaterial_separation_vector());
+  REQUIRE_NOTHROW(node2->compute_multimaterial_separation_vector());
+  REQUIRE_NOTHROW(node3->compute_multimaterial_separation_vector());
+
+  // Map multimaterial domains (volumes) to nodes
+  REQUIRE_NOTHROW(particle1->map_multimaterial_domain_to_nodes());
+  REQUIRE_NOTHROW(particle2->map_multimaterial_domain_to_nodes());
+  REQUIRE_NOTHROW(particle3->map_multimaterial_domain_to_nodes());
 
   // Map multimaterial domain gradients to nodes
-  particle1->map_multimaterial_domain_gradients_to_nodes();
-  particle2->map_multimaterial_domain_gradients_to_nodes();
-  particle3->map_multimaterial_domain_gradients_to_nodes();
+  REQUIRE_NOTHROW(particle1->map_multimaterial_domain_gradients_to_nodes());
+  REQUIRE_NOTHROW(particle2->map_multimaterial_domain_gradients_to_nodes());
+  REQUIRE_NOTHROW(particle3->map_multimaterial_domain_gradients_to_nodes());
 
   // Compute normal unit vectors at nodes
-  node0->compute_multimaterial_normal_unit_vector();
-  node1->compute_multimaterial_normal_unit_vector();
-  node2->compute_multimaterial_normal_unit_vector();
-  node3->compute_multimaterial_normal_unit_vector();
+  REQUIRE_NOTHROW(node0->compute_multimaterial_normal_unit_vector());
+  REQUIRE_NOTHROW(node1->compute_multimaterial_normal_unit_vector());
+  REQUIRE_NOTHROW(node2->compute_multimaterial_normal_unit_vector());
+  REQUIRE_NOTHROW(node3->compute_multimaterial_normal_unit_vector());
 
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
@@ -259,6 +265,14 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                 -0.00377066115702,  0.00377066115702;
   // clang-format on
 
+  Eigen::Matrix<double, 4, 2> domains;
+  // clang-format off
+  domains << 1.92, 1.46,
+            0.48, 1.04,
+            0.32, 0.56,
+            1.28, 0.44;
+  // clang-format on
+
   Eigen::Matrix<double, 8, 2> gradients;
   // clang-format off
   gradients << -4.8, -5.0,
@@ -288,6 +302,8 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     for (int j = 0; j < Nmaterials; ++j) {
       REQUIRE(nodal_properties->property("masses", i, j, 1)(0, 0) ==
               Approx(masses(i, j)).epsilon(tolerance));
+      REQUIRE(nodal_properties->property("domains", i, j, 1)(0, 0) ==
+              Approx(domains(i, j)).epsilon(tolerance));
       for (int k = 0; k < Dim; ++k) {
         REQUIRE(nodal_properties->property("momenta", i, j, Dim)(k, 0) ==
                 Approx(momenta(i * Dim + k, j)).epsilon(tolerance));
