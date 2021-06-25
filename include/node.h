@@ -255,6 +255,15 @@ class Node : public NodeBase<Tdim> {
                        const Eigen::MatrixXd& property_value, unsigned mat_id,
                        unsigned nprops) noexcept override;
 
+  //! Return nodal property for a given material
+  //! \param[in] property Name of the property to be returned
+  //! \param[in] mat_id Material id
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  Eigen::MatrixXd property(const std::string& property, unsigned mat_id,
+                           unsigned nprops = 1) override {
+    return property_handle_->property(property, prop_id_, mat_id, nprops);
+  }
+
   //! Compute multimaterial change in momentum
   void compute_multimaterial_change_in_momentum() override;
 

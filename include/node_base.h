@@ -244,6 +244,13 @@ class NodeBase {
                                const Eigen::MatrixXd& property_value,
                                unsigned mat_id, unsigned nprops) noexcept = 0;
 
+  //! Return nodal property for a given material
+  //! \param[in] property Name of the property to be returned
+  //! \param[in] mat_id Material id
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  virtual Eigen::MatrixXd property(const std::string& property, unsigned mat_id,
+                                   unsigned nprops = 1) = 0;
+
   //! Compute multimaterial change in momentum
   virtual void compute_multimaterial_change_in_momentum() = 0;
 
