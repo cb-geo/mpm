@@ -1,8 +1,12 @@
 //! Constructor of contact with mesh
 template <unsigned Tdim>
 mpm::ContactFriction<Tdim>::ContactFriction(
-    const std::shared_ptr<mpm::Mesh<Tdim>>& mesh)
-    : mpm::Contact<Tdim>(mesh) {}
+    const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double friction,
+    std::string normal_type)
+    : mpm::Contact<Tdim>(mesh) {
+  friction_ = friction;
+  normal_type_ = normal_type;
+}
 
 //! Initialize nodal properties
 template <unsigned Tdim>
