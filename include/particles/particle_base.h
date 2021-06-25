@@ -156,6 +156,9 @@ class ParticleBase {
   //! Map multimaterial displacements to nodes
   virtual void map_multimaterial_displacements_to_nodes() noexcept = 0;
 
+  //! Map multimaterial domain to nodes
+  virtual void map_multimaterial_domain_to_nodes() noexcept = 0;
+
   //! Map multimaterial domain gradients to nodes
   virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
 

@@ -146,6 +146,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Map multimaterial displacements to nodes
   void map_multimaterial_displacements_to_nodes() noexcept override;
 
+  //! Map multimaterial domain to nodes
+  void map_multimaterial_domain_to_nodes() noexcept override;
+
   //! Map multimaterial domain gradients to nodes
   void map_multimaterial_domain_gradients_to_nodes() noexcept override;
 

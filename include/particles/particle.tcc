@@ -565,6 +565,20 @@ void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
   }
 }
 
+//! Map multimaterial domain to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_multimaterial_domain_to_nodes() noexcept {
+  // Check if particle volume is set
+  assert(volume_ != std::numeric_limits<double>::max());
+
+  // Map domain (volume) to nodal property with the shape functions
+  Eigen::Matrix<double, 1, 1> domain = Eigen::Matrix<double, 1, 1>::Zero();
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    domain(0, 0) = volume_ * shapefn_[i];
+    nodes_[i]->update_property(true, "domains", domain, this->material_id(), 1);
+  }
+}
+
 //! Map multimaterial domain gradients to nodes
 template <unsigned Tdim>
 void mpm::Particle<
