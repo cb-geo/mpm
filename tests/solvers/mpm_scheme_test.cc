@@ -186,8 +186,8 @@ TEST_CASE("Stress update is checked for USF and USL",
     REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
 
     // Update stress first
-    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false));
-    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false, false));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true, false));
 
     // Compute forces
     REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, false));
@@ -204,8 +204,8 @@ TEST_CASE("Stress update is checked for USF and USL",
         mpm_scheme->compute_particle_kinematics(false, phase, "None", 0.02));
 
     // Update Stress Last
-    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true));
-    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true, false));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false, false));
 
     // Locate particles
     REQUIRE_NOTHROW(mpm_scheme->locate_particles(true));
@@ -227,8 +227,8 @@ TEST_CASE("Stress update is checked for USF and USL",
     REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
 
     // Update stress first
-    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false));
-    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false, false));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true, false));
 
     // Compute forces
     REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, false));
@@ -245,8 +245,8 @@ TEST_CASE("Stress update is checked for USF and USL",
         mpm_scheme->compute_particle_kinematics(false, phase, "None", 0.02));
 
     // Update Stress Last
-    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true));
-    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true, false));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false, false));
 
     // Locate particles
     REQUIRE_NOTHROW(mpm_scheme->locate_particles(true));
