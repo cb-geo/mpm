@@ -216,7 +216,7 @@ class ParticleBase {
   virtual double pressure(unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
   //! Compute strain
-  virtual void compute_strain(double dt) noexcept = 0;
+  virtual void compute_strain(double dt, bool interface) noexcept = 0;
 
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
