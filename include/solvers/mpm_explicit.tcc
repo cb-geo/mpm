@@ -15,8 +15,9 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
   // Iterate over each particle to calculate strain
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1,
+                dt_, interface_));
 
   // Iterate over each particle to update particle volume
   mesh_->iterate_over_particles(std::bind(
@@ -145,7 +146,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     contact_->compute_contact_forces();
 
     // Update stress first
-    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_,
+                                          interface_);
 
     // Compute forces
     mpm_scheme_->compute_forces(gravity_, phase, step_,
@@ -156,7 +158,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                                              damping_factor_);
 
     // Update Stress Last
-    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_,
+                                           interface_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);

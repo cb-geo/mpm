@@ -28,20 +28,26 @@ class MPMScheme {
   //! Compute stress and strain
   //! \param[in] phase Phase to smooth pressure
   //! \param[in] pressure_smoothing Enable or disable pressure smoothing
+  //! \param[in] interface Enable or disable interface
   virtual inline void compute_stress_strain(unsigned phase,
-                                            bool pressure_smoothing);
+                                            bool pressure_smoothing,
+                                            bool interface);
 
   //! Precompute stress and strain (empty call)
   //! \param[in] phase Phase to smooth pressure
   //! \param[in] pressure_smoothing Enable or disable pressure smoothing
+  //! \param[in] interface Enable or disable interface
   virtual inline void precompute_stress_strain(unsigned phase,
-                                               bool pressure_smoothing) = 0;
+                                               bool pressure_smoothing,
+                                               bool interface) = 0;
 
   //! Postcompute stress and strain (empty call)
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing
+  //! \param[in] interface Enable or disable interface
   virtual inline void postcompute_stress_strain(unsigned phase,
-                                                bool pressure_smoothing) = 0;
+                                                bool pressure_smoothing,
+                                                bool interface) = 0;
 
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
