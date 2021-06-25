@@ -545,8 +545,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     unsigned nprops) noexcept {
   // Update/assign property
   node_mutex_.lock();
-  property_handle_->update_property(property, prop_id_, mat_id, property_value,
-                                    nprops);
+  if (update)
+    property_handle_->update_property(property, prop_id_, mat_id,
+                                      property_value, nprops);
+  else
+    property_handle_->assign_property(property, prop_id_, mat_id,
+                                      property_value, nprops);
   node_mutex_.unlock();
 }
 
