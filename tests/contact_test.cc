@@ -196,7 +196,8 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
 
     auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSF<Dim>>(mesh, 0.01);
 
-    auto contact = std::make_shared<mpm::ContactFriction<Dim>>(mesh);
+    auto contact =
+        std::make_shared<mpm::ContactFriction<Dim>>(mesh, 0.0, "MVG");
 
     // Initialise material models
     REQUIRE_NOTHROW(mesh->initialise_material_models(materials));
