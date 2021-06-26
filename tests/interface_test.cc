@@ -45,6 +45,10 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                                     Nmaterials);
   nodal_properties->create_property("normal_unit_vectors", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("internal_forces", Nnodes * Dim,
+                                    Nmaterials);
+  nodal_properties->create_property("external_forces", Nnodes * Dim,
+                                    Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -147,22 +151,6 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle2->compute_shapefn();
   particle3->compute_shapefn();
 
-  // Map multimaterial properties from the particles to the nodes
-  REQUIRE_NOTHROW(particle1->map_multimaterial_mass_momentum_to_nodes());
-  REQUIRE_NOTHROW(particle2->map_multimaterial_mass_momentum_to_nodes());
-  REQUIRE_NOTHROW(particle3->map_multimaterial_mass_momentum_to_nodes());
-
-  // Map masses and momenta from particles to nodes
-  REQUIRE_NOTHROW(particle1->map_mass_momentum_to_nodes());
-  REQUIRE_NOTHROW(particle2->map_mass_momentum_to_nodes());
-  REQUIRE_NOTHROW(particle3->map_mass_momentum_to_nodes());
-
-  // Compute velocities at nodes
-  node0->compute_velocity();
-  node1->compute_velocity();
-  node2->compute_velocity();
-  node3->compute_velocity();
-
   // Append material ids to node
   for (unsigned i = 0; i < 2; ++i) {
     REQUIRE_NOTHROW(node0->append_material_id(i));
@@ -171,160 +159,150 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     REQUIRE_NOTHROW(node3->append_material_id(i));
   }
 
-  // Compute multimaterial change in momentum
-  REQUIRE_NOTHROW(node0->compute_multimaterial_change_in_momentum());
-  REQUIRE_NOTHROW(node1->compute_multimaterial_change_in_momentum());
-  REQUIRE_NOTHROW(node2->compute_multimaterial_change_in_momentum());
-  REQUIRE_NOTHROW(node3->compute_multimaterial_change_in_momentum());
+  // Check computation of nodal mass and momentum
+  SECTION("Check mass and momentum at nodes") {
+    // Map multimaterial properties from the particles to the nodes
+    REQUIRE_NOTHROW(particle1->map_multimaterial_mass_momentum_to_nodes());
+    REQUIRE_NOTHROW(particle2->map_multimaterial_mass_momentum_to_nodes());
+    REQUIRE_NOTHROW(particle3->map_multimaterial_mass_momentum_to_nodes());
 
-  // Compute displacements of next time step with dt = 0.05
-  const double dt = 0.05;
-  particle1->compute_updated_position(dt, true);
-  particle2->compute_updated_position(dt, true);
-  particle3->compute_updated_position(dt, true);
+    // Map masses and momenta from particles to nodes
+    REQUIRE_NOTHROW(particle1->map_mass_momentum_to_nodes());
+    REQUIRE_NOTHROW(particle2->map_mass_momentum_to_nodes());
+    REQUIRE_NOTHROW(particle3->map_mass_momentum_to_nodes());
 
-  // Map multimaterial displacements to nodes
-  REQUIRE_NOTHROW(particle1->map_multimaterial_displacements_to_nodes());
-  REQUIRE_NOTHROW(particle2->map_multimaterial_displacements_to_nodes());
-  REQUIRE_NOTHROW(particle3->map_multimaterial_displacements_to_nodes());
+    // Compute velocities at nodes
+    node0->compute_velocity();
+    node1->compute_velocity();
+    node2->compute_velocity();
+    node3->compute_velocity();
 
-  // Determine separation vectors
-  REQUIRE_NOTHROW(node0->compute_multimaterial_separation_vector());
-  REQUIRE_NOTHROW(node1->compute_multimaterial_separation_vector());
-  REQUIRE_NOTHROW(node2->compute_multimaterial_separation_vector());
-  REQUIRE_NOTHROW(node3->compute_multimaterial_separation_vector());
+    // Compute multimaterial change in momentum
+    REQUIRE_NOTHROW(node0->compute_multimaterial_change_in_momentum());
+    REQUIRE_NOTHROW(node1->compute_multimaterial_change_in_momentum());
+    REQUIRE_NOTHROW(node2->compute_multimaterial_change_in_momentum());
+    REQUIRE_NOTHROW(node3->compute_multimaterial_change_in_momentum());
 
-  // Map multimaterial domains (volumes) to nodes
-  REQUIRE_NOTHROW(particle1->map_multimaterial_domain_to_nodes());
-  REQUIRE_NOTHROW(particle2->map_multimaterial_domain_to_nodes());
-  REQUIRE_NOTHROW(particle3->map_multimaterial_domain_to_nodes());
+    Eigen::Matrix<double, 4, 2> masses;
+    // clang-format off
+    masses << 0.96, 1.46,
+              0.24, 1.04,
+              0.16, 0.56,
+              0.64, 0.44;
+    // clang-format on
 
-  // Map multimaterial domain gradients to nodes
-  REQUIRE_NOTHROW(particle1->map_multimaterial_domain_gradients_to_nodes());
-  REQUIRE_NOTHROW(particle2->map_multimaterial_domain_gradients_to_nodes());
-  REQUIRE_NOTHROW(particle3->map_multimaterial_domain_gradients_to_nodes());
+    Eigen::Matrix<double, 8, 2> momenta;
+    // clang-format off
+    momenta << 0.96,  -0.70,
+               1.92,   0.76,
+               0.24,  -0.40,
+               0.48,   0.64,
+               0.16,   0.20,
+               0.32,   0.76,
+               0.64,  -0.10,
+               1.28,   0.34;
+    // clang-format on
 
-  // Compute normal unit vectors at nodes
-  REQUIRE_NOTHROW(node0->compute_multimaterial_normal_unit_vector());
-  REQUIRE_NOTHROW(node1->compute_multimaterial_normal_unit_vector());
-  REQUIRE_NOTHROW(node2->compute_multimaterial_normal_unit_vector());
-  REQUIRE_NOTHROW(node3->compute_multimaterial_normal_unit_vector());
+    Eigen::Matrix<double, 8, 2> delta_momenta;
+    // clang-format off
+    delta_momenta << -0.8568595041322, 0.8568595041322,
+                     -0.8568595041322, 0.8568595041322,
+                     -0.2700000000000, 0.2700000000000,
+                     -0.2700000000000, 0.2700000000000,
+                     -0.0800000000000, 0.0800000000000,
+                     -0.0800000000000, 0.0800000000000,
+                     -0.3200000000000, 0.3200000000000,
+                     -0.3200000000000, 0.3200000000000;
+    // clang-format on
 
-  Eigen::Matrix<double, 4, 2> masses;
-  // clang-format off
-  masses << 0.96, 1.46,
-            0.24, 1.04,
-            0.16, 0.56,
-            0.64, 0.44;
-  // clang-format on
-  Eigen::Matrix<double, 8, 2> momenta;
-  // clang-format off
-  momenta << 0.96,  -0.70,
-             1.92,   0.76,
-             0.24,  -0.40,
-             0.48,   0.64,
-             0.16,   0.20,
-             0.32,   0.76,
-             0.64,  -0.10,
-             1.28,   0.34;
-  // clang-format on
-
-  Eigen::Matrix<double, 8, 2> delta_momenta;
-  // clang-format off
-  delta_momenta << -0.8568595041322, 0.8568595041322,
-                   -0.8568595041322, 0.8568595041322,
-                   -0.2700000000000, 0.2700000000000,
-                   -0.2700000000000, 0.2700000000000,
-                   -0.0800000000000, 0.0800000000000,
-                   -0.0800000000000, 0.0800000000000,
-                   -0.3200000000000, 0.3200000000000,
-                   -0.3200000000000, 0.3200000000000;
-  // clang-format on
-
-  Eigen::Matrix<double, 8, 2> displacements;
-  // clang-format off
-  displacements << 0.01182851239670, 0.00576531189856,
-                   0.06182851239669, 0.05576531189856,
-                   0.01182851239670, 0.00662746344565,
-                   0.06182851239669, 0.05662746344565,
-                   0.01182851239670, 0.01337072018890,
-                   0.06182851239669, 0.06337072018890,
-                   0.01182851239670, 0.00805785123967,
-                   0.06182851239669, 0.05805785123967;
-  // clang-format on
-
-  Eigen::Matrix<double, 8, 2> separation;
-  // clang-format off
-  separation << -0.00606320049813,  0.00606320049813,
-                -0.00606320049813,  0.00606320049813,
-                -0.00520104895105,  0.00520104895105,
-                -0.00520104895105,  0.00520104895105,
-                 0.00154220779221, -0.00154220779221,
-                 0.00154220779221, -0.00154220779221,
-                -0.00377066115702,  0.00377066115702,
-                -0.00377066115702,  0.00377066115702;
-  // clang-format on
-
-  Eigen::Matrix<double, 4, 2> domains;
-  // clang-format off
-  domains << 1.92, 1.46,
-            0.48, 1.04,
-            0.32, 0.56,
-            1.28, 0.44;
-  // clang-format on
-
-  Eigen::Matrix<double, 8, 2> gradients;
-  // clang-format off
-  gradients << -4.8, -5.0,
-               -6.4, -3.8,
-                4.8,  5.0,
-               -1.6, -3.2,
-                3.2,  2.0,
-                1.6,  3.2,
-               -3.2, -2.0,
-                6.4,  3.8;
-  // clang-format on
-
-  Eigen::Matrix<double, 8, 2> normal;
-  // clang-format off
-  normal << -0.60000000000000, -0.79616219412310,
-            -0.80000000000000, -0.60508326753356,
-             0.94868329805051,  0.84227140066151,
-            -0.31622776601684, -0.53905369642337,
-             0.89442719099992,  0.52999894000318,
-             0.44721359549996,  0.84799830400509,
-            -0.44721359549996, -0.46574643283262,
-             0.89442719099992,  0.88491822238198;
-  // clang-format on
-
-  // Check if nodal properties were properly mapped and computed
-  for (int i = 0; i < Nnodes; ++i) {
-    for (int j = 0; j < Nmaterials; ++j) {
-      REQUIRE(nodal_properties->property("masses", i, j, 1)(0, 0) ==
-              Approx(masses(i, j)).epsilon(tolerance));
-      REQUIRE(nodal_properties->property("domains", i, j, 1)(0, 0) ==
-              Approx(domains(i, j)).epsilon(tolerance));
-      for (int k = 0; k < Dim; ++k) {
-        REQUIRE(nodal_properties->property("momenta", i, j, Dim)(k, 0) ==
-                Approx(momenta(i * Dim + k, j)).epsilon(tolerance));
-        REQUIRE(
-            nodal_properties->property("change_in_momenta", i, j, Dim)(k, 0) ==
-            Approx(delta_momenta(i * Dim + k, j)).epsilon(tolerance));
-        REQUIRE(nodal_properties->property("displacements", i, j, Dim)(k, 0) ==
-                Approx(displacements(i * Dim + k, j)).epsilon(tolerance));
-        REQUIRE(
-            nodal_properties->property("separation_vectors", i, j, Dim)(k, 0) ==
-            Approx(separation(i * Dim + k, j)).epsilon(tolerance));
-        REQUIRE(
-            nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
-            Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
-        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
-                    k, 0) == Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+    // Check values of mass and momentum at each node
+    for (int i = 0; i < Nnodes; ++i) {
+      for (int j = 0; j < Nmaterials; ++j) {
+        REQUIRE(nodal_properties->property("masses", i, j, 1)(0, 0) ==
+                Approx(masses(i, j)).epsilon(tolerance));
+        for (int k = 0; k < Dim; ++k) {
+          REQUIRE(nodal_properties->property("momenta", i, j, Dim)(k, 0) ==
+                  Approx(momenta(i * Dim + k, j)).epsilon(tolerance));
+          REQUIRE(nodal_properties->property("change_in_momenta", i, j, Dim)(
+                      k, 0) ==
+                  Approx(delta_momenta(i * Dim + k, j)).epsilon(tolerance));
+        }
       }
-      // Check if normal vector are also unit vectors
-      REQUIRE(
-          nodal_properties->property("normal_unit_vectors", i, j, Dim).norm() ==
-          Approx(1.0).epsilon(tolerance));
     }
   }
+
+  SECTION("Check normal unit vector") {
+    // Map multimaterial domains (volumes) to nodes
+    REQUIRE_NOTHROW(particle1->map_multimaterial_domain_to_nodes());
+    REQUIRE_NOTHROW(particle2->map_multimaterial_domain_to_nodes());
+    REQUIRE_NOTHROW(particle3->map_multimaterial_domain_to_nodes());
+
+    // Map multimaterial domain gradients to nodes
+    REQUIRE_NOTHROW(particle1->map_multimaterial_domain_gradients_to_nodes());
+    REQUIRE_NOTHROW(particle2->map_multimaterial_domain_gradients_to_nodes());
+    REQUIRE_NOTHROW(particle3->map_multimaterial_domain_gradients_to_nodes());
+
+    // Compute normal unit vectors at nodes
+    REQUIRE_NOTHROW(node0->compute_multimaterial_normal_unit_vector());
+    REQUIRE_NOTHROW(node1->compute_multimaterial_normal_unit_vector());
+    REQUIRE_NOTHROW(node2->compute_multimaterial_normal_unit_vector());
+    REQUIRE_NOTHROW(node3->compute_multimaterial_normal_unit_vector());
+
+    Eigen::Matrix<double, 4, 2> domains;
+    // clang-format off
+    domains << 1.92, 1.46,
+              0.48, 1.04,
+              0.32, 0.56,
+              1.28, 0.44;
+    // clang-format on
+
+    Eigen::Matrix<double, 8, 2> gradients;
+    // clang-format off
+    gradients << -4.8, -5.0,
+                 -6.4, -3.8,
+                  4.8,  5.0,
+                 -1.6, -3.2,
+                  3.2,  2.0,
+                  1.6,  3.2,
+                 -3.2, -2.0,
+                  6.4,  3.8;
+    // clang-format on
+
+    Eigen::Matrix<double, 8, 2> normal;
+    // clang-format off
+    normal << -0.60000000000000, -0.79616219412310,
+              -0.80000000000000, -0.60508326753356,
+               0.94868329805051,  0.84227140066151,
+              -0.31622776601684, -0.53905369642337,
+               0.89442719099992,  0.52999894000318,
+               0.44721359549996,  0.84799830400509,
+              -0.44721359549996, -0.46574643283262,
+               0.89442719099992,  0.88491822238198;
+    // clang-format on
+
+    // Check if nodal properties were properly mapped and computed
+    for (int i = 0; i < Nnodes; ++i) {
+      for (int j = 0; j < Nmaterials; ++j) {
+        REQUIRE(nodal_properties->property("domains", i, j, 1)(0, 0) ==
+                Approx(domains(i, j)).epsilon(tolerance));
+        for (int k = 0; k < Dim; ++k) {
+          REQUIRE(
+              nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
+              Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
+                      k, 0) ==
+                  Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+        }
+        // Check if normal vector are also unit vectors
+        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
+                    .norm() == Approx(1.0).epsilon(tolerance));
+      }
+    }
+  }
+
+  // Check internal forces
+  SECTION("Check internal forces") {}
+
+  // Check external forces
+  SECTION("Check external forces") {}
 }
