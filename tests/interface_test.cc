@@ -56,7 +56,8 @@ TEST_CASE("Interface functions are checked", "[interface]") {
 
   // Create cell
   auto cell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, element);
-  // Add nodes to cell
+  
+  // Create nodes
   Eigen::Vector2d coords;
   coords << 0.0, 0.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -74,20 +75,23 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-  cell->add_node(0, node0);
-  cell->add_node(1, node1);
-  cell->add_node(2, node3);
-  cell->add_node(3, node2);
+  // Create vector of nodes
+  std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+  nodes.emplace_back(node0);
+  nodes.emplace_back(node1);
+  nodes.emplace_back(node3);
+  nodes.emplace_back(node2);
+
+  // Add nodes to cell
+  for (unsigned i = 0; i < Nnodes; ++i) cell->add_node(i, nodes[i]);
 
   // Initialise cell properties
   cell->initialise();
 
   // Initialise property handle in each node
-  REQUIRE_NOTHROW(node0->initialise_property_handle(0, nodal_properties));
-  REQUIRE_NOTHROW(node1->initialise_property_handle(1, nodal_properties));
-  REQUIRE_NOTHROW(node3->initialise_property_handle(2, nodal_properties));
-  REQUIRE_NOTHROW(node2->initialise_property_handle(3, nodal_properties));
-
+  for (unsigned i = 0; i < Nnodes; ++i)
+    REQUIRE_NOTHROW(nodes[i]->initialise_property_handle(i, nodal_properties));
+  
   // Create particle
   // Particle coordinates
   coords << 0.1, 0.2;
@@ -97,14 +101,19 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   coords << 0.4, 0.4;
   auto particle3 = std::make_shared<mpm::Particle<Dim>>(2, coords);
 
-  // Assign particle to cell
-  particle1->assign_cell_id(1);
-  particle2->assign_cell_id(1);
-  particle3->assign_cell_id(1);
-  particle1->assign_cell(cell);
-  particle2->assign_cell(cell);
-  particle3->assign_cell(cell);
+  // Create vector of particles
+  std::vector<std::shared_ptr<mpm::Particle<Dim>>> particles;
+  particles.emplace_back(particle1);
+  particles.emplace_back(particle2);
+  particles.emplace_back(particle3);
+  int Nparticles = particles.size();
 
+  // Assign particle to cell
+  for (unsigned i = 0; i < Nparticles; ++i) {
+    particles[i]->assign_cell_id(1);
+    particles[i]->assign_cell(cell);
+  }
+  
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
@@ -119,19 +128,19 @@ TEST_CASE("Interface functions are checked", "[interface]") {
           "LinearElastic2D", std::move(1), jmaterial);
 
   // Assign materials to particles
-  particle1->assign_material(material1);
-  particle2->assign_material(material2);
-  particle3->assign_material(material2);
+  particles[0]->assign_material(material1);
+  particles[1]->assign_material(material2);
+  particles[2]->assign_material(material2);
 
   // Assign mass
-  particle1->assign_mass(2.0);
-  particle2->assign_mass(3.0);
-  particle3->assign_mass(0.5);
+  particles[0]->assign_mass(2.0);
+  particles[1]->assign_mass(3.0);
+  particles[2]->assign_mass(0.5);
 
   // Assign volume
-  particle1->assign_volume(4.0);
-  particle2->assign_volume(3.0);
-  particle3->assign_volume(0.5);
+  particles[0]->assign_volume(4.0);
+  particles[1]->assign_volume(3.0);
+  particles[2]->assign_volume(0.5);
 
   // Assign velocity
   Eigen::VectorXd velocity1;
@@ -142,46 +151,35 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     velocity1(i) = i + 1;
     velocity2(i) = i - 0.5;
   }
-  particle1->assign_velocity(velocity1);
-  particle2->assign_velocity(velocity2);
-  particle3->assign_velocity(velocity1);
+  particles[0]->assign_velocity(velocity1);
+  particles[1]->assign_velocity(velocity2);
+  particles[2]->assign_velocity(velocity1);
 
   // Compute shape functions
-  particle1->compute_shapefn();
-  particle2->compute_shapefn();
-  particle3->compute_shapefn();
+  for (unsigned i = 0; i < Nparticles; ++i) particles[i]->compute_shapefn();
 
   // Append material ids to node
-  for (unsigned i = 0; i < 2; ++i) {
-    REQUIRE_NOTHROW(node0->append_material_id(i));
-    REQUIRE_NOTHROW(node1->append_material_id(i));
-    REQUIRE_NOTHROW(node2->append_material_id(i));
-    REQUIRE_NOTHROW(node3->append_material_id(i));
-  }
+  for (unsigned i = 0; i < 2; ++i)
+    for (unsigned j = 0; j < Nnodes; ++j)
+      REQUIRE_NOTHROW(nodes[j]->append_material_id(i));
 
   // Check computation of nodal mass and momentum
   SECTION("Check mass and momentum at nodes") {
-    // Map multimaterial properties from the particles to the nodes
-    REQUIRE_NOTHROW(particle1->map_multimaterial_mass_momentum_to_nodes());
-    REQUIRE_NOTHROW(particle2->map_multimaterial_mass_momentum_to_nodes());
-    REQUIRE_NOTHROW(particle3->map_multimaterial_mass_momentum_to_nodes());
+    for (unsigned i = 0; i < Nparticles; ++i) {
+      // Map masses and momenta from particles to nodes
+      particles[i]->map_mass_momentum_to_nodes();
+      
+      // Map multimaterial properties from the particles to the nodes
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_mass_momentum_to_nodes());
+    }
 
-    // Map masses and momenta from particles to nodes
-    REQUIRE_NOTHROW(particle1->map_mass_momentum_to_nodes());
-    REQUIRE_NOTHROW(particle2->map_mass_momentum_to_nodes());
-    REQUIRE_NOTHROW(particle3->map_mass_momentum_to_nodes());
+    for (unsigned i = 0; i < Nnodes; ++i) {
+      // Compute velocities at nodes
+      nodes[i]->compute_velocity();
 
-    // Compute velocities at nodes
-    node0->compute_velocity();
-    node1->compute_velocity();
-    node2->compute_velocity();
-    node3->compute_velocity();
-
-    // Compute multimaterial change in momentum
-    REQUIRE_NOTHROW(node0->compute_multimaterial_change_in_momentum());
-    REQUIRE_NOTHROW(node1->compute_multimaterial_change_in_momentum());
-    REQUIRE_NOTHROW(node2->compute_multimaterial_change_in_momentum());
-    REQUIRE_NOTHROW(node3->compute_multimaterial_change_in_momentum());
+      // Compute multimaterial change in momentum
+      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_change_in_momentum());
+    }
 
     Eigen::Matrix<double, 4, 2> masses;
     // clang-format off
@@ -232,21 +230,18 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   }
 
   SECTION("Check normal unit vector") {
-    // Map multimaterial domains (volumes) to nodes
-    REQUIRE_NOTHROW(particle1->map_multimaterial_domain_to_nodes());
-    REQUIRE_NOTHROW(particle2->map_multimaterial_domain_to_nodes());
-    REQUIRE_NOTHROW(particle3->map_multimaterial_domain_to_nodes());
+    for (unsigned i = 0; i < Nparticles; ++i) {
+      // Map multimaterial domains (volumes) to nodes
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_domain_to_nodes());
 
-    // Map multimaterial domain gradients to nodes
-    REQUIRE_NOTHROW(particle1->map_multimaterial_domain_gradients_to_nodes());
-    REQUIRE_NOTHROW(particle2->map_multimaterial_domain_gradients_to_nodes());
-    REQUIRE_NOTHROW(particle3->map_multimaterial_domain_gradients_to_nodes());
+      // Map multimaterial domain gradients to nodes
+      REQUIRE_NOTHROW(
+          particles[i]->map_multimaterial_domain_gradients_to_nodes());
+    }
 
     // Compute normal unit vectors at nodes
-    REQUIRE_NOTHROW(node0->compute_multimaterial_normal_unit_vector());
-    REQUIRE_NOTHROW(node1->compute_multimaterial_normal_unit_vector());
-    REQUIRE_NOTHROW(node2->compute_multimaterial_normal_unit_vector());
-    REQUIRE_NOTHROW(node3->compute_multimaterial_normal_unit_vector());
+    for (unsigned i = 0; i < Nnodes; ++i)
+      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector());
 
     Eigen::Matrix<double, 4, 2> domains;
     // clang-format off
