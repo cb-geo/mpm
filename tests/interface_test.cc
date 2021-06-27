@@ -163,6 +163,12 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     for (unsigned j = 0; j < Nnodes; ++j)
       REQUIRE_NOTHROW(nodes[j]->append_material_id(i));
 
+  // Check that all material ids were appended to node
+  for (unsigned i = 0; i < 2; ++i)
+    for (unsigned j = 0; j < Nnodes; ++j)
+      REQUIRE(nodes[j]->material_ids().find(i) !=
+              nodes[j]->material_ids().end());
+
   // Check computation of nodal mass and momentum
   SECTION("Check mass and momentum at nodes") {
     for (unsigned i = 0; i < Nparticles; ++i) {
