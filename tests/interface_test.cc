@@ -367,8 +367,62 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     }
   }
 
-  // Check internal forces
-  SECTION("Check internal forces") {}
+  // Check strain, stresses and internal forces
+  SECTION("Check strain, stresses and internal forces") {
+    // Map mass and momentum to nodes
+    for (unsigned i = 0; i < Nparticles; ++i)
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_mass_momentum_to_nodes());
+
+    // Compute velocity at nodes
+    for (unsigned i = 0; i < Nnodes; ++i)
+      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_velocity());
+
+    // Compute strain and stress at particles
+    for (unsigned i = 0; i < Nparticles; ++i) {
+      REQUIRE_NOTHROW(particles[i]->compute_strain(0.01, true));
+      REQUIRE_NOTHROW(particles[i]->compute_stress());
+    }
+
+    Eigen::Matrix<double, 6, 3> strain_rates;
+    // clang-format off
+    strain_rates << 0.0, 0.385504906052851, 0.97299960313659,
+                    0.0, 0.896021786432745, 1.2876849178219,
+                    0.0, 0.000000000000000, 0.0,
+                    0.0, 1.281526692485600, 2.26068452095849,
+                    0.0, 0.000000000000000, 0.0,
+                    0.0, 0.000000000000000, 0.0;
+    // clang-format on
+
+    // Check strain_rate
+    for (unsigned i = 0; i < 6; ++i)
+      for (unsigned j = 0; j < Nparticles; ++j)
+        REQUIRE(particles[j]->strain_rate()(i, j) ==
+                Approx(strain_rates(i, j)).epsilon(tolerance));
+
+    // Map internal forces
+    for (unsigned i = 0; i < Nparticles; ++i)
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_internal_force());
+
+    Eigen::Matrix<double, 8, 2> internal_forces;
+    // clang-format off
+    internal_forces << 0.0,  733110.672257143,
+                       0.0,  814167.128972187,
+                       0.0, -350424.338569755,
+                       0.0,  272463.574360308,
+                       0.0, -476376.626534688,
+                       0.0, -655149.908047695,
+                       0.0,   93690.2928473004,
+                       0.0, -431480.795284800;
+    // clang-format on
+
+    // Check internal forces
+    for (int i = 0; i < Nnodes; ++i)
+      for (int j = 0; j < Nmaterials; ++j)
+        for (int k = 0; k < Dim; ++k)
+          REQUIRE(
+              nodal_properties->property("internal_forces", i, j, Dim)(k, 0) ==
+              Approx(internal_forces(i * Dim + k, j)).epsilon(tolerance));
+  }
 
   // Check external forces
   SECTION("Check external forces") {}
