@@ -346,6 +346,65 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
   }
 }
 
+//! Apply velocity constraints to contact
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_velocity_constraints() {
+  // Set velocity constraint
+  for (const auto& constraint : this->velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+
+    // Iterate over all materials in this node if phase == 0
+    if (phase == 0) {
+      for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+           ++mitr) {
+        // Get veloocity and acceleration for current material
+        VectorDim velocity =
+            property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+        VectorDim acceleration =
+            property_handle_->property("accelerations", prop_id_, *mitr, Tdim);
+
+        if (!generic_boundary_constraints_) {
+          // Velocity constraints are applied on Cartesian boundaries
+          velocity(direction, 0) = constraint.second;
+          // Set acceleration to 0 in direction of velocity constraint
+          acceleration(direction, 0) = 0;
+
+          // Apply constrained velocity and acceleration to property pool
+          property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                            velocity, Tdim);
+          property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                            acceleration, Tdim);
+        } else {
+          // Velocity constraints on general boundaries
+          // Compute inverse rotation matrix
+          const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
+              rotation_matrix_.inverse();
+          // Transform to local coordinate
+          velocity = inverse_rotation_matrix * velocity;
+          acceleration = inverse_rotation_matrix * acceleration;
+          // Apply boundary condition in local coordinate
+          velocity(direction, 0) = constraint.second;
+          acceleration(direction, 0) = 0.;
+          // Transform back to global coordinate
+          velocity = rotation_matrix_ * velocity;
+          acceleration = rotation_matrix_ * acceleration;
+
+          // Apply constrained velocity and acceleration to property pool
+          property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                            velocity, Tdim);
+          property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                            acceleration, Tdim);
+        }
+      }
+    }
+  }
+}
+
 //! Assign friction constraint
 //! Constrain directions can take values between 0 and Dim * Nphases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>

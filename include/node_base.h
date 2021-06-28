@@ -193,6 +193,9 @@ class NodeBase {
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 
+  //! Apply velocity constraints to contact
+  virtual void apply_contact_velocity_constraints() = 0;
+
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of friction constraint
