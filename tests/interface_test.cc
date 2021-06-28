@@ -32,9 +32,13 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   // Initialise a nodal property pool
   auto nodal_properties = std::make_shared<mpm::NodalProperties>();
 
-  // Add masses and momenta to the nodal properties pool
+  // Add all properties to the nodal properties pool
   nodal_properties->create_property("masses", Nnodes, Nmaterials);
   nodal_properties->create_property("momenta", Nnodes * Dim, Nmaterials);
+  nodal_properties->create_property("velocities", Nnodes * Dim, Nmaterials);
+  nodal_properties->create_property("current_velocities", Nnodes * Dim,
+                                    Nmaterials);
+  nodal_properties->create_property("accelerations", Nnodes * Dim, Nmaterials);
   nodal_properties->create_property("change_in_momenta", Nnodes * Dim,
                                     Nmaterials);
   nodal_properties->create_property("displacements", Nnodes * Dim, Nmaterials);
@@ -56,7 +60,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
 
   // Create cell
   auto cell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, element);
-  
+
   // Create nodes
   Eigen::Vector2d coords;
   coords << 0.0, 0.0;
@@ -91,7 +95,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   // Initialise property handle in each node
   for (unsigned i = 0; i < Nnodes; ++i)
     REQUIRE_NOTHROW(nodes[i]->initialise_property_handle(i, nodal_properties));
-  
+
   // Create particle
   // Particle coordinates
   coords << 0.1, 0.2;
@@ -113,7 +117,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     particles[i]->assign_cell_id(1);
     particles[i]->assign_cell(cell);
   }
-  
+
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
@@ -169,12 +173,12 @@ TEST_CASE("Interface functions are checked", "[interface]") {
       REQUIRE(nodes[j]->material_ids().find(i) !=
               nodes[j]->material_ids().end());
 
-  // Check computation of nodal mass and momentum
-  SECTION("Check mass and momentum at nodes") {
+  // Check computation of nodal mass, momentum, and velocity
+  SECTION("Check mass, momentum, and velocity at nodes") {
     for (unsigned i = 0; i < Nparticles; ++i) {
       // Map masses and momenta from particles to nodes
       particles[i]->map_mass_momentum_to_nodes();
-      
+
       // Map multimaterial properties from the particles to the nodes
       REQUIRE_NOTHROW(particles[i]->map_multimaterial_mass_momentum_to_nodes());
     }
@@ -230,6 +234,68 @@ TEST_CASE("Interface functions are checked", "[interface]") {
           REQUIRE(nodal_properties->property("change_in_momenta", i, j, Dim)(
                       k, 0) ==
                   Approx(delta_momenta(i * Dim + k, j)).epsilon(tolerance));
+        }
+      }
+    }
+
+    // Check nodal velocity constraints
+    SECTION("Check nodal velocity constraints") {
+      // Create and apply the velocity constraints
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        nodes[i]->assign_velocity_constraint(i%2, 0.5*i);
+        REQUIRE_NOTHROW(nodes[i]->apply_contact_velocity_constraints());
+      }
+
+      Eigen::Matrix<double, 8, 2> velocities;
+      // clang-format off
+      velocities << 0.0, 0.0,
+                    0.0, 0.0,
+                    0.0, 0.0,
+                    0.5, 0.5,
+                    1.0, 1.0,
+                    0.0, 0.0,
+                    0.0, 0.0,
+                    1.5, 1.5;
+      // clang-format on
+
+      // Check values of mass and momentum at each node
+      for (int i = 0; i < Nnodes; ++i)
+        for (int j = 0; j < Nmaterials; ++j)
+          for (int k = 0; k < Dim; ++k)
+            REQUIRE(nodal_properties->property("velocities", i, j, Dim)(k, 0) ==
+                    Approx(velocities(i * Dim + k, j)).epsilon(tolerance));
+    }
+
+    // Check nodal velocities from mapped momenta
+    SECTION("Check nodal velocities from mapped momenta") {
+      // Create velocity constraints and compute velocity from mass and momenta
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        nodes[i]->assign_velocity_constraint(i%2, 0.5*i);
+        REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_velocity());
+      }
+
+      Eigen::Matrix<double, 8, 2> velocities;
+      // clang-format off
+      velocities << 0.0,  0.0,
+                    2.0,  0.520547945205479,
+                    1.0, -0.384615384615385,
+                    0.5,  0.5,
+                    1.0,  1.0,
+                    2.0,  1.35714285714286,
+                    1.0, -0.227272727272727,
+                    1.5,  1.5;
+      // clang-format on
+
+      // Check values of mass and momentum at each node
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("velocities", i, j, Dim)(k, 0) ==
+                    Approx(velocities(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(nodal_properties->property("current_velocities", i, j, Dim)(
+                        k, 0) ==
+                    Approx(velocities(i * Dim + k, j)).epsilon(tolerance));
+          }
         }
       }
     }
