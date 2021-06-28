@@ -635,3 +635,41 @@ void mpm::Node<Tdim, Tdof,
   }
   node_mutex_.unlock();
 }
+
+//! Compute multimaterial velocity from mass and momentum
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
+  // Iterate over all materials in the material_ids set
+  node_mutex_.lock();
+
+  const double tolerance = 1.0E-15;
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // Calculate the velocity by dividing the momentum by the mass
+    double mass =
+        property_handle_->property("masses", prop_id_, *mitr, 1)(0, 0);
+    if (mass > tolerance) {
+      VectorDim momentum =
+          property_handle_->property("momenta", prop_id_, *mitr, Tdim);
+      VectorDim velocity = (1 / mass) * momentum;
+
+      // Check to see if velocity is below threshold
+      for (int i = 0; i < Tdim; ++i) {
+        if (std::abs(velocity(i, 0)) < tolerance) velocity(i, 0) = 0.0;
+      }
+
+      // Assign the velocity to its corresponding node and material ids in the
+      // property pool
+      property_handle_->assign_property("velocities", prop_id_, *mitr, velocity,
+                                        Tdim);
+
+      // Apply velocity constraints, which also sets acceleration to 0
+      this->apply_contact_velocity_constraints();
+
+      // Assign current velocity
+      velocity = this->property("velocities", *mitr, Tdim);
+      property_handle_->assign_property("current_velocities", prop_id_, *mitr,
+                                        velocity, Tdim);
+    }
+  }
+  node_mutex_.unlock();
+}
