@@ -1326,6 +1326,17 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   }
 }
 
+//! Apply particle tractions
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::apply_multimaterial_traction_on_particles() {
+  // Iterate over particles to map traction forces if there are any
+  if (!particle_tractions_.empty()) {
+    this->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_multimaterial_traction_force,
+                  std::placeholders::_1));
+  }
+}
+
 //! Create particle velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particle_velocity_constraint(
