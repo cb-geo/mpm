@@ -732,3 +732,21 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_velocity() {
   }
   node_mutex_.unlock();
 }
+
+//! Compute multimaterial relative velocities
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_relative_velocity() {
+  // Iterate over all materials in the material_ids set
+  node_mutex_.lock();
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    VectorDim velocity_material =
+        property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+    VectorDim relative_velocity = velocity_material - this->velocity_.col(0);
+
+    // Assign relative velocities
+    property_handle_->assign_property("relative_velocities", prop_id_, *mitr,
+                                      relative_velocity, Tdim);
+  }
+  node_mutex_.unlock();
+}

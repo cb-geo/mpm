@@ -279,6 +279,9 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial velocity from mass and momentum
   void compute_multimaterial_velocity() override;
 
+  //! Compute multimaterial relative velocities
+  void compute_multimaterial_relative_velocity() override;
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
