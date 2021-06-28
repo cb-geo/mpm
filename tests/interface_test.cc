@@ -41,8 +41,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   nodal_properties->create_property("accelerations", Nnodes * Dim, Nmaterials);
   nodal_properties->create_property("change_in_momenta", Nnodes * Dim,
                                     Nmaterials);
-  nodal_properties->create_property("displacements", Nnodes * Dim, Nmaterials);
-  nodal_properties->create_property("separation_vectors", Nnodes * Dim,
+  nodal_properties->create_property("relative_velocities", Nnodes * Dim,
                                     Nmaterials);
   nodal_properties->create_property("domains", Nnodes, Nmaterials);
   nodal_properties->create_property("domain_gradients", Nnodes * Dim,
@@ -147,10 +146,8 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particles[2]->assign_volume(0.5);
 
   // Assign velocity
-  Eigen::VectorXd velocity1;
-  Eigen::VectorXd velocity2;
-  velocity1.resize(Dim);
-  velocity2.resize(Dim);
+  Eigen::Vector2d velocity1;
+  Eigen::Vector2d velocity2;
   for (unsigned i = 0; i < velocity1.size(); ++i) {
     velocity1(i) = i + 1;
     velocity2(i) = i - 0.5;
@@ -242,7 +239,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     SECTION("Check nodal velocity constraints") {
       // Create and apply the velocity constraints
       for (unsigned i = 0; i < Nnodes; ++i) {
-        nodes[i]->assign_velocity_constraint(i%2, 0.5*i);
+        nodes[i]->assign_velocity_constraint(i % 2, 0.5 * i);
         REQUIRE_NOTHROW(nodes[i]->apply_contact_velocity_constraints());
       }
 
@@ -270,8 +267,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
     SECTION("Check nodal velocities from mapped momenta") {
       // Create velocity constraints and compute velocity from mass and momenta
       for (unsigned i = 0; i < Nnodes; ++i) {
-        nodes[i]->assign_velocity_constraint(i%2, 0.5*i);
+        nodes[i]->assign_velocity_constraint(i % 2, 0.5 * i);
         REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_velocity());
+        REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_relative_velocity());
       }
 
       Eigen::Matrix<double, 8, 2> velocities;
@@ -286,6 +284,18 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                     1.5,  1.5;
       // clang-format on
 
+      Eigen::Matrix<double, 8, 2> rel_velocities;
+      // clang-format off
+      rel_velocities << -0.107438016528926, -0.107438016528926,
+                         0.892561983471074, -0.586890071323446,
+                         1.125000000000000, -0.259615384615385,
+                        -0.375000000000000, -0.375000000000000,
+                         0.500000000000000,  0.500000000000000,
+                         0.500000000000000, -0.142857142857143,
+                         0.500000000000000, -0.727272727272727,
+                         0.000000000000000,  0.000000000000000;
+      // clang-format on
+
       // Check values of mass and momentum at each node
       for (int i = 0; i < Nnodes; ++i) {
         for (int j = 0; j < Nmaterials; ++j) {
@@ -295,6 +305,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
             REQUIRE(nodal_properties->property("current_velocities", i, j, Dim)(
                         k, 0) ==
                     Approx(velocities(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(nodal_properties->property("relative_velocities", i, j,
+                                               Dim)(k, 0) ==
+                    Approx(rel_velocities(i * Dim + k, j)).epsilon(tolerance));
           }
         }
       }
@@ -425,5 +438,47 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   }
 
   // Check external forces
-  SECTION("Check external forces") {}
+  SECTION("Check external forces") {
+    // Gravity
+    Eigen::Vector2d gravity;
+    gravity << 2.0, 8.0;
+
+    // Assign traction to particle
+    particles[1]->assign_traction(0, 2.5);
+    particles[2]->assign_traction(1, -1.0);
+
+    // Assign concentrated forces to nodes
+    nodes[1]->assign_concentrated_force(0, 0, 2.0, nullptr);
+    nodes[2]->assign_concentrated_force(0, 1, 5.0, nullptr);
+
+    // Map body force and traction to nodes
+    for (unsigned i = 0; i < Nparticles; ++i) {
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_body_force(gravity));
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_traction_force());
+    }
+
+    // Apply concentrated nodal forces
+    for (unsigned i = 0; i < Nnodes; ++i)
+      REQUIRE_NOTHROW(nodes[i]->apply_multimaterial_concentrated_force(0, 0.0));
+
+    Eigen::Matrix<double, 8, 2> external_forces;
+    // clang-format off
+    external_forces << 1.92, 4.99846096908265,
+                       7.68, 11.6517157287525,
+                       2.48, 5.46564064605510,
+                       1.92, 8.20686291501015,
+                       0.32, 1.46641016151378,
+                       6.28, 9.02745166004061,
+                       1.28, 1.39961524227066,
+                       5.12, 3.40686291501015;
+    // clang-format on
+
+    // Check external forces
+    for (int i = 0; i < Nnodes; ++i)
+      for (int j = 0; j < Nmaterials; ++j)
+        for (int k = 0; k < Dim; ++k)
+          REQUIRE(
+              nodal_properties->property("external_forces", i, j, Dim)(k, 0) ==
+              Approx(external_forces(i * Dim + k, j)).epsilon(tolerance));
+  }
 }
