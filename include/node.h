@@ -282,6 +282,12 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial relative velocities
   void compute_multimaterial_relative_velocity() override;
 
+  //! Apply concentrated force to the nodes in the multimaterial environment
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current_time Current instant of time
+  void apply_multimaterial_concentrated_force(unsigned phase,
+                                              double current_time) override;
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
