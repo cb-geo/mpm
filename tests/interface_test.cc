@@ -52,6 +52,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                                     Nmaterials);
   nodal_properties->create_property("external_forces", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("rigid_constraints", Nnodes, Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -544,5 +545,31 @@ TEST_CASE("Interface functions are checked", "[interface]") {
           REQUIRE(
               nodal_properties->property("external_forces", i, j, Dim)(k, 0) ==
               Approx(external_forces(i * Dim + k, j)).epsilon(tolerance));
+  }
+
+  // Check mapping of particle constrained status
+  SECTION("Check mapping of particle constrained status") {
+    // Apply particle velocity constraint to one particle
+    particles[1]->apply_particle_velocity_constraints(0, 1.0);
+
+    // Map particle constraint status to all nodes
+    for (unsigned i = 0; i < Nparticles; ++i)
+      REQUIRE_NOTHROW(particles[i]->map_multimaterial_rigid_constraint());
+
+    Eigen::Matrix<double, 4, 2> constraints;
+    // clang-format off
+    constraints << 0.0, 1.0,
+                   0.0, 1.0,
+                   0.0, 1.0,
+                   0.0, 1.0;
+    // clang-format on
+
+    // Check constraint status at nodes and materials
+    for (int i = 0; i < Nnodes; ++i)
+      for (int j = 0; j < Nmaterials; ++j)
+        for (int k = 0; k < Dim; ++k)
+          REQUIRE(
+              nodal_properties->property("rigid_constraints", i, j, Dim)(k, 0) ==
+              Approx(constraints(i * Dim + k, j)).epsilon(tolerance));
   }
 }
