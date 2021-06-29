@@ -324,9 +324,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
           particles[i]->map_multimaterial_domain_gradients_to_nodes());
     }
 
-    // Compute normal unit vectors at nodes
+    // Compute normal unit vectors at nodes with PVG normal type
     for (unsigned i = 0; i < Nnodes; ++i)
-      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector());
+      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector("PVG"));
 
     Eigen::Matrix<double, 4, 2> domains;
     // clang-format off
@@ -376,6 +376,70 @@ TEST_CASE("Interface functions are checked", "[interface]") {
         // Check if normal vector are also unit vectors
         REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
                     .norm() == Approx(1.0).epsilon(tolerance));
+      }
+    }
+
+    // Compute normal unit vectors at nodes with MVG normal type
+    for (unsigned i = 0; i < Nnodes; ++i)
+      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector("MVG"));
+
+    // clang-format off
+    normal << -0.60000000000000,  0.60000000000000,
+              -0.80000000000000,  0.80000000000000,
+              -0.84227140066151,  0.84227140066151,
+               0.53905369642337, -0.53905369642337,
+              -0.52999894000318,  0.52999894000318,
+              -0.84799830400509,  0.84799830400509,
+              -0.44721359549996,  0.44721359549996,
+               0.89442719099992, -0.89442719099992;
+    // clang-format on
+
+    // Check if normal unit vector was properly computed
+    for (int i = 0; i < Nnodes; ++i) {
+      for (int j = 0; j < Nmaterials; ++j) {
+        // Check if normal vector are also unit vectors
+        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
+                    .norm() == Approx(1.0).epsilon(tolerance));
+        for (int k = 0; k < Dim; ++k) {
+          REQUIRE(
+              nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
+              Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
+                      k, 0) ==
+                  Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+        }
+      }
+    }
+
+    // Compute normal unit vectors at nodes with AVG normal type
+    for (unsigned i = 0; i < Nnodes; ++i)
+      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector("AVG"));
+
+    // clang-format off
+    normal << -0.273439154608222,  0.273439154608222,
+              -0.961889301701158,  0.961889301701158,
+              -0.749233543124942,  0.749233543124942,
+               0.662305894475087, -0.662305894475087,
+              -0.074789948241634,  0.074789948241634,
+              -0.997199309888456,  0.997199309888456,
+              -0.442365234368165,  0.442365234368165,
+               0.896834990074762, -0.896834990074762;
+    // clang-format on
+
+    // Check if normal unit vector was properly computed
+    for (int i = 0; i < Nnodes; ++i) {
+      for (int j = 0; j < Nmaterials; ++j) {
+        // Check if normal vector are also unit vectors
+        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
+                    .norm() == Approx(1.0).epsilon(tolerance));
+        for (int k = 0; k < Dim; ++k) {
+          REQUIRE(
+              nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
+              Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
+                      k, 0) ==
+                  Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+        }
       }
     }
   }
