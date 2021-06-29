@@ -152,6 +152,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Map multimaterial domain gradients to nodes
   void map_multimaterial_domain_gradients_to_nodes() noexcept override;
 
+  //! Map multimaterial rigid constraint
+  void map_multimaterial_rigid_constraint() noexcept override;
+
   //! Map multimaterial body force
   //! \param[in] pgravity Gravity
   void map_multimaterial_body_force(
@@ -364,6 +367,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::nodes_;
   //! Status
   using ParticleBase<Tdim>::status_;
+  //! Constrained status
+  using ParticleBase<Tdim>::constrained_;
   //! Material
   using ParticleBase<Tdim>::material_;
   //! Material id

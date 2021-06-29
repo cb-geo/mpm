@@ -162,6 +162,9 @@ class ParticleBase {
   //! Map multimaterial domain gradients to nodes
   virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
 
+  //! Map multimaterial rigid constraint
+  virtual void map_multimaterial_rigid_constraint() noexcept = 0;
+
   //! Map multimaterial body force
   //! \param[in] pgravity Gravity
   virtual void map_multimaterial_body_force(
@@ -338,6 +341,8 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
+  //! Constrained status
+  bool constrained_{false};
   //! Reference coordinates (in a cell)
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
