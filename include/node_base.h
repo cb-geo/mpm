@@ -184,6 +184,10 @@ class NodeBase {
   virtual bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept = 0;
 
+  //! Compute acceleration and velocity for contact interfaces
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_contact_acceleration_velocity(double dt) noexcept = 0;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -261,7 +265,10 @@ class NodeBase {
   virtual void compute_multimaterial_separation_vector() = 0;
 
   //! Compute multimaterial normal unit vector
-  virtual void compute_multimaterial_normal_unit_vector() = 0;
+  //! \param[in] normal_type Tag for the type of computation of the normal unit
+  //! vector
+  virtual void compute_multimaterial_normal_unit_vector(
+      std::string normal_type) = 0;
 
   //! Compute multimaterial velocity from mass and momentum
   virtual void compute_multimaterial_velocity() = 0;

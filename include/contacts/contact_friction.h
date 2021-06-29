@@ -27,7 +27,7 @@ class ContactFriction : public Contact<Tdim> {
   //! Coefficient of friction
   double friction_{.0};
   //! Type of normal detection
-  std::string normal_type_{"default"};
+  std::string normal_type_{"PVG"};
 };  // Contactfriction class
 }  // namespace mpm
 

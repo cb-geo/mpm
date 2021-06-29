@@ -288,6 +288,55 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
   return status;
 }
 
+//! Compute acceleration and velocity for contact interfaces
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_contact_acceleration_velocity(
+    double dt) noexcept {
+  bool status = true;
+  const double tolerance = 1.0E-15;
+
+  // Iterate over all materials in this node
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // Get mass of the current material
+    double mass = property_handle_->property("masses", prop_id_, *mitr)(0, 0);
+
+    if (mass > tolerance) {
+      // Get internal and external forces of the current material
+      VectorDim internal_force =
+          property_handle_->property("internal_forces", prop_id_, *mitr, Tdim);
+      VectorDim external_force =
+          property_handle_->property("external_forces", prop_id_, *mitr, Tdim);
+
+      // Compute the acceleration and of the current material
+      // If particles' velocities are not constrained:
+      // acceleration = (unbalanced force / mass)
+      VectorDim acceleration = VectorDim::Zero();
+      Eigen::Matrix<double, 1, 1> rigid_constraint =
+          this->property("rigid_constraints", *mitr, 1);
+      if (rigid_constraint(0, 0) == 0.0) {
+        acceleration = (1 / mass) * (external_force + internal_force);
+      } else {
+        this->acceleration_ = acceleration;
+        this->velocity_ = this->property("velocities", *mitr, Tdim);
+      }
+      property_handle_->assign_property("accelerations", prop_id_, *mitr,
+                                        acceleration, Tdim);
+
+      // Update velocity: velocity += acceleration * dt
+      VectorDim velocity = acceleration * dt;
+      property_handle_->update_property("velocities", prop_id_, *mitr, velocity,
+                                        Tdim);
+
+      // Apply velocity constraints, which also sets acceleration to 0,
+      // when velocity is set.
+      this->apply_contact_velocity_constraints();
+    } else {
+      status = false;
+    }
+  }
+  return status;
+}
+
 //! Assign velocity constraint
 //! Constrain directions can take values between 0 and Dim * Nphases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
@@ -626,7 +675,7 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-        velocity_ * mass - momentum;
+        velocity_.col(0) * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
@@ -676,17 +725,84 @@ void mpm::Node<Tdim, Tdof,
 
 //! Compute multimaterial normal unit vector
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof,
-               Tnphases>::compute_multimaterial_normal_unit_vector() {
-  // Iterate over all materials in the material_ids set
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_multimaterial_normal_unit_vector(
+    std::string normal_type) {
   node_mutex_.lock();
+  // Iterate over all materials in the material_ids set to get the largest
+  // domain gradient of all materials if the normal type used is MVG
+  VectorDim largest_domain_gradient = VectorDim::Zero();
+  double max_magnitude = 0;
+  unsigned int material_id_largest = 0;
+  if (normal_type == "MVG") {
+    for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+         ++mitr) {
+      // Get the domain gradient of the current material
+      VectorDim current_domain_gradient =
+          property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+      // Update the largest domain gradient if the current domain gradient is
+      // greater in magnitude
+      if (current_domain_gradient.norm() >= max_magnitude) {
+        max_magnitude = current_domain_gradient.norm();
+        largest_domain_gradient = current_domain_gradient;
+        material_id_largest = *mitr;
+      }
+    }
+  }
+
+  // Compute total domain if the normal type used is AVG
+  double total_domain = 0;
+  if (normal_type == "AVG") {
+    for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+         ++mitr) {
+      const Eigen::Matrix<double, 1, 1> current_domain =
+          property_handle_->property("domains", prop_id_, *mitr);
+      total_domain += current_domain(0, 0);
+    }
+  }
+
+  // Iterate over all materials in the material_ids set to assign the computed
+  // normal unit vector
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
-    // calculte the normal unit vector
-    VectorDim domain_gradient =
-        property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+    // compute the normal unit vector
     VectorDim normal_unit_vector = VectorDim::Zero();
-    if (domain_gradient.norm() > std::numeric_limits<double>::epsilon())
-      normal_unit_vector = domain_gradient.normalized();
+    // use domain gradient if the type of normal computation is PVG
+    if (normal_type == "PVG") {
+      largest_domain_gradient =
+          property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+    } else if (normal_type == "AVG") {
+      largest_domain_gradient = VectorDim::Zero();
+      for (auto mitr_other = material_ids_.begin();
+           mitr_other != material_ids_.end(); ++mitr_other) {
+        const VectorDim current_domain_gradient = property_handle_->property(
+            "domain_gradients", prop_id_, *mitr_other, Tdim);
+        const Eigen::Matrix<double, 1, 1> current_domain =
+            property_handle_->property("domains", prop_id_, *mitr_other);
+        if (*mitr == *mitr_other)
+          largest_domain_gradient =
+              largest_domain_gradient +
+              current_domain_gradient * current_domain(0, 0);
+        else
+          largest_domain_gradient =
+              largest_domain_gradient -
+              current_domain_gradient * current_domain(0, 0);
+      }
+      largest_domain_gradient = largest_domain_gradient / total_domain;
+    }
+
+    // set normal unit vector to be the normalized domain gradient
+    if (largest_domain_gradient.norm() > std::numeric_limits<double>::epsilon())
+      normal_unit_vector = largest_domain_gradient.normalized();
+
+    // change normal unit vector according to direction of the largest
+    if (material_id_largest != *mitr && normal_type == "MVG")
+      normal_unit_vector = -1 * normal_unit_vector;
+
+    // Check to see if normal unit vector is below threshold
+    const double tolerance = 1.0E-15;
+    for (int i = 0; i < Tdim; ++i) {
+      if (std::abs(normal_unit_vector(i, 0)) < tolerance)
+        normal_unit_vector(i, 0) = 0.0;
+    }
 
     // assign nodal-multimaterial normal unit vector to property pool
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,

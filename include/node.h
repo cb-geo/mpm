@@ -192,6 +192,10 @@ class Node : public NodeBase<Tdim> {
   bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept override;
 
+  //! Compute acceleration and velocity for contact interface
+  //! \param[in] dt Timestep in analysis
+  bool compute_contact_acceleration_velocity(double dt) noexcept override;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -256,7 +260,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   void update_property(bool update, const std::string& property,
                        const Eigen::MatrixXd& property_value, unsigned mat_id,
-                       unsigned nprops) noexcept override;
+                       unsigned nprops = 1) noexcept override;
 
   //! Return nodal property for a given material
   //! \param[in] property Name of the property to be returned
@@ -274,7 +278,10 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_separation_vector() override;
 
   //! Compute multimaterial normal unit vector
-  void compute_multimaterial_normal_unit_vector() override;
+  //! \param[in] normal_type Tag for the type of computation of the normal unit
+  //! vector
+  void compute_multimaterial_normal_unit_vector(
+      std::string normal_type) override;
 
   //! Compute multimaterial velocity from mass and momentum
   void compute_multimaterial_velocity() override;
