@@ -313,32 +313,32 @@ TEST_CASE("Interface functions are checked", "[interface]") {
         }
       }
     }
-  }
 
-  SECTION("Check normal unit vector") {
-    for (unsigned i = 0; i < Nparticles; ++i) {
-      // Map multimaterial domains (volumes) to nodes
-      REQUIRE_NOTHROW(particles[i]->map_multimaterial_domain_to_nodes());
+    SECTION("Check normal unit vector") {
+      for (unsigned i = 0; i < Nparticles; ++i) {
+        // Map multimaterial domains (volumes) to nodes
+        REQUIRE_NOTHROW(particles[i]->map_multimaterial_domain_to_nodes());
 
-      // Map multimaterial domain gradients to nodes
-      REQUIRE_NOTHROW(
-          particles[i]->map_multimaterial_domain_gradients_to_nodes());
-    }
+        // Map multimaterial domain gradients to nodes
+        REQUIRE_NOTHROW(
+            particles[i]->map_multimaterial_domain_gradients_to_nodes());
+      }
 
-    // Compute normal unit vectors at nodes with PVG normal type
-    for (unsigned i = 0; i < Nnodes; ++i)
-      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector("PVG"));
+      // Compute normal unit vectors at nodes with PVG normal type
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE_NOTHROW(
+            nodes[i]->compute_multimaterial_normal_unit_vector("PVG"));
 
-    Eigen::Matrix<double, 4, 2> domains;
-    // clang-format off
+      Eigen::Matrix<double, 4, 2> domains;
+      // clang-format off
     domains << 1.92, 1.46,
               0.48, 1.04,
               0.32, 0.56,
               1.28, 0.44;
-    // clang-format on
+      // clang-format on
 
-    Eigen::Matrix<double, 8, 2> gradients;
-    // clang-format off
+      Eigen::Matrix<double, 8, 2> gradients;
+      // clang-format off
     gradients << -4.8, -5.0,
                  -6.4, -3.8,
                   4.8,  5.0,
@@ -347,10 +347,10 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                   1.6,  3.2,
                  -3.2, -2.0,
                   6.4,  3.8;
-    // clang-format on
+      // clang-format on
 
-    Eigen::Matrix<double, 8, 2> normal;
-    // clang-format off
+      Eigen::Matrix<double, 8, 2> normal;
+      // clang-format off
     normal << -0.60000000000000, -0.79616219412310,
               -0.80000000000000, -0.60508326753356,
                0.94868329805051,  0.84227140066151,
@@ -359,32 +359,33 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                0.44721359549996,  0.84799830400509,
               -0.44721359549996, -0.46574643283262,
                0.89442719099992,  0.88491822238198;
-    // clang-format on
+      // clang-format on
 
-    // Check if nodal properties were properly mapped and computed
-    for (int i = 0; i < Nnodes; ++i) {
-      for (int j = 0; j < Nmaterials; ++j) {
-        REQUIRE(nodal_properties->property("domains", i, j, 1)(0, 0) ==
-                Approx(domains(i, j)).epsilon(tolerance));
-        for (int k = 0; k < Dim; ++k) {
-          REQUIRE(
-              nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
-              Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
-          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
-                      k, 0) ==
-                  Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+      // Check if nodal properties were properly mapped and computed
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          REQUIRE(nodal_properties->property("domains", i, j, 1)(0, 0) ==
+                  Approx(domains(i, j)).epsilon(tolerance));
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("domain_gradients", i, j, Dim)(
+                        k, 0) ==
+                    Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(nodal_properties->property("normal_unit_vectors", i, j,
+                                               Dim)(k, 0) ==
+                    Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+          }
+          // Check if normal vector are also unit vectors
+          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
+                      .norm() == Approx(1.0).epsilon(tolerance));
         }
-        // Check if normal vector are also unit vectors
-        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
-                    .norm() == Approx(1.0).epsilon(tolerance));
       }
-    }
 
-    // Compute normal unit vectors at nodes with MVG normal type
-    for (unsigned i = 0; i < Nnodes; ++i)
-      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector("MVG"));
+      // Compute normal unit vectors at nodes with MVG normal type
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE_NOTHROW(
+            nodes[i]->compute_multimaterial_normal_unit_vector("MVG"));
 
-    // clang-format off
+      // clang-format off
     normal << -0.60000000000000,  0.60000000000000,
               -0.80000000000000,  0.80000000000000,
               -0.84227140066151,  0.84227140066151,
@@ -393,30 +394,31 @@ TEST_CASE("Interface functions are checked", "[interface]") {
               -0.84799830400509,  0.84799830400509,
               -0.44721359549996,  0.44721359549996,
                0.89442719099992, -0.89442719099992;
-    // clang-format on
+      // clang-format on
 
-    // Check if normal unit vector was properly computed
-    for (int i = 0; i < Nnodes; ++i) {
-      for (int j = 0; j < Nmaterials; ++j) {
-        // Check if normal vector are also unit vectors
-        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
-                    .norm() == Approx(1.0).epsilon(tolerance));
-        for (int k = 0; k < Dim; ++k) {
-          REQUIRE(
-              nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
-              Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
-          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
-                      k, 0) ==
-                  Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+      // Check if normal unit vector was properly computed
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          // Check if normal vector are also unit vectors
+          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
+                      .norm() == Approx(1.0).epsilon(tolerance));
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("domain_gradients", i, j, Dim)(
+                        k, 0) ==
+                    Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(nodal_properties->property("normal_unit_vectors", i, j,
+                                               Dim)(k, 0) ==
+                    Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+          }
         }
       }
-    }
 
-    // Compute normal unit vectors at nodes with AVG normal type
-    for (unsigned i = 0; i < Nnodes; ++i)
-      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_normal_unit_vector("AVG"));
+      // Compute normal unit vectors at nodes with AVG normal type
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE_NOTHROW(
+            nodes[i]->compute_multimaterial_normal_unit_vector("AVG"));
 
-    // clang-format off
+      // clang-format off
     normal << -0.273439154608222,  0.273439154608222,
               -0.961889301701158,  0.961889301701158,
               -0.749233543124942,  0.749233543124942,
@@ -425,64 +427,65 @@ TEST_CASE("Interface functions are checked", "[interface]") {
               -0.997199309888456,  0.997199309888456,
               -0.442365234368165,  0.442365234368165,
                0.896834990074762, -0.896834990074762;
-    // clang-format on
+      // clang-format on
 
-    // Check if normal unit vector was properly computed
-    for (int i = 0; i < Nnodes; ++i) {
-      for (int j = 0; j < Nmaterials; ++j) {
-        // Check if normal vector are also unit vectors
-        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
-                    .norm() == Approx(1.0).epsilon(tolerance));
-        for (int k = 0; k < Dim; ++k) {
-          REQUIRE(
-              nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
-              Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
-          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
-                      k, 0) ==
-                  Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+      // Check if normal unit vector was properly computed
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          // Check if normal vector are also unit vectors
+          REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)
+                      .norm() == Approx(1.0).epsilon(tolerance));
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("domain_gradients", i, j, Dim)(
+                        k, 0) ==
+                    Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(nodal_properties->property("normal_unit_vectors", i, j,
+                                               Dim)(k, 0) ==
+                    Approx(normal(i * Dim + k, j)).epsilon(tolerance));
+          }
         }
       }
     }
-  }
 
-  // Check strain, stresses and internal forces
-  SECTION("Check strain, stresses and internal forces") {
-    // Map mass and momentum to nodes
-    for (unsigned i = 0; i < Nparticles; ++i)
-      REQUIRE_NOTHROW(particles[i]->map_multimaterial_mass_momentum_to_nodes());
+    // Check strain, stresses and internal forces
+    SECTION("Check strain, stresses and internal forces") {
+      // Map mass and momentum to nodes
+      for (unsigned i = 0; i < Nparticles; ++i)
+        REQUIRE_NOTHROW(
+            particles[i]->map_multimaterial_mass_momentum_to_nodes());
 
-    // Compute velocity at nodes
-    for (unsigned i = 0; i < Nnodes; ++i)
-      REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_velocity());
+      // Compute velocity at nodes
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE_NOTHROW(nodes[i]->compute_multimaterial_velocity());
 
-    // Compute strain and stress at particles
-    for (unsigned i = 0; i < Nparticles; ++i) {
-      REQUIRE_NOTHROW(particles[i]->compute_strain(0.01, true));
-      REQUIRE_NOTHROW(particles[i]->compute_stress());
-    }
+      // Compute strain and stress at particles
+      for (unsigned i = 0; i < Nparticles; ++i) {
+        REQUIRE_NOTHROW(particles[i]->compute_strain(0.01, true));
+        REQUIRE_NOTHROW(particles[i]->compute_stress());
+      }
 
-    Eigen::Matrix<double, 6, 3> strain_rates;
-    // clang-format off
+      Eigen::Matrix<double, 6, 3> strain_rates;
+      // clang-format off
     strain_rates << 0.0, 0.385504906052851, 0.97299960313659,
                     0.0, 0.896021786432745, 1.2876849178219,
                     0.0, 0.000000000000000, 0.0,
                     0.0, 1.281526692485600, 2.26068452095849,
                     0.0, 0.000000000000000, 0.0,
                     0.0, 0.000000000000000, 0.0;
-    // clang-format on
+      // clang-format on
 
-    // Check strain_rate
-    for (unsigned i = 0; i < 6; ++i)
-      for (unsigned j = 0; j < Nparticles; ++j)
-        REQUIRE(particles[j]->strain_rate()(i, j) ==
-                Approx(strain_rates(i, j)).epsilon(tolerance));
+      // Check strain_rate
+      for (unsigned i = 0; i < 6; ++i)
+        for (unsigned j = 0; j < Nparticles; ++j)
+          REQUIRE(particles[j]->strain_rate()(i, j) ==
+                  Approx(strain_rates(i, j)).epsilon(tolerance));
 
-    // Map internal forces
-    for (unsigned i = 0; i < Nparticles; ++i)
-      REQUIRE_NOTHROW(particles[i]->map_multimaterial_internal_force());
+      // Map internal forces
+      for (unsigned i = 0; i < Nparticles; ++i)
+        REQUIRE_NOTHROW(particles[i]->map_multimaterial_internal_force());
 
-    Eigen::Matrix<double, 8, 2> internal_forces;
-    // clang-format off
+      Eigen::Matrix<double, 8, 2> internal_forces;
+      // clang-format off
     internal_forces << 0.0,  733110.672257143,
                        0.0,  814167.128972187,
                        0.0, -350424.338569755,
@@ -491,43 +494,44 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                        0.0, -655149.908047695,
                        0.0,   93690.2928473004,
                        0.0, -431480.795284800;
-    // clang-format on
+      // clang-format on
 
-    // Check internal forces
-    for (int i = 0; i < Nnodes; ++i)
-      for (int j = 0; j < Nmaterials; ++j)
-        for (int k = 0; k < Dim; ++k)
-          REQUIRE(
-              nodal_properties->property("internal_forces", i, j, Dim)(k, 0) ==
-              Approx(internal_forces(i * Dim + k, j)).epsilon(tolerance));
-  }
-
-  // Check external forces
-  SECTION("Check external forces") {
-    // Gravity
-    Eigen::Vector2d gravity;
-    gravity << 2.0, 8.0;
-
-    // Assign traction to particle
-    particles[1]->assign_traction(0, 2.5);
-    particles[2]->assign_traction(1, -1.0);
-
-    // Assign concentrated forces to nodes
-    nodes[1]->assign_concentrated_force(0, 0, 2.0, nullptr);
-    nodes[2]->assign_concentrated_force(0, 1, 5.0, nullptr);
-
-    // Map body force and traction to nodes
-    for (unsigned i = 0; i < Nparticles; ++i) {
-      REQUIRE_NOTHROW(particles[i]->map_multimaterial_body_force(gravity));
-      REQUIRE_NOTHROW(particles[i]->map_multimaterial_traction_force());
+      // Check internal forces
+      for (int i = 0; i < Nnodes; ++i)
+        for (int j = 0; j < Nmaterials; ++j)
+          for (int k = 0; k < Dim; ++k)
+            REQUIRE(nodal_properties->property("internal_forces", i, j, Dim)(
+                        k, 0) ==
+                    Approx(internal_forces(i * Dim + k, j)).epsilon(tolerance));
     }
 
-    // Apply concentrated nodal forces
-    for (unsigned i = 0; i < Nnodes; ++i)
-      REQUIRE_NOTHROW(nodes[i]->apply_multimaterial_concentrated_force(0, 0.0));
+    // Check external forces
+    SECTION("Check external forces") {
+      // Gravity
+      Eigen::Vector2d gravity;
+      gravity << 2.0, 8.0;
 
-    Eigen::Matrix<double, 8, 2> external_forces;
-    // clang-format off
+      // Assign traction to particle
+      particles[1]->assign_traction(0, 2.5);
+      particles[2]->assign_traction(1, -1.0);
+
+      // Assign concentrated forces to nodes
+      nodes[1]->assign_concentrated_force(0, 0, 2.0, nullptr);
+      nodes[2]->assign_concentrated_force(0, 1, 5.0, nullptr);
+
+      // Map body force and traction to nodes
+      for (unsigned i = 0; i < Nparticles; ++i) {
+        REQUIRE_NOTHROW(particles[i]->map_multimaterial_body_force(gravity));
+        REQUIRE_NOTHROW(particles[i]->map_multimaterial_traction_force());
+      }
+
+      // Apply concentrated nodal forces
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE_NOTHROW(
+            nodes[i]->apply_multimaterial_concentrated_force(0, 0.0));
+
+      Eigen::Matrix<double, 8, 2> external_forces;
+      // clang-format off
     external_forces << 1.92, 4.99846096908265,
                        7.68, 11.6517157287525,
                        2.48, 5.46564064605510,
@@ -536,40 +540,134 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                        6.28, 9.02745166004061,
                        1.28, 1.39961524227066,
                        5.12, 3.40686291501015;
-    // clang-format on
+      // clang-format on
 
-    // Check external forces
-    for (int i = 0; i < Nnodes; ++i)
-      for (int j = 0; j < Nmaterials; ++j)
-        for (int k = 0; k < Dim; ++k)
-          REQUIRE(
-              nodal_properties->property("external_forces", i, j, Dim)(k, 0) ==
-              Approx(external_forces(i * Dim + k, j)).epsilon(tolerance));
-  }
+      // Check external forces
+      for (int i = 0; i < Nnodes; ++i)
+        for (int j = 0; j < Nmaterials; ++j)
+          for (int k = 0; k < Dim; ++k)
+            REQUIRE(nodal_properties->property("external_forces", i, j, Dim)(
+                        k, 0) ==
+                    Approx(external_forces(i * Dim + k, j)).epsilon(tolerance));
+    }
 
-  // Check mapping of particle constrained status
-  SECTION("Check mapping of particle constrained status") {
-    // Apply particle velocity constraint to one particle
-    particles[1]->apply_particle_velocity_constraints(0, 1.0);
+    // Check mapping of particle constrained status
+    SECTION("Check mapping of particle constrained status") {
+      // Apply particle velocity constraint to one particle
+      particles[1]->apply_particle_velocity_constraints(0, 1.0);
 
-    // Map particle constraint status to all nodes
-    for (unsigned i = 0; i < Nparticles; ++i)
-      REQUIRE_NOTHROW(particles[i]->map_multimaterial_rigid_constraint());
+      // Map particle constraint status to all nodes
+      for (unsigned i = 0; i < Nparticles; ++i)
+        REQUIRE_NOTHROW(particles[i]->map_multimaterial_rigid_constraint());
 
-    Eigen::Matrix<double, 4, 2> constraints;
-    // clang-format off
-    constraints << 0.0, 1.0,
-                   0.0, 1.0,
-                   0.0, 1.0,
-                   0.0, 1.0;
-    // clang-format on
+      Eigen::Matrix<double, 4, 2> constraints;
+      // clang-format off
+      constraints << 0.0, 1.0,
+                     0.0, 1.0,
+                     0.0, 1.0,
+                     0.0, 1.0;
+      // clang-format on
 
-    // Check constraint status at nodes and materials
-    for (int i = 0; i < Nnodes; ++i)
-      for (int j = 0; j < Nmaterials; ++j)
-        for (int k = 0; k < Dim; ++k)
-          REQUIRE(
-              nodal_properties->property("rigid_constraints", i, j, Dim)(k, 0) ==
-              Approx(constraints(i * Dim + k, j)).epsilon(tolerance));
+      // Check constraint status at nodes and materials
+      for (int i = 0; i < Nnodes; ++i)
+        for (int j = 0; j < Nmaterials; ++j)
+          REQUIRE(nodal_properties->property("rigid_constraints", i, j, 1)(
+                      0, 0) == Approx(constraints(i, j)).epsilon(tolerance));
+    }
+
+    // Check computation of acceleration and velocity at multimaterial nodes
+    SECTION("Check computation of acceleration and velocity") {
+      // Assign random internal and external forces
+      Eigen::Matrix<double, 2, 1> force;
+      force << 1.0, -1.0;
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        for (unsigned j = 0; j < 2; ++j) {
+          REQUIRE_NOTHROW(nodal_properties->assign_property(
+              "internal_forces", i, j, (0.5 * i - 2.0 * j) * force, Dim));
+          REQUIRE_NOTHROW(nodal_properties->assign_property(
+              "external_forces", i, j, (2.0 * i + 0.5 * j) * force, Dim));
+        }
+      }
+
+      Eigen::Matrix<double, 8, 2> internals;
+      // clang-format off
+      internals <<  0.0, -2.0,
+                    0.0,  2.0,
+                    0.5, -1.5,
+                   -0.5,  1.5,
+                    1.0, -1.0,
+                   -1.0,  1.0,
+                    1.5, -0.5,
+                   -1.5,  0.5;
+      // clang-format on
+
+      Eigen::Matrix<double, 8, 2> externals;
+      // clang-format off
+      externals <<  0.0,  0.5,
+                    0.0, -0.5,
+                    2.0,  2.5,
+                   -2.0, -2.5,
+                    4.0,  4.5,
+                   -4.0, -4.5,
+                    6.0,  6.5,
+                   -6.0, -6.5;
+      // clang-format on
+
+      // Check acceleration and velocity after computations
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("internal_forces", i, j, Dim)(
+                        k, 0) ==
+                    Approx(internals(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(nodal_properties->property("external_forces", i, j, Dim)(
+                        k, 0) ==
+                    Approx(externals(i * Dim + k, j)).epsilon(tolerance));
+          }
+        }
+      }
+
+      // Compute acceleration and velocity at every node
+      for (int i = 0; i < Nnodes; ++i)
+        REQUIRE(nodes[i]->compute_contact_acceleration_velocity(0.01) == true);
+
+      Eigen::Matrix<double, 8, 2> accelerations;
+      // clang-format off
+      accelerations <<   0.0000000000000,  -1.02739726027397,
+                         0.0000000000000,   1.02739726027397,
+                        10.4166666666667,   0.961538461538461,
+                       -10.4166666666667,  -0.961538461538461,
+                        31.2500000000000,   6.25,
+                       -31.2500000000000,  -6.25,
+                        11.7187500000000,  13.6363636363636,
+                       -11.7187500000000, -13.6363636363636;
+      // clang-format on
+
+      // Check acceleration and velocity after computations
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("velocities", i, j, Dim)(k, 0) ==
+                    Approx(0.01 * accelerations(i * Dim + k, j))
+                        .epsilon(tolerance));
+            REQUIRE(
+                nodal_properties->property("accelerations", i, j, Dim)(k, 0) ==
+                Approx(accelerations(i * Dim + k, j)).epsilon(tolerance));
+          }
+        }
+      }
+
+      // Assign zero mass
+      Eigen::Matrix<double, 1, 1> mass;
+      mass << 0.0;
+      for (unsigned i = 0; i < Nnodes; ++i)
+        for (unsigned j = 0; j < 2; ++j)
+          REQUIRE_NOTHROW(
+              nodal_properties->assign_property("masses", i, j, mass, Dim));
+
+      // Check acceleration and velocity computation for no mass
+      for (int i = 0; i < Nnodes; ++i)
+        REQUIRE(nodes[i]->compute_contact_acceleration_velocity(0.01) == false);
+    }
   }
 }
