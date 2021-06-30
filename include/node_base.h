@@ -282,6 +282,11 @@ class NodeBase {
   virtual void apply_multimaterial_concentrated_force(unsigned phase,
                                                       double current_time) = 0;
 
+  //! Apply contact mechanics to the nodes
+  //! \param[in] friction Friction coefficient
+  //! \param[in] dt Time-step
+  virtual void apply_contact_mechanics(double friction, double dt) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 

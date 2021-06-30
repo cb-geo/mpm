@@ -295,6 +295,11 @@ class Node : public NodeBase<Tdim> {
   void apply_multimaterial_concentrated_force(unsigned phase,
                                               double current_time) override;
 
+  //! Apply contact mechanics to the nodes
+  //! \param[in] friction Friction coefficient
+  //! \param[in] dt Time-step
+  void apply_contact_mechanics(double friction, double dt) override;
+
  private:
   //! Mutex
   SpinMutex node_mutex_;

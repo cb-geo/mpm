@@ -878,3 +878,99 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_multimaterial_concentrated_force(
     property_handle_->update_property("external_forces", prop_id_, *mitr,
                                       concentrated_force, Tdim);
 }
+
+//! Apply contact mechanics to the nodes
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
+                                                              double dt) {
+  // Check if there is more than one material in the material_ids_ set
+  node_mutex_.lock();
+  double tolerance = 1.0e-12;
+  if (material_ids_.size() > 1) {
+    // Iterate over all materials in the node
+    for (auto mitr = material_ids_.begin(); mitr != material_ids_.end();
+         ++mitr) {
+      // Determine the normal component of the relative velocity
+      VectorDim normal_unit_vector = property_handle_->property(
+          "normal_unit_vectors", prop_id_, *mitr, Tdim);
+      VectorDim relative_velocity = property_handle_->property(
+          "relative_velocities", prop_id_, *mitr, Tdim);
+      double velocity_normal = relative_velocity.dot(normal_unit_vector);
+      velocity_normal =
+          (std::abs(velocity_normal) < tolerance) ? 0.0 : velocity_normal;
+
+      // Get current velocity
+      VectorDim corrected_velocity =
+          property_handle_->property("velocities", prop_id_, *mitr, Tdim);
+
+      // Check if the material is approaching the other materials (v_norm > 0)
+      if (velocity_normal > 0) {
+        // Compute the normal correction
+        VectorDim normal_correction = -velocity_normal * normal_unit_vector;
+
+        // Compute the tangent correction
+        VectorDim tangent_correction = VectorDim::Zero();
+        if (Tdim == 2) {
+          // Determine the friction coefficient to apply tangent correction
+          double cross_product =
+              relative_velocity(0, 0) * normal_unit_vector(1, 0) -
+              relative_velocity(1, 0) * normal_unit_vector(0, 0);
+          double mu =
+              std::min(friction, std::abs(cross_product) / velocity_normal);
+
+          tangent_correction(0, 0) = normal_unit_vector(1, 0) * cross_product;
+          tangent_correction(1, 0) = -normal_unit_vector(0, 0) * cross_product;
+          tangent_correction = -mu * velocity_normal / std::abs(cross_product) *
+                               tangent_correction;
+        } else if (Tdim == 3) {
+          // Determine the friction coefficient to apply tangent correction
+          VectorDim cross_product = VectorDim::Zero();
+          cross_product(0, 0) =
+              relative_velocity(1, 0) * normal_unit_vector(2, 0) -
+              relative_velocity(2, 0) * normal_unit_vector(1, 0);
+          cross_product(1, 0) =
+              relative_velocity(2, 0) * normal_unit_vector(0, 0) -
+              relative_velocity(0, 0) * normal_unit_vector(2, 0);
+          cross_product(2, 0) =
+              relative_velocity(0, 0) * normal_unit_vector(1, 0) -
+              relative_velocity(1, 0) * normal_unit_vector(0, 0);
+          double mu =
+              std::min(friction, cross_product.norm() / velocity_normal);
+
+          tangent_correction(0, 0) =
+              normal_unit_vector(1, 0) * cross_product(2, 0) -
+              normal_unit_vector(2, 0) * cross_product(1, 0);
+          tangent_correction(1, 0) =
+              normal_unit_vector(2, 0) * cross_product(0, 0) -
+              normal_unit_vector(0, 0) * cross_product(2, 0);
+          tangent_correction(2, 0) =
+              normal_unit_vector(0, 0) * cross_product(1, 0) -
+              normal_unit_vector(1, 0) * cross_product(0, 0);
+          tangent_correction =
+              -velocity_normal * mu * tangent_correction / cross_product.norm();
+        }
+
+        // Update the velocity with the computed corrections
+        VectorDim corrections = normal_correction + tangent_correction;
+        corrected_velocity = corrected_velocity + corrections;
+
+        // Approximate small values to 0
+        for (int i = 0; i < Tdim; ++i)
+          if (std::abs(corrected_velocity(i, 0)) < tolerance)
+            corrected_velocity(i, 0) = 0.0;
+
+        // Assign new velocity
+        property_handle_->assign_property("velocities", prop_id_, *mitr,
+                                          corrected_velocity, Tdim);
+
+        // Determine the corrected acceleration
+        VectorDim current_velocity = property_handle_->property(
+            "current_velocities", prop_id_, *mitr, Tdim);
+        VectorDim corrected_acceleration = corrections / dt;
+        property_handle_->update_property("accelerations", prop_id_, *mitr,
+                                          corrected_acceleration, Tdim);
+      }
+    }
+  }
+  node_mutex_.unlock();
+}
