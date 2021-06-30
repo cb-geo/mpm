@@ -947,8 +947,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
           tangent_correction(2, 0) =
               normal_unit_vector(0, 0) * cross_product(1, 0) -
               normal_unit_vector(1, 0) * cross_product(0, 0);
-          tangent_correction =
-              -velocity_normal * mu * tangent_correction;
+          tangent_correction = -velocity_normal * mu * tangent_correction;
           if (cross_product.norm() != 0.0)
             tangent_correction = tangent_correction / cross_product.norm();
         }

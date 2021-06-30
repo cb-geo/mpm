@@ -577,7 +577,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
 
     // Check computation of acceleration and velocity at multimaterial nodes
     SECTION("Check computation of acceleration and velocity") {
-      // Assign random internal and external forces
+      // Assign generic internal and external forces
       Eigen::Matrix<double, 2, 1> force;
       force << 1.0, -1.0;
       for (unsigned i = 0; i < Nnodes; ++i) {
@@ -668,6 +668,78 @@ TEST_CASE("Interface functions are checked", "[interface]") {
       // Check acceleration and velocity computation for no mass
       for (int i = 0; i < Nnodes; ++i)
         REQUIRE(nodes[i]->compute_contact_acceleration_velocity(0.01) == false);
+    }
+
+    // Check the application of contact mechanics
+    SECTION("Check the application of contact mechanics") {
+      // Create reference normal unit vector
+      Eigen::Matrix<double, 2, 1> ref_normal;
+      ref_normal << 0.8, 0.6;
+
+      // Create reference velocity vector
+      Eigen::Matrix<double, 2, 1> ref_velocity;
+      ref_velocity << -0.5, -1.0;
+
+      // Assign Current velocity, relative velocity and normal unit vectors
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        for (unsigned j = 0; j < 2; ++j) {
+          Eigen::Matrix<double, 2, 1> relative_velocity =
+              (1.0 - 2.0 * j) * ref_normal * (1.0 + i) -
+              ref_velocity * i * (j + 1.0);
+          nodal_properties->assign_property("normal_unit_vectors", i, j,
+                                            ref_normal * (1.0 - 2.0 * j), Dim);
+          REQUIRE_NOTHROW(nodal_properties->assign_property(
+              "relative_velocities", i, j, relative_velocity, Dim));
+          relative_velocity(0, 0) = relative_velocity(0, 0) + (i + 1.0) * 0.5;
+          relative_velocity(1, 0) = relative_velocity(1, 0) + (i + 1.0) * 0.5;
+          REQUIRE_NOTHROW(nodal_properties->assign_property(
+              "current_velocities", i, j, relative_velocity, Dim));
+          REQUIRE_NOTHROW(nodal_properties->assign_property(
+              "velocities", i, j, relative_velocity, Dim));
+        }
+      }
+
+      // Apply contact mechanics to all nodes
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        REQUIRE_NOTHROW(nodes[i]->apply_contact_mechanics(0.2, 0.01));
+      }
+
+      Eigen::Matrix<double, 8, 2> velocities;
+      // clang-format off
+      velocities <<  0.50, 0.5,
+                     0.50, 0.5,
+                     1.00, 0.4,
+                     1.00, 1.8,
+                     1.50, 1.1,
+                     1.50, 3.7,
+                     1.94, 1.8,
+                     2.08, 5.6;
+      // clang-format on
+
+      Eigen::Matrix<double, 8, 2> accelerations;
+      // clang-format off
+      accelerations <<  -80, 80,
+                        -60, 60,
+                       -210,  0,
+                       -220,  0,
+                       -340,  0,
+                       -380,  0,
+                       -476,  0,
+                       -532,  0;
+      // clang-format on
+
+      // Check corrected velocities and accelerations
+      for (int i = 0; i < Nnodes; ++i) {
+        for (int j = 0; j < Nmaterials; ++j) {
+          for (int k = 0; k < Dim; ++k) {
+            REQUIRE(nodal_properties->property("velocities", i, j, Dim)(k, 0) ==
+                    Approx(velocities(i * Dim + k, j)).epsilon(tolerance));
+            REQUIRE(
+                nodal_properties->property("accelerations", i, j, Dim)(k, 0) ==
+                Approx(accelerations(i * Dim + k, j)).epsilon(tolerance));
+          }
+        }
+      }
     }
   }
 }
