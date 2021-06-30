@@ -252,6 +252,12 @@ class Particle : public ParticleBase<Tdim> {
   void compute_updated_position(double dt,
                                 bool velocity_update = false) noexcept override;
 
+  //! Compute updated position of the particle from contact nodes
+  //! \param[in] dt Analysis time step
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  void compute_contact_updated_position(
+      double dt, bool velocity_update = false) noexcept override;
+
   //! Return a state variable
   //! \param[in] var State variable
   //! \param[in] phase Index to indicate phase

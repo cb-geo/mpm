@@ -925,6 +925,53 @@ void mpm::Particle<Tdim>::compute_updated_position(
   this->displacement_ += nodal_velocity * dt;
 }
 
+// Compute updated position of the particle
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_contact_updated_position(
+    double dt, bool velocity_update) noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get interpolated nodal velocity considering this particle's material id
+  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  // Initialize nodal acceleration
+  Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  // If the particle is not constrained, update its kinematics using the nodal
+  // acceleration and velocity
+  if (!this->constrained_) {
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      VectorDim velocity = VectorDim::Zero();
+      velocity = nodes_[i]->property("velocities", this->material_id(), Tdim);
+
+      nodal_velocity += shapefn_[i] * velocity;
+    }
+
+    // update from velocity only
+    if (!velocity_update) {
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
+        Eigen::Matrix<double, Tdim, 1> acceleration =
+            Eigen::Matrix<double, Tdim, 1>::Zero();
+        acceleration =
+            nodes_[i]->property("accelerations", this->material_id(), Tdim);
+
+        nodal_acceleration += shapefn_[i] * acceleration;
+      }
+      this->velocity_ += nodal_acceleration * dt;
+    } else  // Update particle velocity using interpolated nodal velocity
+      this->velocity_ = nodal_velocity;
+  } else {
+    nodal_velocity = this->velocity_;
+  }
+
+  // New position = current position + velocity * dt
+  this->coordinates_ += nodal_velocity * dt;
+  // Update displacement (displacement is initialized from zero)
+  this->displacement_ += nodal_velocity * dt;
+}
+
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
