@@ -920,8 +920,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
 
           tangent_correction(0, 0) = normal_unit_vector(1, 0) * cross_product;
           tangent_correction(1, 0) = -normal_unit_vector(0, 0) * cross_product;
-          tangent_correction = -mu * velocity_normal / std::abs(cross_product) *
-                               tangent_correction;
+          tangent_correction = -mu * velocity_normal * tangent_correction;
+          if (cross_product != 0.0)
+            tangent_correction = tangent_correction / std::abs(cross_product);
         } else if (Tdim == 3) {
           // Determine the friction coefficient to apply tangent correction
           VectorDim cross_product = VectorDim::Zero();
@@ -947,7 +948,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_contact_mechanics(double friction,
               normal_unit_vector(0, 0) * cross_product(1, 0) -
               normal_unit_vector(1, 0) * cross_product(0, 0);
           tangent_correction =
-              -velocity_normal * mu * tangent_correction / cross_product.norm();
+              -velocity_normal * mu * tangent_correction;
+          if (cross_product.norm() != 0.0)
+            tangent_correction = tangent_correction / cross_product.norm();
         }
 
         // Update the velocity with the computed corrections
