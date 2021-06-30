@@ -477,7 +477,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
       // Check strain_rate
       for (unsigned i = 0; i < 6; ++i)
         for (unsigned j = 0; j < Nparticles; ++j)
-          REQUIRE(particles[j]->strain_rate()(i, j) ==
+          REQUIRE(particles[j]->strain_rate()(i, 0) ==
                   Approx(strain_rates(i, j)).epsilon(tolerance));
 
       // Map internal forces
@@ -663,7 +663,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
       for (unsigned i = 0; i < Nnodes; ++i)
         for (unsigned j = 0; j < 2; ++j)
           REQUIRE_NOTHROW(
-              nodal_properties->assign_property("masses", i, j, mass, Dim));
+              nodal_properties->assign_property("masses", i, j, mass));
 
       // Check acceleration and velocity computation for no mass
       for (int i = 0; i < Nnodes; ++i)
