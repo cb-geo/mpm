@@ -700,8 +700,10 @@ TEST_CASE("Interface functions are checked", "[interface]") {
       }
 
       // Apply contact mechanics to all nodes
+      double mu = 0.2;
+      double dt = 0.01;
       for (unsigned i = 0; i < Nnodes; ++i) {
-        REQUIRE_NOTHROW(nodes[i]->apply_contact_mechanics(0.2, 0.01));
+        REQUIRE_NOTHROW(nodes[i]->apply_contact_mechanics(mu, dt));
       }
 
       Eigen::Matrix<double, 8, 2> velocities;
@@ -739,6 +741,116 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                 Approx(accelerations(i * Dim + k, j)).epsilon(tolerance));
           }
         }
+      }
+    }
+
+    // Check particle update from multimaterial velocities
+    SECTION("Check particle update from nodal velocities") {
+      // Create generic nodal velocities
+      double dt = 0.01;
+      Eigen::Matrix<double, 2, 1> ref_vector1, ref_vector2;
+      ref_vector1 << 1.0, 1.0;
+      ref_vector2 << 1.0, -1.0;
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        for (unsigned j = 0; j < 2; ++j) {
+          Eigen::Matrix<double, 2, 1> accel;
+          accel = ref_vector1 * (j + 1.0) + i * 0.5 * ref_vector2;
+          REQUIRE_NOTHROW(nodal_properties->assign_property("velocities", i, j,
+                                                            dt * accel, Dim));
+        }
+      }
+
+      // Update particle positions with acceleration update
+      for (unsigned i = 0; i < Nparticles; ++i)
+        REQUIRE_NOTHROW(
+            particles[i]->compute_contact_updated_position(dt, true));
+
+      Eigen::Matrix<double, 2, 3> velocities;
+      // clang-format off
+      velocities << 0.0162,  0.0242, 0.0296,
+                    0.0038,  0.0158, 0.0104;
+      // clang-format on
+      Eigen::Matrix<double, 2, 3> coordinates;
+      // clang-format off
+      coordinates << 0.100162, 0.200242, 0.400296,
+                     0.200038, 0.100158, 0.400104;
+      // clang-format on
+      Eigen::Matrix<double, 2, 3> displacements;
+      // clang-format off
+      displacements << 0.000162, 0.000242, 0.000296,
+                       0.000038, 0.000158, 0.000104;
+      // clang-format on
+
+      // Check velocities, displacements and coordinates at particles
+      for (unsigned i = 0; i < Nparticles; ++i) {
+        REQUIRE(particles[i]->velocity()(0, 0) ==
+                Approx(velocities(0, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->velocity()(1, 0) ==
+                Approx(velocities(1, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->coordinates()(0, 0) ==
+                Approx(coordinates(0, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->coordinates()(1, 0) ==
+                Approx(coordinates(1, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->displacement()(0, 0) ==
+                Approx(displacements(0, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->displacement()(1, 0) ==
+                Approx(displacements(1, i)).epsilon(tolerance));
+      }
+    }
+
+    // Check particle update from multimaterial accelerations
+    SECTION("Check particle update from nodal acceleration") {
+      // Create generic nodal accelerations
+      double dt = 0.01;
+      Eigen::Matrix<double, 2, 1> ref_vector1, ref_vector2;
+      ref_vector1 << 1.0, 1.0;
+      ref_vector2 << 1.0, -1.0;
+      for (unsigned i = 0; i < Nnodes; ++i) {
+        for (unsigned j = 0; j < 2; ++j) {
+          Eigen::Matrix<double, 2, 1> accel;
+          accel = ref_vector1 * (j + 1.0) + i * 0.5 * ref_vector2;
+          REQUIRE_NOTHROW(nodal_properties->assign_property("accelerations", i,
+                                                            j, accel, Dim));
+          REQUIRE_NOTHROW(nodal_properties->assign_property("velocities", i, j,
+                                                            dt * accel, Dim));
+        }
+      }
+
+      // Update particle positions with acceleration update
+      for (unsigned i = 0; i < Nparticles; ++i)
+        REQUIRE_NOTHROW(
+            particles[i]->compute_contact_updated_position(dt, false));
+
+      Eigen::Matrix<double, 2, 3> velocities;
+      // clang-format off
+      velocities << 1.0162, -0.4758, 1.0296,
+                    2.0038,  0.5158, 2.0104;
+      // clang-format on
+      Eigen::Matrix<double, 2, 3> coordinates;
+      // clang-format off
+      coordinates << 0.100162, 0.200242, 0.400296,
+                     0.200038, 0.100158, 0.400104;
+      // clang-format on
+      Eigen::Matrix<double, 2, 3> displacements;
+      // clang-format off
+      displacements << 0.000162, 0.000242, 0.000296,
+                       0.000038, 0.000158, 0.000104;
+      // clang-format on
+
+      // Check velocities, displacements and coordinates at particles
+      for (unsigned i = 0; i < Nparticles; ++i) {
+        REQUIRE(particles[i]->velocity()(0, 0) ==
+                Approx(velocities(0, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->velocity()(1, 0) ==
+                Approx(velocities(1, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->coordinates()(0, 0) ==
+                Approx(coordinates(0, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->coordinates()(1, 0) ==
+                Approx(coordinates(1, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->displacement()(0, 0) ==
+                Approx(displacements(0, i)).epsilon(tolerance));
+        REQUIRE(particles[i]->displacement()(1, 0) ==
+                Approx(displacements(1, i)).epsilon(tolerance));
       }
     }
   }
