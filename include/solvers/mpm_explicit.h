@@ -79,6 +79,10 @@ class MPMExplicit : public MPMBase<Tdim> {
  private:
   //! Pressure smoothing
   bool pressure_smoothing_{false};
+  //! State_vars smoothing
+  bool state_vars_smoothing_{false};
+  //! State_vars smoothing variable
+  std::string state_vars_var_;
   //! Interface
   bool interface_{false};
 
