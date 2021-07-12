@@ -586,7 +586,7 @@ std::array<std::vector<double>, 2> mpm::IOMeshAscii<Tdim>::read_math_functions(
 
   // Read from csv file
   try {
-    io::CSVReader<2> in(math_file);
+    io::CSVReader<2> in(math_file.c_str());
     double x_value, fx_value;
     while (in.read_row(x_value, fx_value)) {
       xfx_values[0].push_back(x_value);

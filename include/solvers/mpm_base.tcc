@@ -774,8 +774,8 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
       // Math function is specified in a file, replace function_props_update
       if (function_props.find("file") != function_props.end()) {
         // Read file and store in array of vectors
-        std::string math_file =
-            function_props.at("file").template get<std::string>();
+        std::string math_file = io_->file_name(
+            function_props.at("file").template get<std::string>());
         auto xfx_values = reader->read_math_functions(math_file);
 
         function_props_update["xvalues"] = xfx_values[0];
