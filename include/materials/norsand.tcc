@@ -169,12 +169,12 @@ void mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
 //! Compute image parameters
 template <unsigned Tdim>
 void mpm::NorSand<Tdim>::compute_image_parameters(mpm::dense_map* state_vars) {
-  
+
   // Collect necessary state variables
   const double void_ratio = (*state_vars).at("void_ratio");
   const double e_image = (*state_vars).at("e_image");
   const double M_theta = (*state_vars).at("M_theta");
-  
+
   // Compute state parameter image
   const double psi_image_ = void_ratio - e_image;
   (*state_vars).at("psi_image") = psi_image_;
@@ -331,7 +331,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   this->compute_stress_invariants(stress, &mean_p, &dev_q, &lode_angle,
                                   &mtheta);
 
-  // Get state variables and image parameters 
+  // Get state variables and image parameters
   // note: M_image is at current stress
   const double M_image = (*state_vars).at("M_image");
   const double M_image_tc = (*state_vars).at("M_image_tc");
