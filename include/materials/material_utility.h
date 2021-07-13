@@ -43,10 +43,8 @@ inline double lode_angle(
     double tolerance = std::numeric_limits<double>::epsilon());
 
 //! Compute derivative of p in terms of stress sigma
-//! \param[in] stress Stress in Voigt notation where positive is tension
 //! \retval dp_dsigma Derivative of p in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> dp_dsigma(
-    const Eigen::Matrix<double, 6, 1>& stress);
+inline const Eigen::Matrix<double, 6, 1> dp_dsigma();
 
 //! Compute derivative of q in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension

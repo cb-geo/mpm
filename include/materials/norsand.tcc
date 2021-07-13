@@ -314,7 +314,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
                     (N_ / (1 - N_))));
 
   // Compute dp / dsigma
-  const Vector6d dp_dsigma = mpm::materials::dp_dsigma(-stress);
+  const Vector6d dp_dsigma = mpm::materials::dp_dsigma();
 
   // Compute dF / dq
   const double dF_dq = 1.;

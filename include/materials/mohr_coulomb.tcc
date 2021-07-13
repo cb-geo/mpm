@@ -205,7 +205,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
                  (sin(theta + M_PI / 3.) * tan(phi) / 3.));
   }
   // Compute dEpsilon / dSigma
-  Vector6d depsilon_dsigma = mpm::materials::dp_dsigma(stress) * std::sqrt(3.);
+  Vector6d depsilon_dsigma = mpm::materials::dp_dsigma() * std::sqrt(3.);
   // Initialise dRho / dSigma
   Vector6d drho_dsigma = mpm::materials::dq_dsigma(stress) * std::sqrt(2. / 3.);
   // Compute dtheta / dsigma
