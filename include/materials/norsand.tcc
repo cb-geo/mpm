@@ -81,7 +81,7 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       // M_image
       {"M_image", 0.},
       // M_image_tc
-      {"M_image_tc", 0},
+      {"M_image_tc", 0.},
       // Current void ratio
       {"void_ratio", void_ratio_initial_},
       // Void ratio image
