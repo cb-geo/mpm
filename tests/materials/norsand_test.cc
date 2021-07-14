@@ -1,7 +1,6 @@
 #include <limits>
 
 #include <cmath>
-#include <iostream>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
