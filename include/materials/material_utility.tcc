@@ -81,8 +81,7 @@ inline double mpm::materials::lode_angle(
 }
 
 //! Compute derivative of p in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> mpm::materials::dp_dsigma(
-    const Eigen::Matrix<double, 6, 1>& stress) {
+inline const Eigen::Matrix<double, 6, 1> mpm::materials::dp_dsigma() {
 
   Eigen::Matrix<double, 6, 1> dp_dsigma = Eigen::Matrix<double, 6, 1>::Zero();
   dp_dsigma(0) = 1. / 3.;

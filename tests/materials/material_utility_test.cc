@@ -61,7 +61,7 @@ TEST_CASE("materials utility is checked", "[materials]") {
     REQUIRE(lode_angle_tolerance == Approx(M_PI / 6.).epsilon(Tolerance));
 
     // Compute dp_dsigma
-    Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::materials::dp_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::materials::dp_dsigma();
     REQUIRE(dp_dsigma(0) == Approx(1. / 3.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(1) == Approx(1. / 3.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(2) == Approx(1. / 3.).epsilon(Tolerance));
@@ -188,7 +188,7 @@ TEST_CASE("materials utility is checked", "[materials]") {
             Approx(0.563342522771415).epsilon(Tolerance));
 
     // Compute dp_dsigma
-    Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::materials::dp_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::materials::dp_dsigma();
     REQUIRE(dp_dsigma(0) == Approx(1. / 3.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(1) == Approx(1. / 3.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(2) == Approx(1. / 3.).epsilon(Tolerance));

@@ -81,6 +81,11 @@ class NorSand : public Material<Tdim> {
   void compute_stress_invariants(const Vector6d& stress, double* p, double* q,
                                  double* lode_angle, double* M_theta);
 
+  //! Compute image parameters (psi_image, chi_image, M_image, M_image_tc)
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval computation of image parameters
+  void compute_image_parameters(mpm::dense_map* state_vars);
+
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
@@ -149,6 +154,8 @@ class NorSand : public Material<Tdim> {
   double gamma_{std::numeric_limits<double>::max()};
   //! Dilatancy coefficient
   double chi_{std::numeric_limits<double>::max()};
+  //! Dilatancy coefficient image
+  double chi_image_{std::numeric_limits<double>::max()};
   //! Hardening modulus
   double hardening_modulus_{std::numeric_limits<double>::max()};
   //! Initial void ratio

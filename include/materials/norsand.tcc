@@ -62,6 +62,8 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
     Mte_ = (6 * sin_friction_cs) / (3 + sin_friction_cs);
 
+    chi_image_ = chi_ / (1. - ((chi_ * lambda_) / Mtc_));
+
     // Properties
     properties_ = material_properties;
 
@@ -76,11 +78,19 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
   mpm::dense_map state_vars = {
       // M_theta
       {"M_theta", Mtc_},
+      // M_image
+      {"M_image", 0.},
+      // M_image_tc
+      {"M_image_tc", 0.},
       // Current void ratio
       {"void_ratio", void_ratio_initial_},
       // Void ratio image
       {"e_image",
        gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_)},
+      // State parameter image
+      {"psi_image",
+       void_ratio_initial_ -
+           (gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_))},
       // Image pressure
       {"p_image", p_image_initial_},
       // p_cohesion
@@ -104,7 +114,8 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
 template <unsigned Tdim>
 std::vector<std::string> mpm::NorSand<Tdim>::state_variables() const {
   const std::vector<std::string> state_vars = {
-      "M_theta",         "void_ratio",      "e_image",
+      "M_theta",         "M_image",         "M_image_tc",
+      "void_ratio",      "e_image",         "psi_image",
       "p_image",         "p_cohesion",      "p_dilation",
       "pdstrain",        "plastic_strain0", "plastic_strain1",
       "plastic_strain2", "plastic_strain3", "plastic_strain4",
@@ -138,20 +149,43 @@ void mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
                                                    double* p, double* q,
                                                    double* lode_angle,
                                                    double* M_theta) {
-  // Note that in this subroutine, stress is compression positive
 
   // Compute mean stress p
-  *p = check_low(-1. * mpm::materials::p(-stress));
+  *p = check_low(mpm::materials::p(stress));
 
   // Compute q
-  *q = check_low(mpm::materials::q(-stress));
+  *q = check_low(mpm::materials::q(stress));
 
   // Compute Lode angle (cos convetion)
+  // Note: stress tensor passed in as compression positive, but lode_angle()
+  //       expects tenstion positive thus (-stress) passed to function
   *lode_angle = mpm::materials::lode_angle(-stress, tolerance_);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
   *M_theta =
       Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos(3. / 2. * *lode_angle);
+}
+
+//! Compute image parameters
+template <unsigned Tdim>
+void mpm::NorSand<Tdim>::compute_image_parameters(mpm::dense_map* state_vars) {
+
+  // Collect necessary state variables
+  const double void_ratio = (*state_vars).at("void_ratio");
+  const double e_image = (*state_vars).at("e_image");
+  const double M_theta = (*state_vars).at("M_theta");
+
+  // Compute state parameter image
+  const double psi_image_ = void_ratio - e_image;
+  (*state_vars).at("psi_image") = psi_image_;
+
+  // Compute critical state coefficient image
+  (*state_vars).at("M_image") =
+      M_theta * (1. - ((chi_image_ * N_ * std::fabs(psi_image_)) / Mtc_));
+
+  // Compute critical state coefficient image triaxial compression
+  (*state_vars).at("M_image_tc") =
+      Mtc_ * (1. - ((chi_image_ * N_ * std::fabs(psi_image_)) / Mtc_));
 }
 
 //! Compute state parameters
@@ -162,20 +196,21 @@ void mpm::NorSand<Tdim>::compute_state_variables(
 
   // Initialize invariants
   double mean_p = 0.;
-  double deviatoric_q = 0.;
+  double dev_q = 0.;
   double lode_angle = 0.;
   double mtheta = 0.;
 
   // Get invariants
-  this->compute_stress_invariants(stress, &mean_p, &deviatoric_q, &lode_angle,
+  this->compute_stress_invariants(stress, &mean_p, &dev_q, &lode_angle,
                                   &mtheta);
 
-  // Get state variables (note that M_theta used is at current stress)
-  const double M_theta = (*state_vars).at("M_theta");
+  // Get state variables and image parameters
+  // note : M_image is at current stress
+  const double M_image = (*state_vars).at("M_image");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
-  double p_image;
   double e_image;
+  double p_image;
 
   if (yield_type == mpm::norsand::FailureState::Elastic) {
     // Keep the same pressure image and void ratio image at critical state
@@ -184,12 +219,10 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   } else {
     // Compute and update pressure image
     p_image =
-        (mean_p + p_cohesion) *
-            std::pow(
-                ((1 - N_ / M_theta * deviatoric_q / (mean_p + p_cohesion)) /
-                 (1 - N_)),
-                ((N_ - 1) / N_)) -
-        p_cohesion - p_dilation;
+        std::pow(std::exp(1. - (dev_q / ((mean_p + p_cohesion) * M_image))),
+                 -1) *
+            (mean_p + p_cohesion) -
+        (p_cohesion + p_dilation);
     (*state_vars).at("p_image") = p_image;
 
     // Compute and update void ratio image
@@ -205,9 +238,10 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e_initial)
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
-  (*state_vars).at("void_ratio") =
+  double void_ratio =
       check_low((*state_vars).at("void_ratio") -
-                (1 + void_ratio_initial_) * dvolumetric_strain);
+                (1. + void_ratio_initial_) * dvolumetric_strain);
+  (*state_vars).at("void_ratio") = void_ratio;
 }
 
 //! Compute elastic tensor
@@ -241,30 +275,38 @@ typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
 
   // Initialize invariants
   double mean_p = 0.;
-  double deviatoric_q = 0.;
+  double dev_q = 0.;
   double lode_angle = 0.;
   double mtheta = 0.;
 
   // Get invariants
-  this->compute_stress_invariants(stress, &mean_p, &deviatoric_q, &lode_angle,
+  this->compute_stress_invariants(stress, &mean_p, &dev_q, &lode_angle,
                                   &mtheta);
 
-  // Get state variables
+  // Get state variables and image parameters
+  // note : M_image is at current stress
+  const double M_image = (*state_vars).at("M_image");
+  const double M_image_tc = (*state_vars).at("M_image_tc");
+  const double psi_image = (*state_vars).at("psi_image");
   const double p_image = (*state_vars).at("p_image");
-  const double M_theta = (*state_vars).at("M_theta");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
 
   // Initialise yield status (Elastic, Yield)
   auto yield_type = mpm::norsand::FailureState::Elastic;
 
-  // Compute yield functions
-  (*yield_function) =
-      deviatoric_q / (mean_p + p_cohesion) -
-      M_theta / N_ *
-          (1 + (N_ - 1) * std::pow(((mean_p + p_cohesion) /
-                                    (p_image + p_cohesion + p_dilation)),
-                                   (N_ / (1 - N_))));
+  // Compute yield function with internal cap
+  const double ratio =
+      (p_image + p_cohesion + p_dilation) / (mean_p + p_cohesion);
+  const double cap = std::exp(-chi_image_ * psi_image / M_image_tc);
+  if (ratio > cap) {
+    (*yield_function) =
+        dev_q / (mean_p + p_cohesion) - M_image + M_image * std::log(1. / cap);
+  } else {
+    (*yield_function) = dev_q / (mean_p + p_cohesion) - M_image +
+                        M_image * std::log((mean_p + p_cohesion) /
+                                           (p_image + p_cohesion + p_dilation));
+  }
 
   // Yield criterion
   if ((*yield_function) > tolerance_)
@@ -282,76 +324,69 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Initialize invariants
   double mean_p = 0.;
-  double deviatoric_q = 0.;
+  double dev_q = 0.;
   double lode_angle = 0.;
   double mtheta = 0.;
 
   // Get invariants
-  this->compute_stress_invariants(stress, &mean_p, &deviatoric_q, &lode_angle,
+  this->compute_stress_invariants(stress, &mean_p, &dev_q, &lode_angle,
                                   &mtheta);
 
-  // Get state variables
-  const double M_theta = (*state_vars).at("M_theta");
+  // Get state variables and image parameters
+  // note: M_image is at current stress
+  const double M_image = (*state_vars).at("M_image");
+  const double M_image_tc = (*state_vars).at("M_image_tc");
+  const double psi_image = (*state_vars).at("psi_image");
   const double p_image = (*state_vars).at("p_image");
-  const double e_image = (*state_vars).at("e_image");
-  const double void_ratio = (*state_vars).at("void_ratio");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
 
-  // Estimate dilatancy at peak
-  const double D_min = chi_ * (void_ratio - e_image);
-
-  // Estimate maximum image pressure
-  const double p_image_max =
-      (mean_p + p_cohesion) *
-      std::pow((1 + D_min * N_ / M_theta), ((N_ - 1) / N_));
-
   // Compute derivatives
   // Compute dF / dp
-  const double dF_dp =
-      -1. * M_theta / N_ *
-      (1 - std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion)),
-                    (N_ / (1 - N_))));
+  const double dF_dp = M_image * (std::log(mean_p + p_cohesion) -
+                                  std::log(p_image + p_cohesion + p_dilation));
 
   // Compute dp / dsigma
-  const Vector6d dp_dsigma = mpm::materials::dp_dsigma(-stress);
+  const Vector6d dp_dsigma = mpm::materials::dp_dsigma();
 
   // Compute dF / dq
   const double dF_dq = 1.;
 
   // Compute dq / dsigma
-  const Vector6d dq_dsigma = mpm::materials::dq_dsigma(-stress);
+  const Vector6d dq_dsigma = mpm::materials::dq_dsigma(stress);
 
-  // Compute dF / dM
-  const double dF_dM =
-      -1.0 / N_ * (mean_p + p_cohesion) *
-      (1 + (N_ - 1) * std::pow(((mean_p + p_cohesion) /
-                                (p_image + p_cohesion + p_dilation)),
-                               (N_ / (1 - N_))));
+  // Compute dF / dMi
+  const double dF_dMi =
+      (mean_p + p_cohesion) * (-1. + std::log(mean_p + p_cohesion) -
+                               std::log(p_image + p_cohesion + p_dilation));
 
-  // Use current lode angle to compute dtheta
-  const double sin_lode_angle = sin(3. / 2. * lode_angle);
+  // Compute dMi / dMtheta
+  const double dMi_dMtheta =
+      1. - (chi_image_ * N_ * std::fabs(psi_image) / Mtc_);
 
-  // Compute dM / dtehta
-  const double dM_dtheta =
-      3. / 2. * std::pow(Mtc_, 2) / (3. + Mtc_) * sin_lode_angle;
+  // Compute dMtheta / dtheta
+  const double dMtheta_dtheta =
+      (3. * std::pow(Mtc_, 2) * sin(3. / 2. * lode_angle)) / (2. * (3. + Mtc_));
 
   // Compute dtheta / dsigma
-  const Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(-stress);
+  const Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(stress);
 
   // dF_dsigma is in compression negative
-  const Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
-                             (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
+  const Vector6d dF_dsigma =
+      (dF_dp * dp_dsigma) + (dF_dq * dq_dsigma) +
+      (dF_dMi * dMi_dMtheta * dMtheta_dtheta * dtheta_dsigma);
 
   // Derivatives in respect to p_image
-  const double dF_dpi =
-      -1. * M_theta *
-      std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
-               (1 / (1 - N_)));
+  const double dF_dpi = (-1. * M_image * (mean_p + p_cohesion)) /
+                        (p_image + p_cohesion + p_dilation);
 
-  const double dpi_depsd = hardening_modulus_ * (p_image_max - p_image);
+  const double dpi_depsd =
+      hardening_modulus_ * (M_image / M_image_tc) *
+      std::pow((mean_p / p_image), 2) *
+      (std::exp(-1. * chi_image_ * psi_image / Mtc_) - (p_image / mean_p)) *
+      p_image;
 
-  const double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3;
+  const double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3.;
   const double dF_dsigma_deviatoric =
       std::sqrt(2. / 3.) * std::sqrt(std::pow(dF_dsigma(0) - dF_dsigma_v, 2) +
                                      std::pow(dF_dsigma(1) - dF_dsigma_v, 2) +
@@ -365,26 +400,18 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   if (bond_model_) {
     // Derivatives in respect to p_cohesion
     const double dF_dpcohesion =
-        M_theta / N_ *
-        (1 +
-         (N_ - 1) * std::pow(((mean_p + p_cohesion) /
-                              (p_image + p_cohesion + p_dilation)),
-                             (N_ / (1 - N_))) -
-         N_ * (p_image + p_dilation - mean_p) /
-             (p_image + p_cohesion + p_dilation) *
-             std::pow(
-                 ((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
-                 (N_ / (1 - N_))));
+        M_image *
+        ((-1. * (mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)) +
+         std::log(mean_p + p_cohesion) -
+         std::log(p_image + p_cohesion + p_dilation));
 
     const double dpcohesion_depsd =
         -p_cohesion_initial_ * m_cohesion_ *
         exp(-m_cohesion_ * (*state_vars).at("pdstrain"));
 
     // Derivatives in respect to p_dilation
-    const double dF_dpdilation =
-        -1. * M_theta *
-        std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
-                 (1 / (1 - N_)));
+    const double dF_dpdilation = (-1. * M_image * (mean_p + p_cohesion)) /
+                                 (p_image + p_cohesion + p_dilation);
 
     const double dpdilation_depsd =
         -p_dilation_initial_ * m_dilation_ *
@@ -413,7 +440,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   Vector6d dstrain_neg = -1 * dstrain;
 
   // Get stress invariants
-  const double mean_p = check_low(-1. * mpm::materials::p(stress));
+  const double mean_p = check_low(mpm::materials::p(stress_neg));
 
   // Elastic step
   // Bulk modulus computation
@@ -429,6 +456,9 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
 
   // Trial stress - elastic
   Vector6d trial_stress = stress_neg + (this->de_ * dstrain_neg);
+
+  // Compute image parameters at current stress
+  this->compute_image_parameters(state_vars);
 
   // Initialise value for yield function
   double yield_function;
