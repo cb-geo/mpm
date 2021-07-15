@@ -219,7 +219,7 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   } else {
     // Compute and update pressure image
     p_image =
-        std::pow(std::exp(1 - (dev_q / ((mean_p + p_cohesion) * M_image))),
+        std::pow(std::exp(1. - (dev_q / ((mean_p + p_cohesion) * M_image))),
                  -1) *
             (mean_p + p_cohesion) -
         (p_cohesion + p_dilation);
@@ -238,8 +238,9 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e_initial)
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
-  double void_ratio = check_low((*state_vars).at("void_ratio") -
-                                (1 + void_ratio_initial_) * dvolumetric_strain);
+  double void_ratio =
+      check_low((*state_vars).at("void_ratio") -
+                (1. + void_ratio_initial_) * dvolumetric_strain);
   (*state_vars).at("void_ratio") = void_ratio;
 }
 
@@ -300,7 +301,7 @@ typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
   const double cap = std::exp(-chi_image_ * psi_image / M_image_tc);
   if (ratio > cap) {
     (*yield_function) =
-        dev_q / (mean_p + p_cohesion) - M_image + M_image * std::log(1 / cap);
+        dev_q / (mean_p + p_cohesion) - M_image + M_image * std::log(1. / cap);
   } else {
     (*yield_function) = dev_q / (mean_p + p_cohesion) - M_image +
                         M_image * std::log((mean_p + p_cohesion) /
@@ -356,16 +357,16 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Compute dF / dMi
   const double dF_dMi =
-      (mean_p + p_cohesion) * (-1 + std::log(mean_p + p_cohesion) -
+      (mean_p + p_cohesion) * (-1. + std::log(mean_p + p_cohesion) -
                                std::log(p_image + p_cohesion + p_dilation));
 
   // Compute dMi / dMtheta
   const double dMi_dMtheta =
-      1 - (chi_image_ * N_ * std::fabs(psi_image) / Mtc_);
+      1. - (chi_image_ * N_ * std::fabs(psi_image) / Mtc_);
 
   // Compute dMtheta / dtheta
   const double dMtheta_dtheta =
-      (3 * std::pow(Mtc_, 2) * sin(3. / 2. * lode_angle)) / (2 * (3 + Mtc_));
+      (3. * std::pow(Mtc_, 2) * sin(3. / 2. * lode_angle)) / (2. * (3. + Mtc_));
 
   // Compute dtheta / dsigma
   const Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(stress);
@@ -385,7 +386,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
       (std::exp(-1. * chi_image_ * psi_image / Mtc_) - (p_image / mean_p)) *
       p_image;
 
-  const double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3;
+  const double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3.;
   const double dF_dsigma_deviatoric =
       std::sqrt(2. / 3.) * std::sqrt(std::pow(dF_dsigma(0) - dF_dsigma_v, 2) +
                                      std::pow(dF_dsigma(1) - dF_dsigma_v, 2) +
@@ -400,7 +401,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     // Derivatives in respect to p_cohesion
     const double dF_dpcohesion =
         M_image *
-        ((-(mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)) +
+        ((-1. * (mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)) +
          std::log(mean_p + p_cohesion) -
          std::log(p_image + p_cohesion + p_dilation));
 
