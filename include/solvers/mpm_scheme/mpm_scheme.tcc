@@ -71,12 +71,14 @@ inline void mpm::MPMScheme<Tdim>::compute_nodal_kinematics(unsigned phase) {
 
 //! Initialize nodes, cells and shape functions
 template <unsigned Tdim>
-inline void mpm::MPMScheme<Tdim>::compute_stress_strain(
-    unsigned phase, bool pressure_smoothing) {
+inline void mpm::MPMScheme<Tdim>::compute_stress_strain(unsigned phase,
+                                                        bool pressure_smoothing,
+                                                        bool interface) {
 
   // Iterate over each particle to calculate strain
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1,
+                dt_, interface));
 
   // Iterate over each particle to update particle volume
   mesh_->iterate_over_particles(std::bind(
@@ -171,8 +173,7 @@ inline void mpm::MPMScheme<Tdim>::compute_forces(
 // Compute particle kinematics
 template <unsigned Tdim>
 inline void mpm::MPMScheme<Tdim>::compute_particle_kinematics(
-    bool velocity_update, unsigned phase, const std::string& damping_type,
-    double damping_factor) {
+    unsigned phase, const std::string& damping_type, double damping_factor) {
 
   // Check if damping has been specified and accordingly Iterate over
   // active nodes to compute acceleratation and velocity
@@ -186,6 +187,11 @@ inline void mpm::MPMScheme<Tdim>::compute_particle_kinematics(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
                   std::placeholders::_1, phase, dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+}
+
+// Update particles
+template <unsigned Tdim>
+inline void mpm::MPMScheme<Tdim>::update_particles(bool velocity_update) {
 
   // Iterate over each particle to compute updated position
   mesh_->iterate_over_particles(

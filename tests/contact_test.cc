@@ -165,6 +165,8 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
   SECTION("Check ContactFriction") {
 
     unsigned phase = 0;
+    double dt = 0.001;
+    unsigned step = 1;
 
     // Initialise material
     Json jmaterial;
@@ -194,9 +196,10 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
     REQUIRE_NOTHROW(particle1->assign_volume(4.0));
     REQUIRE_NOTHROW(particle2->assign_volume(3.0));
 
-    auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSF<Dim>>(mesh, 0.01);
+    auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSF<Dim>>(mesh, dt);
 
-    auto contact = std::make_shared<mpm::ContactFriction<Dim>>(mesh);
+    auto contact =
+        std::make_shared<mpm::ContactFriction<Dim>>(mesh, 0.0, "MVG");
 
     // Initialise material models
     REQUIRE_NOTHROW(mesh->initialise_material_models(materials));
@@ -210,7 +213,25 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
 
     // Mass momentum and compute velocity at nodes
     REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
+    // Compute mass, momentum and velocity at the contact nodes
+    REQUIRE_NOTHROW(contact->compute_nodal_kinematics());
+
+    Eigen::Matrix<double, Dim, 1> gravity;
+    gravity << 0.0, -10, 0.0;
+    // Compute forces
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, false));
     // Contact compute forces
-    REQUIRE_NOTHROW(contact->compute_contact_forces());
+    REQUIRE_NOTHROW(
+        contact->compute_contact_forces(gravity, phase, step * dt, false));
+
+    // Particle kinematics
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(phase, "None", 0.02));
+
+    // Nodal kinematics at contact nodes
+    REQUIRE_NOTHROW(contact->compute_contact_kinematics(dt));
+
+    // Compute particle udpated position
+    REQUIRE_NOTHROW(contact->update_particles_contact(dt, false));
   }
 }
