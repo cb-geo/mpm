@@ -27,6 +27,9 @@
 #include "particle.h"
 #include "vector.h"
 
+// CSV-parser
+#include "csv/csv.h"
+
 namespace mpm {
 
 //! Variable type
@@ -119,6 +122,12 @@ class MPMBase : public MPM {
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] mesh_io Mesh IO handle
   void nodal_velocity_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Nodal acceleration constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_acceleration_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
 
   //! Nodal frictional constraints

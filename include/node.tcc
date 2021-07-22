@@ -14,8 +14,9 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
       "node" + std::to_string(Tdim) + "d::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
-  // Clear any velocity constraints
+  // Clear any velocity and acceleration constraints
   velocity_constraints_.clear();
+  acceleration_constraints_.clear();
   concentrated_force_.setZero();
   this->initialise();
 }
@@ -234,6 +235,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
     // Apply friction constraints
     this->apply_friction_constraints(dt);
 
+    // Apply acceleration constraints
+    this->apply_acceleration_constraints();
+
     // Velocity += acceleration * dt
     this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
     // Apply velocity constraints, which also sets acceleration to 0,
@@ -269,6 +273,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
 
     // Apply friction constraints
     this->apply_friction_constraints(dt);
+
+    // Apply acceleration constraints
+    this->apply_acceleration_constraints();
 
     // Velocity += acceleration * dt
     this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
@@ -309,6 +316,46 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraint(
   return status;
 }
 
+//! Assign acceleration constraint
+//! Constrain directions can take values between 0 and Dim * Nphases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration_constraint(
+    unsigned dir, double acceleration) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases
+    if (dir < (Tdim * Tnphases))
+      this->acceleration_constraints_.insert(std::make_pair<unsigned, double>(
+          static_cast<unsigned>(dir), static_cast<double>(acceleration)));
+    else
+      throw std::runtime_error("Constraint direction is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Update acceleration constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration_constraint(
+    unsigned dir, double acceleration) {
+  bool status = true;
+  try {
+    // Check if an acceleration constraint was assigned to dir
+    if (acceleration_constraints_.find(dir) != acceleration_constraints_.end())
+      acceleration_constraints_.find(dir)->second = acceleration;
+    else
+      throw std::runtime_error("Acceleration constraint direction is invalid");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Apply velocity constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
@@ -341,6 +388,37 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
       local_acceleration(direction, phase) = 0.;
       // Transform back to global coordinate
       this->velocity_ = rotation_matrix_ * local_velocity;
+      this->acceleration_ = rotation_matrix_ * local_acceleration;
+    }
+  }
+}
+
+//! Apply acceleration constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_acceleration_constraints() {
+  // Set acceleration constraint
+  for (const auto& constraint : this->acceleration_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+
+    if (!generic_boundary_constraints_) {
+      // Acceleration constraints are applied on Cartesian boundaries
+      this->acceleration_(direction, phase) = constraint.second;
+    } else {
+      // Acceleration constraints on general boundaries
+      // Compute inverse rotation matrix
+      const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
+          rotation_matrix_.inverse();
+      // Transform to local coordinate
+      Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
+          inverse_rotation_matrix * this->acceleration_;
+      // Apply boundary condition in local coordinate
+      local_acceleration(direction, phase) = constraint.second;
+      // Transform back to global coordinate
       this->acceleration_ = rotation_matrix_ * local_acceleration;
     }
   }

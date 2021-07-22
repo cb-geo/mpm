@@ -270,12 +270,12 @@ std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID and read stream
+          mpm::Index id;
+          // Angles and ream stream
+          Eigen::Matrix<double, Tdim, 1> angles;
           while (istream.good()) {
-            // ID and read stream
-            mpm::Index id;
             istream >> id;
-            // Angles and ream stream
-            Eigen::Matrix<double, Tdim, 1> angles;
             for (unsigned i = 0; i < Tdim; ++i) istream >> angles[i];
             euler_angles.emplace(std::make_pair(id, angles));
           }
@@ -314,11 +314,11 @@ std::vector<std::tuple<mpm::Index, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Volume
+          double volume;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Volume
-            double volume;
             // Read stream
             istream >> id >> volume;
             volumes.emplace_back(std::make_tuple(id, volume));
@@ -358,9 +358,9 @@ std::vector<std::array<mpm::Index, 2>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index pid, cid;
           while (istream.good()) {
-            // ID
-            mpm::Index pid, cid;
             // Read stream
             istream >> pid >> cid;
             particles_cells.emplace_back(std::array<mpm::Index, 2>({pid, cid}));
@@ -416,13 +416,13 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Velocity
+          double velocity;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Velocity
-            double velocity;
             // Read stream
             istream >> id >> dir >> velocity;
             constraints.emplace_back(std::make_tuple(id, dir, velocity));
@@ -433,6 +433,52 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
     file.close();
   } catch (std::exception& exception) {
     console_->error("Read velocity constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
+//! Return acceleration constraints of nodes or particles
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, double>>
+    mpm::IOMeshAscii<Tdim>::read_acceleration_constraints(
+        const std::string& acceleration_constraints_file) {
+
+  // Nodal or particle acceleration constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(acceleration_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Velocity
+          double acceleration;
+          while (istream.good()) {
+            // Read stream
+            istream >> id >> dir >> acceleration;
+            constraints.emplace_back(std::make_tuple(id, dir, acceleration));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read acceleration constraints: {}", exception.what());
     file.close();
   }
   return constraints;
@@ -462,15 +508,15 @@ std::vector<std::tuple<mpm::Index, unsigned, int, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Sign
+          int sign;
+          // Friction
+          double friction;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Sign
-            int sign;
-            // Friction
-            double friction;
             // Read stream
             istream >> id >> dir >> sign >> friction;
             constraints.emplace_back(std::make_tuple(id, dir, sign, friction));
@@ -509,13 +555,13 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Force
+          double force;
           while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Force
-            double force;
             // Read stream
             istream >> id >> dir >> force;
             forces.emplace_back(std::make_tuple(id, dir, force));
@@ -529,4 +575,26 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
     file.close();
   }
   return forces;
+}
+
+// Return array with math function entries
+template <unsigned Tdim>
+std::array<std::vector<double>, 2> mpm::IOMeshAscii<Tdim>::read_math_functions(
+    const std::string& math_file) {
+  // Initialise vector with 2 empty vectors
+  std::array<std::vector<double>, 2> xfx_values;
+
+  // Read from csv file
+  try {
+    io::CSVReader<2> in(math_file.c_str());
+    double x_value, fx_value;
+    while (in.read_row(x_value, fx_value)) {
+      xfx_values[0].push_back(x_value);
+      xfx_values[1].push_back(fx_value);
+    }
+  } catch (std::exception& exception) {
+    console_->error("Read math functions: {}", exception.what());
+  }
+
+  return xfx_values;
 }

@@ -74,14 +74,20 @@ class IOMeshAscii : public IOMesh<Tdim> {
       const std::string& particles_cells_file,
       const std::vector<std::array<mpm::Index, 2>>& particles_cells) override;
 
-  //! Read constraints file
-  //! \param[in] velocity_constraints_files file name with constraints
+  //! Read velocity constraints file
+  //! \param[in] velocity_constraints_file file name with constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_velocity_constraints(
           const std::string& velocity_constraints_file) override;
 
+  //! Read acceleration constraints file
+  //! \param[in] acceleration_constraints_file file name with constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_acceleration_constraints(
+          const std::string& acceleration_constraints_file) override;
+
   //! Read friction constraints file
-  //! \param[in] friction_constraints_files file name with frictions
+  //! \param[in] friction_constraints_file file name with frictions
   std::vector<std::tuple<mpm::Index, unsigned, int, double>>
       read_friction_constraints(
           const std::string& friction_constraints_file) override;
@@ -90,6 +96,11 @@ class IOMeshAscii : public IOMesh<Tdim> {
   //! \param[in] forces_files file name with nodal concentrated force
   std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) override;
+
+  //! Read math function file
+  //! \param[in] function_file file name with linear math function entries
+  std::array<std::vector<double>, 2> read_math_functions(
+      const std::string& math_file) override;
 
  private:
   //! Logger

@@ -12,6 +12,7 @@
 #include "Eigen/Dense"
 #include <boost/algorithm/string.hpp>
 
+#include "csv/csv.h"
 #include "spdlog/spdlog.h"
 
 #include "data_types.h"
@@ -87,21 +88,32 @@ class IOMesh {
       const std::vector<std::array<mpm::Index, 2>>& particles_cells) = 0;
 
   //! Read velocity constraints file
-  //! \param[in] velocity_constraints_files file name with constraints
+  //! \param[in] velocity_constraints_file file name with constraints
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_velocity_constraints(
           const std::string& velocity_constraints_file) = 0;
 
+  //! Read acceleration constraints file
+  //! \param[in] acceleration_constraints_file file name with constraints
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_acceleration_constraints(
+          const std::string& acceleration_constraints_file) = 0;
+
   //! Read friction constraints file
-  //! \param[in] friction_constraints_files file name with frictions
+  //! \param[in] friction_constraints_file file name with frictions
   virtual std::vector<std::tuple<mpm::Index, unsigned, int, double>>
       read_friction_constraints(
           const std::string& friction_constraints_file) = 0;
 
   //! Read forces file
-  //! \param[in] forces_files file name with nodal concentrated force
+  //! \param[in] forces_file file name with nodal concentrated force
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) = 0;
+
+  //! Read math function file
+  //! \param[in] function_file file name with linear math function entries
+  virtual std::array<std::vector<double>, 2> read_math_functions(
+      const std::string& math_file) = 0;
 
 };  // IOMesh class
 }  // namespace mpm
