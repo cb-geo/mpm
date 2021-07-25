@@ -261,6 +261,14 @@ class ParticleBase {
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
 
+  //! Compute updated velocity for musl
+  virtual void compute_updated_velocity_musl(
+      double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Compute updated position for musl
+  virtual void compute_updated_position_musl(
+      double dt, bool velocity_update = false) noexcept = 0;
+
   //! Return a state variable
   virtual double state_variable(
       const std::string& var,

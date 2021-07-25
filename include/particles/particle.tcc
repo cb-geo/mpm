@@ -809,6 +809,57 @@ void mpm::Particle<Tdim>::compute_updated_position(
   this->displacement_ += nodal_velocity * dt;
 }
 
+// Compute updated velocity of the particle for musl
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_updated_velocity_musl(
+    double dt, bool velocity_update) noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get interpolated nodal velocity
+  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodal_velocity +=
+        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
+
+  // Acceleration update
+  if (!velocity_update) {
+    // Get interpolated nodal acceleration
+    Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodal_acceleration +=
+          shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
+
+    // Update particle velocity from interpolated nodal acceleration
+    this->velocity_ += nodal_acceleration * dt;
+  }
+  // Update particle velocity using interpolated nodal velocity
+  else
+    this->velocity_ = nodal_velocity;
+}
+
+// Compute updated position of the particle for musl
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_updated_position_musl(
+    double dt, bool velocity_update) noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get interpolated nodal velocity
+  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodal_velocity +=
+        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
+
+  // New position  current position + velocity * dt
+  this->coordinates_ += nodal_velocity * dt;
+  // Update displacement (displacement is initialized from zero)
+  this->displacement_ += nodal_velocity * dt;
+}
+
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
