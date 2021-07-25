@@ -20,13 +20,14 @@
 #include "mpm_scheme.h"
 #include "mpm_scheme_usf.h"
 #include "mpm_scheme_usl.h"
+#include "mpm_scheme_musl.h"
 #include "node.h"
 #include "partio_writer.h"
 #include "quadrilateral_element.h"
 
 //! \brief Check stress update 3D case
-TEST_CASE("Stress update is checked for USF and USL",
-          "[MPMScheme][USF][USL][3D]") {
+TEST_CASE("Stress update is checked for USF, USL and MUSL",
+          "[MPMScheme][USF][USL][MUSL][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -214,6 +215,47 @@ TEST_CASE("Stress update is checked for USF and USL",
 
   SECTION("Check USL") {
     auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSL<Dim>>(mesh, 0.01);
+    // Phase
+    unsigned phase = 0;
+    // Step
+    unsigned step = 5;
+    // Gravity
+    Eigen::Matrix<double, Dim, 1> gravity = {0., 0., 9.81};
+    // Initialise
+    REQUIRE_NOTHROW(mpm_scheme->initialise());
+
+    // Mass momentum and compute velocity at nodes
+    REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
+
+    // Update stress first
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true));
+
+    // Compute forces
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, false));
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, true));
+
+    // Particle kinematics
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(true, phase, "Cundall", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(false, phase, "Cundall", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(true, phase, "None", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(false, phase, "None", 0.02));
+
+    // Update Stress Last
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false));
+
+    // Locate particles
+    REQUIRE_NOTHROW(mpm_scheme->locate_particles(true));
+    REQUIRE_NOTHROW(mpm_scheme->locate_particles(false));
+  }
+
+  SECTION("Check MUSL") {
+    auto mpm_scheme = std::make_shared<mpm::MPMSchemeMUSL<Dim>>(mesh, 0.01);
     // Phase
     unsigned phase = 0;
     // Step
