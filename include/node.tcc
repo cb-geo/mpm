@@ -36,6 +36,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   material_ids_.clear();
 }
 
+//! Initialise nodal momentum (only for musl)
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::initialise_momentum() noexcept {
+  momentum_.setZero();
+}
+
 //! Initialise shared pointer to nodal properties pool
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(

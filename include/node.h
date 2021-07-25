@@ -37,6 +37,9 @@ class Node : public NodeBase<Tdim> {
   //! Initialise nodal properties
   void initialise() noexcept override;
 
+  //! Initialise nodal momentum (only for musl)
+  void initialise_momentum() noexcept override;
+
   //! Return id of the nodebase
   Index id() const override { return id_; }
 
