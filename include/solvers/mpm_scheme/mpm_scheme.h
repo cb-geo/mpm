@@ -66,6 +66,11 @@ class MPMScheme {
       bool velocity_update, unsigned phase, const std::string& damping_type,
       double damping_factor);
 
+  //! Recompute nodal kinematics and compute particle position (only for musl)
+  //! \param[in] phase Phase of particle
+  virtual inline void compute_particle_updated_position(
+      bool velocity_update, unsigned phase) = 0;
+
   //! Compute particle location
   //! \param[in] locate_particles Flag to enable locate particles, if set to
   //! false, unlocated particles will be removed

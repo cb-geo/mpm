@@ -29,6 +29,11 @@ class MPMSchemeUSL : public MPMScheme<Tdim> {
   virtual inline void postcompute_stress_strain(
       unsigned phase, bool pressure_smoothing) override;
 
+  //! Recompute nodal kinematics and compute particle position (only for musl)
+  //! \param[in] phase Phase of particle
+  virtual inline void compute_particle_updated_position(
+      bool velocity_update, unsigned phase) override;
+
   //! Stress update scheme
   //! \retval scheme Stress update scheme
   virtual inline std::string scheme() const override;

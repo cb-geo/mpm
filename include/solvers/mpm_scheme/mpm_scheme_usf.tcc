@@ -16,6 +16,11 @@ template <unsigned Tdim>
 inline void mpm::MPMSchemeUSF<Tdim>::postcompute_stress_strain(
     unsigned phase, bool pressure_smoothing) {}
 
+//! Recompute nodal kinematics and compute particle position (only for musl)
+template <unsigned Tdim>
+inline void mpm::MPMSchemeUSF<Tdim>::compute_particle_updated_position(
+  bool velocity_update, unsigned phase) {}
+
 //! Stress update scheme
 template <unsigned Tdim>
 inline std::string mpm::MPMSchemeUSF<Tdim>::scheme() const {

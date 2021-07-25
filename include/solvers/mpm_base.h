@@ -24,6 +24,7 @@
 #include "mpm_scheme.h"
 #include "mpm_scheme_usf.h"
 #include "mpm_scheme_usl.h"
+#include "mpm_scheme_musl.h"
 #include "particle.h"
 #include "vector.h"
 
