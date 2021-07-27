@@ -9,10 +9,24 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
         material_properties.at("youngs_modulus").template get<double>();
     poisson_ratio_ =
         material_properties.at("poisson_ratio").template get<double>();
+
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
+    // Calculate constrained and shear modulus
+    double constrained_modulus =
+        youngs_modulus_ * (1. - poisson_ratio_) /
+        ((1. + poisson_ratio_) * (1. - 2. * poisson_ratio_));
+    double shear_modulus = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
+
+    // Calculate wave velocities
+    vp_ = sqrt(constrained_modulus / density_);
+    vs_ = sqrt(shear_modulus / density_);
+
     properties_ = material_properties;
+    properties_["pwave_velocity"] = vp_;
+    properties_["swave_velocity"] = vs_;
+
     // Set elastic tensor
     this->compute_elastic_tensor();
   } catch (Json::exception& except) {

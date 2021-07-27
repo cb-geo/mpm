@@ -77,6 +77,10 @@ class LinearElastic : public Material<Tdim> {
   double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Bulk modulus
   double bulk_modulus_{std::numeric_limits<double>::max()};
+  //! Compressional Wave Velocity
+  double vp_{std::numeric_limits<double>::max()};
+  //! Shear Wave Velocity
+  double vs_{std::numeric_limits<double>::max()};
 };  // LinearElastic class
 }  // namespace mpm
 

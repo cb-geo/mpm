@@ -495,7 +495,7 @@ void mpm::ModifiedCamClay<Tdim>::compute_df_dsigma(
   // Compute dF / dpc
   double df_dpc = -(p + pcc);
   // Compute dp / dSigma
-  Vector6d dp_dsigma = -mpm::materials::dp_dsigma(stress);
+  Vector6d dp_dsigma = -mpm::materials::dp_dsigma();
   // Compute dq / dSigma
   Vector6d dq_dsigma = mpm::materials::dq_dsigma(stress);
   // Compute dF/dSigma

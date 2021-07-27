@@ -172,6 +172,15 @@ SET(mpm_src
 )
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
 
+# Git revision
+set(PRE_CONFIGURE_FILE "${CMAKE_SOURCE_DIR}/include/git.cc.in")
+set(POST_CONFIGURE_FILE "${CMAKE_SOURCE_DIR}/include/git.cc")
+include("${CMAKE_SOURCE_DIR}/cmake/git_watcher.cmake")
+add_library(git STATIC ${POST_CONFIGURE_FILE})
+target_include_directories(git PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_dependencies(git check_git)
+target_link_libraries(mpm git)
+
 # Unit test
 if(MPM_BUILD_TESTING)
   SET(test_src
