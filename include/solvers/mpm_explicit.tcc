@@ -151,8 +151,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
                                              damping_factor_);
 
-    // Particle positions (only for MUSL)
-    mpm_scheme_->compute_particle_updated_position(velocity_update_, phase);
+    // Mass momentum and compute velocity at nodes
+    mpm_scheme_->postcompute_nodal_kinematics(phase);
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);

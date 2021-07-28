@@ -69,7 +69,7 @@ inline void mpm::MPMScheme<Tdim>::compute_nodal_kinematics(unsigned phase) {
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 }
 
-//! Initialize nodes, cells and shape functions
+//! Compute stress and strain
 template <unsigned Tdim>
 inline void mpm::MPMScheme<Tdim>::compute_stress_strain(
     unsigned phase, bool pressure_smoothing) {

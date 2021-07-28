@@ -5,6 +5,9 @@
 #include "graph.h"
 #endif
 
+// Eigen
+#include "Eigen/Dense"
+
 #include "mpm_scheme.h"
 
 namespace mpm {
@@ -15,6 +18,9 @@ namespace mpm {
 template <unsigned Tdim>
 class MPMSchemeMUSL : public MPMScheme<Tdim> {
  public:
+   //! Define a vector of size dimension
+  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
+
   //! Default constructor with mesh class
   MPMSchemeMUSL(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
 
@@ -29,18 +35,9 @@ class MPMSchemeMUSL : public MPMScheme<Tdim> {
   virtual inline void postcompute_stress_strain(
       unsigned phase, bool pressure_smoothing) override;
 
-  //! Compute acceleration velocity position
-  //! \param[in] velocity_update Velocity or acceleration update flag
-  //! \param[in] phase Phase of particle
-  //! \param[in] damping_type Type of damping
-  //! \param[in] damping_factor Value of critical damping
-  virtual inline void compute_particle_kinematics(
-      bool velocity_update, unsigned phase, const std::string& damping_type,
-      double damping_factor) override;
-
-  //! Compute position
-  //! \param[in] phase Phase of particle
-  virtual inline void compute_particle_updated_position(bool velocity_update, unsigned phase) override;
+  //! Postcompute nodal kinematics - map mass and momentum to nodes
+  //! \param[in] phase Phase to smooth pressure
+  virtual inline void postcompute_nodal_kinematics(unsigned phase) override;
 
   //! Stress update scheme
   //! \retval scheme Stress update scheme
