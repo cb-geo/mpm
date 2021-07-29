@@ -531,19 +531,6 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
   }
 }
 
-//! Map particle momentum to nodes (only for musl)
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_momentum_to_nodes() noexcept {
-  // Check if particle mass is set
-  assert(mass_ != std::numeric_limits<double>::max());
-
-  // Map mass and momentum to nodes
-  for (unsigned i = 0; i < nodes_.size(); ++i) {
-    nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
-                               mass_ * shapefn_[i] * velocity_);
-  }
-}
-
 //! Map multimaterial properties to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
@@ -815,57 +802,6 @@ void mpm::Particle<Tdim>::compute_updated_position(
   // Update particle velocity using interpolated nodal velocity
   else
     this->velocity_ = nodal_velocity;
-
-  // New position  current position + velocity * dt
-  this->coordinates_ += nodal_velocity * dt;
-  // Update displacement (displacement is initialized from zero)
-  this->displacement_ += nodal_velocity * dt;
-}
-
-// Compute updated velocity of the particle for musl
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_updated_velocity_musl(
-    double dt, bool velocity_update) noexcept {
-  // Check if particle has a valid cell ptr
-  assert(cell_ != nullptr);
-  // Get interpolated nodal velocity
-  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
-
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_velocity +=
-        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
-
-  // Acceleration update
-  if (!velocity_update) {
-    // Get interpolated nodal acceleration
-    Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-        Eigen::Matrix<double, Tdim, 1>::Zero();
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodal_acceleration +=
-          shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
-
-    // Update particle velocity from interpolated nodal acceleration
-    this->velocity_ += nodal_acceleration * dt;
-  }
-  // Update particle velocity using interpolated nodal velocity
-  else
-    this->velocity_ = nodal_velocity;
-}
-
-// Compute updated position of the particle for musl
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_updated_position_musl(
-    double dt, bool velocity_update) noexcept {
-  // Check if particle has a valid cell ptr
-  assert(cell_ != nullptr);
-  // Get interpolated nodal velocity
-  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
-
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_velocity +=
-        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
 
   // New position  current position + velocity * dt
   this->coordinates_ += nodal_velocity * dt;
