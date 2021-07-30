@@ -437,17 +437,6 @@ class Node : public NodeBase<Tdim> {
     return correction_force_.col(phase);
   }
 
-  //! Compute nodal correction force term
-  //! \ingroup MultiPhase
-  void compute_nodal_correction_force(
-      const VectorDim& correction_force) override;
-
-  //! Compute nodal correction force term for two phase
-  //! \ingroup MultiPhase
-  void compute_nodal_correction_force(
-      const VectorDim& solid_correction_force,
-      const VectorDim& liquid_correction_force) override;
-
   /**@}*/
 
  private:

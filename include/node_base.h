@@ -22,7 +22,8 @@ enum NodePhase : unsigned int {
   NSolid = 0,
   NLiquid = 1,
   NGas = 2,
-  NMixture = 0
+  NMixture = 0,
+  NSinglePhase = 0
 };
 
 //! NodeBase base class for nodes
@@ -405,17 +406,6 @@ class NodeBase {
   //! \ingroup MultiPhase
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim correction_force(unsigned phase) const = 0;
-
-  //! Compute nodal correction force term
-  //! \ingroup MultiPhase
-  virtual void compute_nodal_correction_force(
-      const VectorDim& correction_force) = 0;
-
-  //! Compute nodal correction force term for two phase
-  //! \ingroup MultiPhase
-  virtual void compute_nodal_correction_force(
-      const VectorDim& solid_correction_force,
-      const VectorDim& liquid_correction_force) = 0;
 
   /**@}*/
 

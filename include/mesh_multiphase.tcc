@@ -611,8 +611,8 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
           (correction_force.row(active_id)).transpose();
 
       // Compute correction force for each node
-      map_nodes_[(*nitr)->id()]->compute_nodal_correction_force(
-          nodal_correction_force);
+      map_nodes_[(*nitr)->id()]->update_correction_force(
+          false, mpm::NodePhase::NSinglePhase, nodal_correction_force);
     }
 
   } catch (std::exception& exception) {
@@ -664,8 +664,10 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force_twophase(
           (correction_force.row(active_id + nactive_node)).transpose();
 
       // Compute corrected force for each node
-      map_nodes_[(*nitr)->id()]->compute_nodal_correction_force(
-          nodal_correction_force_solid, nodal_correction_force_liquid);
+      map_nodes_[(*nitr)->id()]->update_correction_force(
+          false, mpm::NodePhase::NSolid, nodal_correction_force_solid);
+      map_nodes_[(*nitr)->id()]->update_correction_force(
+          false, mpm::NodePhase::NLiquid, nodal_correction_force_liquid);
     }
 
   } catch (std::exception& exception) {

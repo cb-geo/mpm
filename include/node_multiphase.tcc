@@ -281,22 +281,3 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_correction_force(
   correction_force_.col(phase) = correction_force_.col(phase) * factor + force;
   node_mutex_.unlock();
 }
-
-//! Compute nodal correction force
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
-    const VectorDim& correction_force) {
-  // Compute correction force for fluid phase
-  correction_force_.col(0) = correction_force;
-}
-
-//! Compute nodal corrected force for two-phase
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
-    const VectorDim& solid_correction_force,
-    const VectorDim& liquid_correction_force) {
-  // Compute corrected force for solid phase
-  correction_force_.col(0) = solid_correction_force;
-  // Compute corrected force for liquid phase
-  correction_force_.col(1) = liquid_correction_force;
-}
