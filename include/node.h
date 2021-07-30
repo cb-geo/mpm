@@ -302,7 +302,9 @@ class Node : public NodeBase<Tdim> {
   //! Assign free surface
   //! \ingroup MultiPhase
   void assign_free_surface(bool free_surface) override {
+    node_mutex_.lock();
     free_surface_ = free_surface;
+    node_mutex_.unlock();
   }
 
   //! Return free surface bool

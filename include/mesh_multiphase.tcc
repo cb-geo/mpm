@@ -47,6 +47,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
   // First, we detect the cell with possible free surfaces
   // Compute boundary cells and nodes based on geometry
   std::set<mpm::Index> free_surface_candidate_cells;
+#pragma omp parallel for schedule(runtime)
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
     // Cell contains particles
     if ((*citr)->status()) {
@@ -84,6 +85,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_geometry(
       // Assign free surface cell
       if (candidate_cell) {
         (*citr)->assign_free_surface(true);
+#pragma omp critical
         free_surface_candidate_cells.insert((*citr)->id());
       }
     }
@@ -245,6 +247,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
   memset(send_cell_solving_status, 0, ncells() * sizeof(bool));
   bool* receive_cell_solving_status = new bool[ncells()];
 
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
     if ((*citr)->status())
       // Assign solving status for MPI solver
@@ -255,6 +258,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
   MPI_Allreduce(send_cell_solving_status, receive_cell_solving_status, ncells(),
                 MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
 
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Assign solving status for MPI solver
     (*citr)->assign_solving_status(receive_cell_solving_status[(*citr)->id()]);
@@ -287,6 +291,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
   std::vector<double> receive_cell_vol_fraction;
   receive_cell_vol_fraction.resize(ncells());
 
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
     if ((*citr)->status())
       // Assign volume_fraction for MPI solver
@@ -297,12 +302,14 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
   MPI_Allreduce(send_cell_vol_fraction.data(), receive_cell_vol_fraction.data(),
                 ncells(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Assign volume_fraction for MPI solver
     (*citr)->assign_volume_fraction(receive_cell_vol_fraction[(*citr)->id()]);
   }
 #endif
 
+#pragma omp parallel for schedule(runtime)
   // Compute boundary cells and nodes based on geometry
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
 
@@ -476,7 +483,8 @@ bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
   return status;
 }
 
-//! Create a list of active nodes in mesh and assign active node id (rank-wise)
+//! Create a list of active nodes in mesh and assign active node id
+//! (rank-wise)
 template <unsigned Tdim>
 unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   // Clear existing list of active nodes
@@ -506,6 +514,7 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   MPI_Allreduce(send_nodal_solving_status, receive_nodal_solving_status,
                 nnodes(), MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
 
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if (receive_nodal_solving_status[(*nitr)->id()]) {
       // Assign solving status for MPI solver
@@ -593,12 +602,13 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
           pressure_increment;
     }
 
+#pragma omp parallel for schedule(runtime)
     // Iterate over each active node
-    VectorDim nodal_correction_force;
     for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend();
          ++nitr) {
       unsigned active_id = (*nitr)->active_id();
-      nodal_correction_force = (correction_force.row(active_id)).transpose();
+      VectorDim nodal_correction_force =
+          (correction_force.row(active_id)).transpose();
 
       // Compute correction force for each node
       map_nodes_[(*nitr)->id()]->compute_nodal_correction_force(
@@ -640,18 +650,17 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force_twophase(
     }
 
     // Iterate over each active node
-    VectorDim nodal_correction_force_solid;
-    VectorDim nodal_correction_force_liquid;
+#pragma omp parallel for schedule(runtime)
     // Iterate over each active node
     for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend();
          ++nitr) {
       //! Active id
       unsigned active_id = (*nitr)->active_id();
       // Solid phase
-      nodal_correction_force_solid =
+      VectorDim nodal_correction_force_solid =
           (correction_force.row(active_id)).transpose();
       // Liquid phase
-      nodal_correction_force_liquid =
+      VectorDim nodal_correction_force_liquid =
           (correction_force.row(active_id + nactive_node)).transpose();
 
       // Compute corrected force for each node
