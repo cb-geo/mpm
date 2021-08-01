@@ -209,11 +209,11 @@ class NodeBase {
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of absorbing constraint
   //! \param[in] delta Virtual viscous layer thickness
-  //! \param[in] a Equation constant
-  //! \param[in] a Equation constant
   //! \param[in] h_min Characteristic Length
-  virtual bool apply_absorbing_constraint(unsigned dir, double delta, double a,
-                                          double b, double h_min) = 0;
+  //! \param[in] a Equation constant
+  //! \param[in] a Equation constant
+  virtual bool apply_absorbing_constraint(unsigned dir, double delta,
+                                          double h_min, double a, double b) = 0;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node

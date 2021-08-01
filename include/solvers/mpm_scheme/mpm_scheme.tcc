@@ -168,6 +168,28 @@ inline void mpm::MPMScheme<Tdim>::compute_forces(
 #endif
 }
 
+// Assign Absorbing Boundary Properties
+template <unsigned Tdim>
+inline void mpm::MPMScheme<Tdim>::absorbing_boundary_properties() {
+  mesh_->create_nodal_properties();
+
+  // Initialise nodal properties
+  mesh_->initialise_nodal_properties();
+
+  // Append material ids to nodes
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
+                std::placeholders::_1));
+
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_wave_velocities_to_nodes,
+                std::placeholders::_1));
+  // Map multimaterial displacements from particles to nodes
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::map_multimaterial_displacements_to_nodes,
+      std::placeholders::_1));
+}
+
 // Compute particle kinematics
 template <unsigned Tdim>
 inline void mpm::MPMScheme<Tdim>::compute_particle_kinematics(

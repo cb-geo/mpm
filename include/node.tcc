@@ -1,3 +1,4 @@
+#include <iostream>
 //! Constructor with id, coordinates and dof
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 mpm::Node<Tdim, Tdof, Tnphases>::Node(
@@ -357,41 +358,44 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
       throw std::runtime_error("Direction is out of bounds");
       status = false;
     }
-    // Get material id
-    auto mat_id = material_ids_.begin();
+    if (material_ids_.size() != 0) {
+      // Get material id
+      auto mat_id = material_ids_.begin();
 
-    // Extract material properties and displacements
-    double pwave_v = this->property_handle_->property(
-        "wave_velocities", prop_id_, *mat_id, Tdim)(0);
-    double swave_v = this->property_handle_->property(
-        "wave_velocities", prop_id_, *mat_id, Tdim)(1);
-    double density =
-        this->property_handle_->property("density", prop_id_, *mat_id)(0);
-    Eigen::Matrix<double, Tdim, 1> material_displacement =
-        this->property_handle_->property("displacements", prop_id_, *mat_id,
-                                         Tdim);
+      // Extract material properties and displacements
+      double pwave_v = this->property_handle_->property(
+          "wave_velocities", prop_id_, *mat_id, Tdim)(0);
+      double swave_v = this->property_handle_->property(
+          "wave_velocities", prop_id_, *mat_id, Tdim)(1);
+      double density =
+          this->property_handle_->property("density", prop_id_, *mat_id)(0);
+      Eigen::Matrix<double, Tdim, 1> material_displacement =
+          this->property_handle_->property("displacements", prop_id_, *mat_id,
+                                           Tdim);
 
-    // Wave velocity Eigen Matrix
-    Eigen::Matrix<double, Tdim, 1> wave_velocity =
-        Eigen::MatrixXd::Constant(Tdim, 1, b * swave_v);
-    wave_velocity(dir, 0) = a * pwave_v;
+      // Wave velocity Eigen Matrix
+      Eigen::Matrix<double, Tdim, 1> wave_velocity =
+          Eigen::MatrixXd::Constant(Tdim, 1, b * swave_v);
+      wave_velocity(dir, 0) = a * pwave_v;
+      // Spring constant Eigen matrix
+      double k_s = (density * pow(swave_v, 2)) / delta;
+      double k_p = (density * pow(pwave_v, 2)) / delta;
+      Eigen::Matrix<double, Tdim, 1> spring_constant =
+          Eigen::MatrixXd::Constant(Tdim, 1, k_s);
+      spring_constant(dir, 0) = k_p;
 
-    // Spring constant Eigen matrix
-    double k_s = (density * pow(swave_v, 2)) / delta;
-    double k_p = (density * pow(pwave_v, 2)) / delta;
-    Eigen::Matrix<double, Tdim, 1> spring_constant =
-        Eigen::MatrixXd::Constant(Tdim, 1, k_s);
-    spring_constant(dir, 0) = k_p;
+      // Iterate through each phase
+      for (unsigned phase = 0; phase < Tnphases; ++phase) {
+        // Calculate Aborbing Traction
+        Eigen::Matrix<double, Tdim, 1> absorbing_traction_ =
+            this->velocity_.col(phase).cwiseProduct(wave_velocity) * density +
+            material_displacement.cwiseProduct(spring_constant);
 
-    // Iterate through each phase
-    for (unsigned phase = 0; phase < Tnphases; ++phase) {
-      // Calculate Aborbing Traction
-      Eigen::Matrix<double, Tdim, 1> absorbing_traction_ =
-          this->velocity_.col(phase).cwiseProduct(wave_velocity) * density +
-          material_displacement.cwiseProduct(spring_constant);
-
-      // Update external force
-      this->update_external_force(true, phase, -absorbing_traction_);
+        // Update external force
+        this->update_external_force(true, phase, -absorbing_traction_);
+        std::cout << "\n Absorbing Traction:  \n" << std::ends;
+        std::cout << absorbing_traction_ << std::ends;
+      }
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -597,10 +601,15 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     bool update, const std::string& property,
     const Eigen::MatrixXd& property_value, unsigned mat_id,
     unsigned nprops) noexcept {
+
   // Update/assign property
   node_mutex_.lock();
-  property_handle_->update_property(property, prop_id_, mat_id, property_value,
-                                    nprops);
+  if (update)
+    property_handle_->update_property(property, prop_id_, mat_id,
+                                      property_value, nprops);
+  else
+    property_handle_->assign_property(property, prop_id_, mat_id,
+                                      property_value, nprops);
   node_mutex_.unlock();
 }
 

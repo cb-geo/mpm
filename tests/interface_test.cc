@@ -46,6 +46,7 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                                     Nmaterials);
   nodal_properties->create_property("wave_velocities", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("density", Nnodes, Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -292,14 +293,14 @@ TEST_CASE("Interface functions are checked", "[interface]") {
 
   Eigen::Matrix<double, 8, 2> wave_velocities;
   // clang-format off
-  wave_velocities << 116.023870223, 2*116.023870223,
-                     62.0173672946, 2*62.0173672946,
-                     116.023870223, 2*116.023870223,
-                     62.0173672946, 2*62.0173672946,
-                     116.023870223, 2*116.023870223,
-                     62.0173672946, 2*62.0173672946,
-                     116.023870223, 2*116.023870223,
-                     62.0173672946, 2*62.0173672946;
+  wave_velocities << 116.023870223, 116.023870223,
+                     62.0173672946, 62.0173672946,
+                     116.023870223, 116.023870223,
+                     62.0173672946, 62.0173672946,
+                     116.023870223, 116.023870223,
+                     62.0173672946, 62.0173672946,
+                     116.023870223, 116.023870223,
+                     62.0173672946, 62.0173672946;
   // clang-format on
 
   // Check if nodal properties were properly mapped and computed

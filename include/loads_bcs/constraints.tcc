@@ -123,7 +123,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
     double h_min = absorbing_constraint->h_min();
     double a = absorbing_constraint->a();
     double b = absorbing_constraint->b();
-    if (delta >= h_min / (2 * a) && delta >= h_min / (2 * b))
+    if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b))
       for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
         if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b))
           throw std::runtime_error(
@@ -158,7 +158,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       double a = std::get<4>(absorbing_constraint);
       // b
       double b = std::get<5>(absorbing_constraint);
-      if (delta >= h_min / (2 * a) && delta >= h_min / (2 * b)) {
+      if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b)) {
         // Apply constraint
         if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min, a,
                                                           b))

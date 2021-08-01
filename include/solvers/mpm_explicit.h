@@ -75,6 +75,17 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::damping_factor_;
   //! Locate particles
   using mpm::MPMBase<Tdim>::locate_particles_;
+  //! Constraints Pointer
+  using mpm::MPMBase<Tdim>::constraints_;
+  //! Absorbing Boundary
+  using mpm::MPMBase<Tdim>::absorbing_boundary_;
+  using mpm::MPMBase<Tdim>::absorbing_nset_id_;
+  using mpm::MPMBase<Tdim>::absorbing_constraint_;
+  using mpm::MPMBase<Tdim>::absorbing_dir_;
+  using mpm::MPMBase<Tdim>::absorbing_delta_;
+  using mpm::MPMBase<Tdim>::absorbing_h_min_;
+  using mpm::MPMBase<Tdim>::absorbing_a_;
+  using mpm::MPMBase<Tdim>::absorbing_b_;
 
  private:
   //! Pressure smoothing

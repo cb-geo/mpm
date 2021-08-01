@@ -99,6 +99,9 @@ class MPMBase : public MPM {
   //! Particle velocity constraints
   void particle_velocity_constraints();
 
+  //! Apply Absorbing Constraints
+  void nodal_absorbing_constraints();
+
  private:
   //! Return if a mesh will be isoparametric or not
   //! \retval isoparametric Status of mesh type
@@ -213,6 +216,15 @@ class MPMBase : public MPM {
   double damping_factor_{0.};
   //! Locate particles
   bool locate_particles_{true};
+  //! Absorbing Boundary Variables
+  bool absorbing_boundary_{false};
+  std::shared_ptr<mpm::AbsorbingConstraint> absorbing_constraint_;
+  unsigned absorbing_dir_{0};
+  int absorbing_nset_id_{0};
+  double absorbing_delta_{0.};
+  double absorbing_h_min_{0.};
+  double absorbing_a_{0.};
+  double absorbing_b_{0.};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
