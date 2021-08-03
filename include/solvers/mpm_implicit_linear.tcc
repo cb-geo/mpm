@@ -6,12 +6,6 @@ mpm::MPMImplicitLinear<Tdim>::MPMImplicitLinear(const std::shared_ptr<IO>& io)
   console_ = spdlog::get("MPMImplicitLinear");
   //! Stress update
   mpm_scheme_ = std::make_shared<mpm::MPMSchemeNewmark<Tdim>>(mesh_, dt_);
-
-  //! Interface scheme
-  if (this->interface_)
-    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_);
-  else
-    contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
 }
 
 //! MPM Implicit Linear compute stress strain
@@ -126,30 +120,30 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     // Initialise nodes, cells and shape functions
     mpm_scheme_->initialise();
 
-    // Initialise nodal properties and append material ids to node
-    contact_->initialise();
-
     // Mass momentum and compute velocity at nodes
+    // ToDo: Map inertia and compute acceleraton at nodes
     mpm_scheme_->compute_nodal_kinematics(phase);
 
-    // Map material properties to nodes
-    contact_->compute_contact_forces();
+    // ToDo: Predict nodal velocity and acceleration -- Predictor step of Newmark scheme
 
-    // Update stress first
-    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
-
-    // Compute forces
+    // Compute local residual force
+    // ToDo: Add nodal inertial force
     mpm_scheme_->compute_forces(gravity_, phase, step_,
                                 set_node_concentrated_force_);
 
-    // Particle kinematics
+    // ToDo: Compute local stiffness matrix
+    
+    // ToDo: Assemble local matrix and vector to global system
+
+    // ToDo: Solve linear equation
+
+    // Particle kinematics -- Corrector step of Newmark scheme
+    // ToDo: Update particle kinematics using nodal displacement increment
     mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
                                              damping_factor_);
 
-    // Mass momentum and compute velocity at nodes
-    mpm_scheme_->postcompute_nodal_kinematics(phase);
-
-    // Update Stress Last
+    // Update stress and strain
+    // ToDo: Update particle strain using nodal displacement increment
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
