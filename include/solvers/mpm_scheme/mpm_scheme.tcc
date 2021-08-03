@@ -69,6 +69,11 @@ inline void mpm::MPMScheme<Tdim>::compute_nodal_kinematics(unsigned phase) {
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 }
 
+//! Predict nodal kinematics - Predictor step of Newmark scheme
+template <unsigned Tdim>
+inline void mpm::MPMScheme<Tdim>::predict_nodal_kinematics(unsigned phase,
+    double newmark_beta, double newmark_gamma) {}
+
 //! Compute stress and strain
 template <unsigned Tdim>
 inline void mpm::MPMScheme<Tdim>::compute_stress_strain(

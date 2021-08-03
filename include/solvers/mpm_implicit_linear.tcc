@@ -123,7 +123,9 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     // Mass momentum inertia and compute velocity and acceleration at nodes
     mpm_scheme_->compute_nodal_kinematics(phase);
 
-    // ToDo: Predict nodal velocity and acceleration -- Predictor step of Newmark scheme
+    // Predict nodal velocity and acceleration -- Predictor step of Newmark scheme
+    mpm_scheme_->predict_nodal_kinematics(phase, newmark_beta_,
+                                          newmark_gamma_);
 
     // Compute local residual force
     // ToDo: Add nodal inertial force

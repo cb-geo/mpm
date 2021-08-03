@@ -25,6 +25,13 @@ class MPMScheme {
   //! \param[in] phase Phase to smooth pressure
   virtual inline void compute_nodal_kinematics(unsigned phase);
 
+   //! Predict nodal kinematics - Predictor step of Newmark scheme
+   //! \param[in] newmark_beta Parameter beta of Newmark scheme
+   //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+   //! \param[in] phase Phase to smooth pressure
+   virtual inline void predict_nodal_kinematics(unsigned phase, double newmark_beta,
+                                                double newmark_gamma);
+
   //! Compute stress and strain
   //! \param[in] phase Phase to smooth pressure
   //! \param[in] pressure_smoothing Enable or disable pressure smoothing

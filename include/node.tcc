@@ -254,6 +254,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
   node_mutex_.unlock();
 }
 
+//! Predict velocity and acceleration - Predictor step of Newmark scheme
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::predict_velocity_acceleration(unsigned phase, 
+    double newmark_beta, double newmark_gamma, double dt) {
+  //! Save velocity and acceleration at the previous step
+  VectorDim velocity_pre = velocity_.col(phase);
+  VectorDim acceleration_pre = acceleration_.col(phase);
+
+  //! Initial prediction of velocity and acceleration
+  velocity_.col(phase) = - newmark_gamma/newmark_beta * velocity_pre
+          - 0.5 * dt * (newmark_gamma/newmark_beta - 2.) * acceleration_pre;
+
+  acceleration_.col(phase) = - 1./newmark_beta/dt * velocity_pre
+                              - (0.5/newmark_beta - 1.) * acceleration_pre;
+}
+
 //! Compute acceleration and velocity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(

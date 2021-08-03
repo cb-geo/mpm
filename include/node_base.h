@@ -191,6 +191,13 @@ class NodeBase {
   virtual bool compute_acceleration_velocity(unsigned phase,
                                              double dt) noexcept = 0;
 
+  //! Predict velocity and acceleration - Predictor step of Newmark scheme
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  virtual void predict_velocity_acceleration(unsigned phase, double newmark_beta,
+                                             double newmark_gamma, double dt) = 0;
+
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis

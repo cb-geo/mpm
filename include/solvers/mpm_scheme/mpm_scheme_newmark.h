@@ -22,6 +22,13 @@ class MPMSchemeNewmark : public MPMScheme<Tdim> {
   //! \param[in] phase Phase to smooth pressure
   virtual inline void compute_nodal_kinematics(unsigned phase) override;
 
+  //! Predict nodal kinematics - Predictor step of Newmark scheme
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] phase Phase to smooth pressure
+  virtual inline void predict_nodal_kinematics(unsigned phase, double newmark_beta,
+                                               double newmark_gamma) override;
+
   //! Precompute stress
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing

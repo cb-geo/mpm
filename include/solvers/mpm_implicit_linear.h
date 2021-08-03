@@ -73,6 +73,10 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::damping_type_;
   //! Damping factor
   using mpm::MPMBase<Tdim>::damping_factor_;
+  //! Parameter beta of Newmark scheme
+  using mpm::MPMBase<Tdim>::newmark_beta_;
+  //! Parameter gamma of Newmark scheme
+  using mpm::MPMBase<Tdim>::newmark_gamma_;
   //! Locate particles
   using mpm::MPMBase<Tdim>::locate_particles_;
 

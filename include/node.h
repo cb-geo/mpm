@@ -195,6 +195,13 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(phase);
   }
 
+  //! Predict velocity and acceleration - Predictor step of Newmark scheme
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  void predict_velocity_acceleration(unsigned phase, double newmark_beta, 
+                                     double newmark_gamma, double dt) override;
+
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
