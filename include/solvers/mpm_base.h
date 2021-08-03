@@ -157,6 +157,10 @@ class MPMBase : public MPM {
   //! \param[in] damping_props Damping properties
   bool initialise_damping(const Json& damping_props);
 
+  //! Initialise parameters of Newmark scheme
+  //! \param[in] newmark_props Newmark scheme properties
+  bool initialise_newmark(const Json& newmark_props);
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
@@ -207,6 +211,10 @@ class MPMBase : public MPM {
   mpm::Damping damping_type_{mpm::Damping::None};
   //! Damping factor
   double damping_factor_{0.};
+  //! Parameter beta of Newmark scheme
+  double newmark_beta_{0.25};
+  //! Parameter gamma of Newmark scheme
+  double newmark_gamma_{0.5};
   //! Locate particles
   bool locate_particles_{true};
 
