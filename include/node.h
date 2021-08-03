@@ -166,6 +166,19 @@ class Node : public NodeBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Update inertia at the nodes
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  void update_inertia(bool update, unsigned phase,
+                      const VectorDim& inertia) noexcept override;
+
+  //! Return inertia at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim inertia(unsigned phase) const override {
+    return inertia_.col(phase);
+  }
+
   //! Compute acceleration from the inertia
   void compute_acceleration() override;
 

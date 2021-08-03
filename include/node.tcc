@@ -204,6 +204,23 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   this->apply_velocity_constraints();
 }
 
+//! Assign nodal inertia
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_inertia(
+    bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& inertia) noexcept {
+  // Assert
+  assert(phase < Tnphases);
+
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+
+  // Update/assign inertia
+  node_mutex_.lock();
+  inertia_.col(phase) = inertia_.col(phase) * factor + inertia;
+  node_mutex_.unlock();
+}
+
 //! Compute acceleration from inertia
 //! acceleration = inertia / mass
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>

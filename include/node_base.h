@@ -161,6 +161,17 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim velocity(unsigned phase) const = 0;
 
+  //! Update nodal inertia
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  virtual void update_inertia(bool update, unsigned phase,
+                              const VectorDim& inertia) noexcept = 0;
+
+  //! Return inertia
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim inertia(unsigned phase) const = 0;
+
   //! Compute acceleration from the inertia
   virtual void compute_acceleration() = 0;
 
