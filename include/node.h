@@ -179,8 +179,8 @@ class Node : public NodeBase<Tdim> {
     return inertia_.col(phase);
   }
 
-  //! Compute acceleration from the inertia
-  void compute_acceleration() override;
+  //! Compute velocity and acceleration from the momentum and inertia
+  void compute_velocity_acceleration() override;
 
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)

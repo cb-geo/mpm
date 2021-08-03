@@ -221,16 +221,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_inertia(
   node_mutex_.unlock();
 }
 
-//! Compute acceleration from inertia
+//! Compute velocity and acceleration from momentum and inertia
+//! velocity = momentum / mass
 //! acceleration = inertia / mass
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration() {
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity_acceleration() {
   const double tolerance = 1.E-16;
   for (unsigned phase = 0; phase < Tnphases; ++phase) {
     if (mass_(phase) > tolerance) {
+      velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
       acceleration_.col(phase) = inertia_.col(phase) / mass_(phase);
 
       // Check to see if value is below threshold
+      for (unsigned i = 0; i < velocity_.rows(); ++i)
+        if (std::abs(velocity_.col(phase)(i)) < 1.E-15)
+          velocity_.col(phase)(i) = 0.;
+
       for (unsigned i = 0; i < acceleration_.rows(); ++i)
         if (std::abs(acceleration_.col(phase)(i)) < 1.E-15)
           acceleration_.col(phase)(i) = 0.;

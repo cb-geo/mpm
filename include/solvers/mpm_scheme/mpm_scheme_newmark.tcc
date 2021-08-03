@@ -33,14 +33,9 @@ inline void mpm::MPMSchemeNewmark<Tdim>::compute_nodal_kinematics(unsigned phase
   }
 #endif
 
-  // Compute nodal velocity
+  // Compute nodal velocity and acceleration
   mesh_->iterate_over_nodes_predicate(
-      std::bind(&mpm::NodeBase<Tdim>::compute_velocity, std::placeholders::_1),
-      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-  // Compute nodal acceleration
-  mesh_->iterate_over_nodes_predicate(
-      std::bind(&mpm::NodeBase<Tdim>::compute_acceleration, std::placeholders::_1),
+      std::bind(&mpm::NodeBase<Tdim>::compute_velocity_acceleration, std::placeholders::_1),
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 }
 
