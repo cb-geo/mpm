@@ -166,6 +166,9 @@ class Node : public NodeBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Compute acceleration from the inertia
+  void compute_acceleration() override;
+
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -297,6 +300,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
+  //! Inertia
+  Eigen::Matrix<double, Tdim, Tnphases> inertia_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints

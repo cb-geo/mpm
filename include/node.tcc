@@ -32,6 +32,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
+  inertia_.setZero();
   status_ = false;
   material_ids_.clear();
 }
@@ -201,6 +202,23 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   // Apply velocity constraints, which also sets acceleration to 0,
   // when velocity is set.
   this->apply_velocity_constraints();
+}
+
+//! Compute acceleration from inertia
+//! acceleration = inertia / mass
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration() {
+  const double tolerance = 1.E-16;
+  for (unsigned phase = 0; phase < Tnphases; ++phase) {
+    if (mass_(phase) > tolerance) {
+      acceleration_.col(phase) = inertia_.col(phase) / mass_(phase);
+
+      // Check to see if value is below threshold
+      for (unsigned i = 0; i < acceleration_.rows(); ++i)
+        if (std::abs(acceleration_.col(phase)(i)) < 1.E-15)
+          acceleration_.col(phase)(i) = 0.;
+    }
+  }
 }
 
 //! Update nodal acceleration
