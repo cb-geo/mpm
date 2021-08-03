@@ -128,7 +128,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
                                           newmark_gamma_);
 
     // Compute local residual force
-    // ToDo: Add nodal inertial force
     mpm_scheme_->compute_forces(gravity_, phase, step_,
                                 set_node_concentrated_force_);
 

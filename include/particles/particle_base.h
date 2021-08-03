@@ -231,6 +231,9 @@ class ParticleBase {
   //! Map body force
   virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
 
+  //! Map inertial force
+  virtual void map_inertial_force() noexcept = 0;
+
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
 

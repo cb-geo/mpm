@@ -40,6 +40,15 @@ class MPMSchemeNewmark : public MPMScheme<Tdim> {
   virtual inline void postcompute_stress_strain(
       unsigned phase, bool pressure_smoothing) override;
 
+  //! Compute forces
+  //! \param[in] gravity Acceleration due to gravity
+  //! \param[in] step Number of step in solver
+  //! \param[in] concentrated_nodal_forces Boolean for if a concentrated force
+  //! is applied or not
+  virtual inline void compute_forces(
+      const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
+      unsigned step, bool concentrated_nodal_forces) override;
+
   //! Postcompute nodal kinematics - map mass and momentum to nodes
   //! \param[in] phase Phase to smooth pressure
   virtual inline void postcompute_nodal_kinematics(unsigned phase) override;

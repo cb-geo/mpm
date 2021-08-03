@@ -204,6 +204,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(const VectorDim& pgravity) noexcept override;
 
+  //! Map inertial force
+  void map_inertial_force() noexcept override;
+
   //! Map internal force
   inline void map_internal_force() noexcept override;
 

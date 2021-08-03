@@ -68,6 +68,65 @@ inline void mpm::MPMSchemeNewmark<Tdim>::postcompute_stress_strain(
   mpm::MPMScheme<Tdim>::compute_stress_strain(phase, pressure_smoothing);
 }
 
+// Compute forces
+template <unsigned Tdim>
+inline void mpm::MPMSchemeNewmark<Tdim>::compute_forces(
+    const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
+    unsigned step, bool concentrated_nodal_forces) {
+  // Spawn a task for external force
+#pragma omp parallel sections
+  {
+#pragma omp section
+    {
+      // Iterate over each particle to compute nodal body force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                    std::placeholders::_1, gravity));
+
+      // Iterate over each particle to compute nodal inertial force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_inertial_force,
+                    std::placeholders::_1));
+
+      // Apply particle traction and map to nodes
+      mesh_->apply_traction_on_particles(step * dt_);
+
+      // Iterate over each node to add concentrated node force to external
+      // force
+      if (concentrated_nodal_forces)
+        mesh_->iterate_over_nodes(
+            std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
+                      std::placeholders::_1, phase, (step * dt_)));
+    }
+
+#pragma omp section
+    {
+      // Spawn a task for internal force
+      // Iterate over each particle to compute nodal internal force
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
+    }
+  }  // Wait for tasks to finish
+
+#ifdef USE_MPI
+  // Run if there is more than a single MPI task
+  if (mpi_size_ > 1) {
+    // MPI all reduce external force
+    mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+        std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
+                  phase),
+        std::bind(&mpm::NodeBase<Tdim>::update_external_force,
+                  std::placeholders::_1, false, phase, std::placeholders::_2));
+    // MPI all reduce internal force
+    mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+        std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
+                  phase),
+        std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
+                  std::placeholders::_1, false, phase, std::placeholders::_2));
+  }
+#endif
+}
+
 //! Postcompute nodal kinematics - map mass and momentum to nodes
 template <unsigned Tdim>
 inline void mpm::MPMSchemeNewmark<Tdim>::postcompute_nodal_kinematics(unsigned phase) {}
