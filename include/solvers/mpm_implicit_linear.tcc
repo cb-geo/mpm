@@ -5,6 +5,7 @@ mpm::MPMImplicitLinear<Tdim>::MPMImplicitLinear(const std::shared_ptr<IO>& io)
   //! Logger
   console_ = spdlog::get("MPMImplicitLinear");
   //! Stress update
+  stress_update_ = "newmark";
   mpm_scheme_ = std::make_shared<mpm::MPMSchemeNewmark<Tdim>>(mesh_, dt_);
 }
 
