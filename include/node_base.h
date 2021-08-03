@@ -191,6 +191,10 @@ class NodeBase {
   virtual bool compute_acceleration_velocity(unsigned phase,
                                              double dt) noexcept = 0;
 
+  //! Return displacement
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim displacement(unsigned phase) const = 0;
+
   //! Predict velocity and acceleration - Predictor step of Newmark scheme
   //! \param[in] newmark_beta Parameter beta of Newmark scheme
   //! \param[in] newmark_gamma Parameter gamma of Newmark scheme

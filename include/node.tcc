@@ -33,6 +33,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   momentum_.setZero();
   acceleration_.setZero();
   inertia_.setZero();
+  displacement_.setZero();
   status_ = false;
   material_ids_.clear();
 }

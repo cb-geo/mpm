@@ -208,6 +208,12 @@ class Node : public NodeBase<Tdim> {
   bool compute_acceleration_velocity(unsigned phase,
                                      double dt) noexcept override;
 
+  //! Return displacement at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);    
+  };
+
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
@@ -322,6 +328,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Inertia
   Eigen::Matrix<double, Tdim, Tnphases> inertia_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
