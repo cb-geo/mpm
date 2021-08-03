@@ -550,15 +550,11 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
 //! Map particle mass, momentum and inertia to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_mass_momentum_inertia_to_nodes() noexcept {
-  // Check if particle mass is set
-  assert(mass_ != std::numeric_limits<double>::max());
+  // Map mass and momentum to nodes
+  this->map_mass_momentum_to_nodes();
 
-  // Map mass, momentum and inertia to nodes
+  // Map inertia to nodes
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
-                           mass_ * shapefn_[i]);
-    nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
-                               mass_ * shapefn_[i] * velocity_);
     nodes_[i]->update_inertia(true, mpm::ParticlePhase::Solid,
                                mass_ * shapefn_[i] * acceleration_);
   }
