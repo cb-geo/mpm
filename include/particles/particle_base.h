@@ -242,6 +242,9 @@ class ParticleBase {
   //! Assign velocity
   virtual bool assign_velocity(const VectorDim& velocity) = 0;
 
+  //! Return acceleration
+  virtual VectorDim acceleration() const = 0;
+
   //! Return velocity
   virtual VectorDim velocity() const = 0;
 

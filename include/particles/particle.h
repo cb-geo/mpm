@@ -209,6 +209,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval status Assignment status
   bool assign_velocity(const VectorDim& velocity) override;
 
+  //! Return acceleration of the particle
+  VectorDim acceleration() const override { return acceleration_; }
+
   //! Return velocity of the particle
   VectorDim velocity() const override { return velocity_; }
 
@@ -378,6 +381,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, 1> dstrain_;
+  //! Acceleration
+  Eigen::Matrix<double, Tdim, 1> acceleration_;
   //! Velocity
   Eigen::Matrix<double, Tdim, 1> velocity_;
   //! Displacement
