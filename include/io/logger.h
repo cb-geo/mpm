@@ -44,6 +44,12 @@ struct Logger {
 
   // Create a logger for MPM Explicit MUSL
   static const std::shared_ptr<spdlog::logger> mpm_explicit_musl_logger;
+
+  // Create a logger for MPM Implicit Linear
+  static const std::shared_ptr<spdlog::logger> mpm_implicit_linear_logger;
+
+  // Create a logger for MPM Implicit Newmark
+  static const std::shared_ptr<spdlog::logger> mpm_implicit_newmark_logger;
 };
 
 }  // namespace mpm

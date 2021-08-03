@@ -39,3 +39,11 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usl_logger =
 // Create a logger for MPM Explicit MUSL
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_musl_logger =
     spdlog::stdout_color_st("MPMExplicitMUSL");
+
+// Create a logger for MPM Implicit Linear
+const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_implicit_linear_logger =
+    spdlog::stdout_color_st("MPMImplicitLinear");
+
+// Create a logger for MPM Implicit Newmark
+const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_implicit_newmark_logger =
+    spdlog::stdout_color_st("MPMImplicitNewmark");
