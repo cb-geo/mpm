@@ -170,6 +170,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   void compute_strain(double dt) noexcept override;
 
+  //! Compute strain using nodal displacement
+  //! \param[in] dt Analysis time step
+  void compute_strain_newmark() noexcept override;
+
   //! Return strain of the particle
   Eigen::Matrix<double, 6, 1> strain() const override { return strain_; }
 
@@ -342,6 +346,13 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index to indicate phase
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
+      const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
+
+  //! Compute strain increment
+  //! \param[in] dn_dx The spatial gradient of shape function
+  //! \param[in] phase Index to indicate phase
+  //! \retval strain increment at particle inside a cell
+  inline Eigen::Matrix<double, 6, 1> compute_strain_increment(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
   //! Compute pack size

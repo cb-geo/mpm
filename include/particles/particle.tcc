@@ -689,6 +689,84 @@ void mpm::Particle<Tdim>::compute_strain(double dt) noexcept {
   volumetric_strain_centroid_ += dvolumetric_strain_;
 }
 
+// Compute strain increment of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_increment(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept {
+  // Define strain rincrement
+  Eigen::Matrix<double, 6, 1> strain_increment = Eigen::Matrix<double, 6, 1>::Zero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 1, 1> dsp = nodes_[i]->displacement(phase);
+    strain_increment[0] += dn_dx(i, 0) * dsp[0];
+  }
+
+  if (std::fabs(strain_increment(0)) < 1.E-15) strain_increment[0] = 0.;
+  return strain_increment;
+}
+
+// Compute strain increment of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_increment(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept {
+  // Define strain increment
+  Eigen::Matrix<double, 6, 1> strain_increment = Eigen::Matrix<double, 6, 1>::Zero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 2, 1> dsp = nodes_[i]->displacement(phase);
+    strain_increment[0] += dn_dx(i, 0) * dsp[0];
+    strain_increment[1] += dn_dx(i, 1) * dsp[1];
+    strain_increment[3] += dn_dx(i, 1) * dsp[0] + dn_dx(i, 0) * dsp[1];
+  }
+
+  if (std::fabs(strain_increment[0]) < 1.E-15) strain_increment[0] = 0.;
+  if (std::fabs(strain_increment[1]) < 1.E-15) strain_increment[1] = 0.;
+  if (std::fabs(strain_increment[3]) < 1.E-15) strain_increment[3] = 0.;
+  return strain_increment;
+}
+
+// Compute strain increment of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_increment(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept {
+  // Define strain increment
+  Eigen::Matrix<double, 6, 1> strain_increment = Eigen::Matrix<double, 6, 1>::Zero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 3, 1> dsp = nodes_[i]->velocity(phase);
+    strain_increment[0] += dn_dx(i, 0) * dsp[0];
+    strain_increment[1] += dn_dx(i, 1) * dsp[1];
+    strain_increment[2] += dn_dx(i, 2) * dsp[2];
+    strain_increment[3] += dn_dx(i, 1) * dsp[0] + dn_dx(i, 0) * dsp[1];
+    strain_increment[4] += dn_dx(i, 2) * dsp[1] + dn_dx(i, 1) * dsp[2];
+    strain_increment[5] += dn_dx(i, 2) * dsp[0] + dn_dx(i, 0) * dsp[2];
+  }
+
+  for (unsigned i = 0; i < strain_increment.size(); ++i)
+    if (std::fabs(strain_increment[i]) < 1.E-15) strain_increment[i] = 0.;
+  return strain_increment;
+}
+
+// Compute strain of the particle using nodal displacement
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_strain_newmark() noexcept {
+  // Assign strain increment
+  strain_rate_ = this->compute_strain_increment(dn_dx_, mpm::ParticlePhase::Solid);
+  // Update strain += latest dstrain - previous dstrain
+  strain_ += strain_rate_ - dstrain_;
+  // Update dstrain 
+  dstrain_ = strain_rate_;
+
+  // Compute at centroid
+  // Strain rate for reduced integration
+  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
+      this->compute_strain_increment(dn_dx_centroid_, mpm::ParticlePhase::Solid);
+
+  // Assign volumetric strain at centroid
+  dvolumetric_strain_ = strain_rate_centroid.head(Tdim).sum();
+  volumetric_strain_centroid_ += dvolumetric_strain_;
+}
+
 // Compute stress
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_stress() noexcept {

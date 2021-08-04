@@ -29,6 +29,12 @@ class MPMSchemeNewmark : public MPMScheme<Tdim> {
   virtual inline void update_nodal_kinematics_newmark(unsigned phase, double newmark_beta,
                                                       double newmark_gamma) override;
 
+  //! Compute stress and strain
+  //! \param[in] phase Phase to smooth pressure
+  //! \param[in] pressure_smoothing Enable or disable pressure smoothing
+  virtual inline void compute_stress_strain(unsigned phase,
+                                            bool pressure_smoothing) override;
+
   //! Precompute stress
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing

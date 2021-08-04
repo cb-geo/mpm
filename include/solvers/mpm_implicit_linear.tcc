@@ -149,7 +149,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
                                              damping_factor_);
 
     // Update stress and strain
-    // ToDo: Update particle strain using nodal displacement increment
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles

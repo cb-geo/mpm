@@ -51,6 +51,27 @@ inline void mpm::MPMSchemeNewmark<Tdim>::update_nodal_kinematics_newmark(
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 }
 
+//! Compute stress and strain by Newmark scheme
+template <unsigned Tdim>
+inline void mpm::MPMSchemeNewmark<Tdim>::compute_stress_strain(
+    unsigned phase, bool pressure_smoothing) {
+
+  // Iterate over each particle to calculate strain using nodal displacement
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_strain_newmark, std::placeholders::_1));
+
+  // Iterate over each particle to update particle volume
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
+
+  // Pressure smoothing
+  if (pressure_smoothing) this->pressure_smoothing(phase);
+
+  // Iterate over each particle to compute stress
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
+}
+
 //! Precompute stresses and strains
 template <unsigned Tdim>
 inline void mpm::MPMSchemeNewmark<Tdim>::precompute_stress_strain(
