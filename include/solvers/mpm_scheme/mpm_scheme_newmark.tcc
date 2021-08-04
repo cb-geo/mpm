@@ -122,6 +122,22 @@ inline void mpm::MPMSchemeNewmark<Tdim>::compute_forces(
 #endif
 }
 
+// Compute particle kinematics
+template <unsigned Tdim>
+inline void mpm::MPMSchemeNewmark<Tdim>::compute_particle_kinematics(
+    bool velocity_update, unsigned phase, const std::string& damping_type,
+    double damping_factor) {
+
+  // Iterate over each particle to compute updated position
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_newmark,
+                std::placeholders::_1, dt_, velocity_update));
+
+  // Apply particle velocity constraints
+  // ToDo: Reconsider boundary constraints
+  mesh_->apply_particle_velocity_constraints();
+}
+
 //! Postcompute nodal kinematics - map mass and momentum to nodes
 template <unsigned Tdim>
 inline void mpm::MPMSchemeNewmark<Tdim>::postcompute_nodal_kinematics(unsigned phase) {}

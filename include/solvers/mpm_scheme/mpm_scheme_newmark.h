@@ -49,6 +49,15 @@ class MPMSchemeNewmark : public MPMScheme<Tdim> {
       const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
       unsigned step, bool concentrated_nodal_forces) override;
 
+  //! Compute acceleration velocity position
+  //! \param[in] velocity_update Velocity or acceleration update flag
+  //! \param[in] phase Phase of particle
+  //! \param[in] damping_type Type of damping
+  //! \param[in] damping_factor Value of critical damping
+  virtual inline void compute_particle_kinematics(
+      bool velocity_update, unsigned phase, const std::string& damping_type,
+      double damping_factor) override;
+
   //! Postcompute nodal kinematics - map mass and momentum to nodes
   //! \param[in] phase Phase to smooth pressure
   virtual inline void postcompute_nodal_kinematics(unsigned phase) override;

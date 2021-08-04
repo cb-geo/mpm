@@ -857,6 +857,50 @@ void mpm::Particle<Tdim>::compute_updated_position(
   this->displacement_ += nodal_velocity * dt;
 }
 
+// Compute updated position of the particle by Newmark scheme
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_updated_position_newmark(
+    double dt, bool velocity_update) noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get interpolated nodal displacement and acceleration
+  Eigen::Matrix<double, Tdim, 1> nodal_displacement =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+  for (unsigned i = 0; i < nodes_.size(); ++i){
+    nodal_displacement +=
+        shapefn_[i] * nodes_[i]->displacement(mpm::ParticlePhase::Solid);
+    nodal_acceleration +=
+        shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
+  }
+
+  // Acceleration update of velocity
+  if (!velocity_update) {
+    // Update particle velocity from interpolated nodal acceleration
+    this->velocity_ += 0.5 * (this->acceleration_ + nodal_acceleration) * dt;
+  }
+  // Update particle velocity using interpolated nodal velocity
+  else {
+    // Get interpolated nodal velocity
+    Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodal_velocity +=
+          shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
+
+    this->velocity_ = nodal_velocity;
+  }
+
+  // Update acceleration
+  this->acceleration_ = nodal_acceleration;
+
+  // New position  current position + (displacement - previous displacement)
+  this->coordinates_ += nodal_displacement - this->displacement_;
+  // Update displacement (displacement is initialized from zero)
+  this->displacement_ = nodal_displacement;
+}
+
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
