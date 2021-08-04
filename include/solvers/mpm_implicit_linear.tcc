@@ -132,13 +132,13 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     mpm_scheme_->compute_forces(gravity_, phase, step_,
                                 set_node_concentrated_force_);
 
-    // ToDo: Compute local stiffness matrix
+    // TODO: Compute local stiffness matrix
     
-    // ToDo: Assemble local matrix and vector to global system
+    // TODO: Assemble local matrix and vector to global system
 
-    // ToDo: Solve linear equation
+    // TODO: Solve linear equation
 
-    // ToDo: Update nodal displacement using solution
+    // TODO: Update nodal displacement using solution
 
     // Update nodal velocity and acceleration -- Corrector step of Newmark scheme
     mpm_scheme_->update_nodal_kinematics_newmark(phase, newmark_beta_,
@@ -175,7 +175,7 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+  console_->info("Rank {}, Implicit Linear {} solver duration: {} ms", mpi_rank,
                  mpm_scheme_->scheme(),
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)

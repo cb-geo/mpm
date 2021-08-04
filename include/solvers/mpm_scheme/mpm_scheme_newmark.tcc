@@ -155,7 +155,7 @@ inline void mpm::MPMSchemeNewmark<Tdim>::compute_particle_kinematics(
                 std::placeholders::_1, dt_, velocity_update));
 
   // Apply particle velocity constraints
-  // ToDo: Reconsider boundary constraints
+  // TODO: Reconsider boundary constraints
   mesh_->apply_particle_velocity_constraints();
 }
 
