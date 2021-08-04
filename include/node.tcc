@@ -261,20 +261,36 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
   node_mutex_.unlock();
 }
 
-//! Predict velocity and acceleration - Predictor step of Newmark scheme
+//! Update velocity and acceleration by Newmark scheme
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::predict_velocity_acceleration(unsigned phase, 
-    double newmark_beta, double newmark_gamma, double dt) {
-  //! Save velocity and acceleration at the previous step
-  VectorDim velocity_pre = velocity_.col(phase);
-  VectorDim acceleration_pre = acceleration_.col(phase);
+void mpm::Node<Tdim, Tdof, Tnphases>::update_velocity_acceleration_newmark(
+    unsigned phase, double newmark_beta, double newmark_gamma, double dt) {
+  const double tolerance = 1.E-16;
+  VectorDim velocity_pre;
+  VectorDim acceleration_pre;
+  //! Compute velocity and acceleration at the previous time step
+  if (mass_(phase) > tolerance) {
+    velocity_pre = momentum_.col(phase) / mass_(phase);
+    acceleration_pre = inertia_.col(phase) / mass_(phase);
+  }
 
-  //! Initial prediction of velocity and acceleration
-  velocity_.col(phase) = - newmark_gamma/newmark_beta * velocity_pre
-          - 0.5 * dt * (newmark_gamma/newmark_beta - 2.) * acceleration_pre;
+  //! Update of velocity and acceleration
+  velocity_.col(phase) = newmark_gamma/newmark_beta/dt * displacement_.col(phase)
+                          - (newmark_gamma/newmark_beta - 1.) * velocity_pre
+                          - 0.5 * dt * (newmark_gamma/newmark_beta - 2.) * acceleration_pre;
 
-  acceleration_.col(phase) = - 1./newmark_beta/dt * velocity_pre
+  acceleration_.col(phase) = 1./newmark_beta/dt/dt * displacement_.col(phase)
+                              - 1./newmark_beta/dt * velocity_pre
                               - (0.5/newmark_beta - 1.) * acceleration_pre;
+
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < velocity_.rows(); ++i)
+    if (std::abs(velocity_.col(phase)(i)) < 1.E-15)
+      velocity_.col(phase)(i) = 0.;
+
+  for (unsigned i = 0; i < acceleration_.rows(); ++i)
+    if (std::abs(acceleration_.col(phase)(i)) < 1.E-15)
+      acceleration_.col(phase)(i) = 0.;
 }
 
 //! Compute acceleration and velocity

@@ -125,8 +125,8 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     mpm_scheme_->compute_nodal_kinematics(phase);
 
     // Predict nodal velocity and acceleration -- Predictor step of Newmark scheme
-    mpm_scheme_->predict_nodal_kinematics(phase, newmark_beta_,
-                                          newmark_gamma_);
+    mpm_scheme_->update_nodal_kinematics_newmark(phase, newmark_beta_,
+                                                 newmark_gamma_);
 
     // Compute local residual force
     mpm_scheme_->compute_forces(gravity_, phase, step_,
@@ -138,8 +138,13 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
 
     // ToDo: Solve linear equation
 
-    // Particle kinematics -- Corrector step of Newmark scheme
-    // ToDo: Update particle kinematics using nodal displacement increment
+    // ToDo: Update nodal displacement using solution
+
+    // Update nodal velocity and acceleration -- Corrector step of Newmark scheme
+    mpm_scheme_->update_nodal_kinematics_newmark(phase, newmark_beta_,
+                                                 newmark_gamma_);
+
+    // Particle kinematics
     mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
                                              damping_factor_);
 

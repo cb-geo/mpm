@@ -195,12 +195,12 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim displacement(unsigned phase) const = 0;
 
-  //! Predict velocity and acceleration - Predictor step of Newmark scheme
+  //! Update velocity and acceleration by Newmark scheme
   //! \param[in] newmark_beta Parameter beta of Newmark scheme
   //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
   //! \param[in] dt Time-step
-  virtual void predict_velocity_acceleration(unsigned phase, double newmark_beta,
-                                             double newmark_gamma, double dt) = 0;
+  virtual void update_velocity_acceleration_newmark(unsigned phase, double newmark_beta,
+                                                    double newmark_gamma, double dt) = 0;
 
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase
