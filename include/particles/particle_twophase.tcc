@@ -376,14 +376,17 @@ void mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) noexcept {
                  ->template property<double>(std::string("bulk_modulus"));
 
   // Compute at centroid
-  // get liquid phase strain rate at cell centre
+  // get phase-wise strain rate at cell centre
+  auto strain_rate_centroid =
+      this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Solid);
+
   auto liquid_strain_rate_centroid =
       this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Liquid);
 
   // update pressure
   this->state_variables_[mpm::ParticlePhase::Liquid].at("pressure") +=
       -dt * (K / porosity_) *
-      ((1 - porosity_) * strain_rate_.head(Tdim).sum() +
+      ((1 - porosity_) * strain_rate_centroid.head(Tdim).sum() +
        porosity_ * liquid_strain_rate_centroid.head(Tdim).sum());
 
   // Apply free surface
