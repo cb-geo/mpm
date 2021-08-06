@@ -18,7 +18,7 @@ namespace mpm {
 template <unsigned Tdim>
 class MPMSchemeMUSL : public MPMScheme<Tdim> {
  public:
-   //! Define a vector of size dimension
+  //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Default constructor with mesh class
