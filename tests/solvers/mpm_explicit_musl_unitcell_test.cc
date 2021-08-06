@@ -104,6 +104,9 @@ TEST_CASE("MPM 3D Explicit MUSL implementation is checked in unitcells",
     REQUIRE_NOTHROW(mpm->initialise_mesh());
     REQUIRE_NOTHROW(mpm->initialise_particles());
 
+    // Initialise external loading
+    REQUIRE_NOTHROW(mpm->initialise_loads());
+
     // Renitialise materials
     REQUIRE_THROWS(mpm->initialise_materials());
   }
