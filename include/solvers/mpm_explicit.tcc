@@ -7,6 +7,8 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
   //! Stress update
   if (this->stress_update_ == "usl")
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSL<Tdim>>(mesh_, dt_);
+  else if (this->stress_update_ == "musl")
+    mpm_scheme_ = std::make_shared<mpm::MPMSchemeMUSL<Tdim>>(mesh_, dt_);
   else
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSF<Tdim>>(mesh_, dt_);
 
@@ -148,6 +150,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Particle kinematics
     mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
                                              damping_factor_);
+
+    // Mass momentum and compute velocity at nodes
+    mpm_scheme_->postcompute_nodal_kinematics(phase);
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);

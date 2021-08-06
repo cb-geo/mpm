@@ -29,6 +29,10 @@ class MPMSchemeUSF : public MPMScheme<Tdim> {
   virtual inline void postcompute_stress_strain(
       unsigned phase, bool pressure_smoothing) override;
 
+  //! Postcompute nodal kinematics - map mass and momentum to nodes
+  //! \param[in] phase Phase to smooth pressure
+  virtual inline void postcompute_nodal_kinematics(unsigned phase) override;
+
   //! Stress update scheme
   //! \retval scheme Stress update scheme
   virtual inline std::string scheme() const override;
