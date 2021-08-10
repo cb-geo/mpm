@@ -15,7 +15,8 @@ template <unsigned Tdim>
 class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
  public:
   //! Constructor
-  AssemblerEigenSemiImplicitNavierStokes();
+  //! \param[in] node_neighbourhood Number of node neighbourhood considered
+  AssemblerEigenSemiImplicitNavierStokes(unsigned node_neighbourhood);
 
   //! Create a pair between nodes and index in Matrix / Vector
   bool assign_global_node_indices(unsigned nactive_node,
@@ -77,6 +78,8 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   using AssemblerBase<Tdim>::active_dof_;
   //! Mesh object
   using AssemblerBase<Tdim>::mesh_;
+  //! Number of sparse matrix container size
+  using AssemblerBase<Tdim>::sparse_row_size_;
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
   //! Global node indices

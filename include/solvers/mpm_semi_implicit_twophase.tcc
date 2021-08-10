@@ -430,7 +430,8 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::initialise_matrix() {
                                      .template get<std::string>();
     // Create matrix assembler
     assembler_ =
-        Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
+        Factory<mpm::AssemblerBase<Tdim>, unsigned>::instance()->create(
+            assembler_type, std::move(node_neighbourhood_));
 
     // Solver settings
     if (analysis_["linear_solver"].contains("solver_settings") &&

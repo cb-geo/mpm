@@ -21,9 +21,25 @@ namespace mpm {
 template <unsigned Tdim>
 class AssemblerBase {
  public:
-  AssemblerBase() {
+  //! Constructor
+  //! \param[in] node_neighbourhood Number of node neighbourhood considered
+  AssemblerBase(unsigned node_neighbourhood) {
     //! Global degrees of freedom
     active_dof_ = 0;
+    //! Assign sparse row size
+    switch (node_neighbourhood) {
+      case 0:
+        sparse_row_size_ = (Tdim == 2) ? 9 : 27;
+        break;
+      case 1:
+        sparse_row_size_ = (Tdim == 2) ? 25 : 125;
+        break;
+      case 2:
+        sparse_row_size_ = (Tdim == 2) ? 49 : 343;
+        break;
+      default:
+        sparse_row_size_ = (Tdim == 2) ? 9 : 27;
+    }
   }
 
   // Virtual destructor
@@ -160,6 +176,8 @@ class AssemblerBase {
   unsigned active_dof_;
   //! Mesh object
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
+  //! Number of sparse matrix container size
+  unsigned sparse_row_size_;
 };
 }  // namespace mpm
 

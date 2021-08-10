@@ -242,6 +242,8 @@ class MPMBase : public MPM {
   double damping_factor_{0.};
   //! Locate particles
   bool locate_particles_{true};
+  //! Nonlocal node neighbourhood
+  unsigned node_neighbourhood_{0};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell

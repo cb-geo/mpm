@@ -75,6 +75,8 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::mesh_;
   //! Materials
   using mpm::MPMBase<Tdim>::materials_;
+  //! Nonlocal neighbourhood
+  using mpm::MPMBase<Tdim>::node_neighbourhood_;
   //! Pressure smoothing
   bool pressure_smoothing_{false};
   // Projection method parameter (beta)

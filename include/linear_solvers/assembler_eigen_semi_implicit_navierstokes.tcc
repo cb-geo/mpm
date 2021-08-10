@@ -1,8 +1,8 @@
 //! Construct a semi-implicit eigen matrix assembler
 template <unsigned Tdim>
 mpm::AssemblerEigenSemiImplicitNavierStokes<
-    Tdim>::AssemblerEigenSemiImplicitNavierStokes()
-    : mpm::AssemblerBase<Tdim>() {
+    Tdim>::AssemblerEigenSemiImplicitNavierStokes(unsigned node_neighbourhood)
+    : mpm::AssemblerBase<Tdim>(node_neighbourhood) {
   //! Logger
   console_ = spdlog::stdout_color_mt("AssemblerEigenSemiImplicitNavierStokes");
 }
@@ -51,18 +51,8 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<
     laplacian_matrix_.setZero();
 
     // Reserve storage for sparse matrix
-    switch (Tdim) {
-      // For 2d: 10 entries /column
-      case (2): {
-        laplacian_matrix_.reserve(Eigen::VectorXi::Constant(active_dof_, 10));
-        break;
-      }
-      // For 3d: 30 entries /column
-      case (3): {
-        laplacian_matrix_.reserve(Eigen::VectorXi::Constant(active_dof_, 30));
-        break;
-      }
-    }
+    laplacian_matrix_.reserve(
+        Eigen::VectorXi::Constant(active_dof_, sparse_row_size_));
 
     // Cell pointer
     const auto& cells = mesh_->cells();
@@ -111,20 +101,8 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_poisson_right(
     poisson_right_matrix.setZero();
 
     // Reserve storage for sparse matrix
-    switch (Tdim) {
-      // For 2d: 10 entries /column
-      case (2): {
-        poisson_right_matrix.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
-        break;
-      }
-      // For 3d: 30 entries /column
-      case (3): {
-        poisson_right_matrix.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
-        break;
-      }
-    }
+    poisson_right_matrix.reserve(
+        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_));
 
     // Cell pointer
     const auto& cells = mesh_->cells();
@@ -199,20 +177,8 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<
     correction_matrix_.setZero();
 
     // Reserve storage for sparse matrix
-    switch (Tdim) {
-      // For 2d: 10 entries /column
-      case (2): {
-        correction_matrix_.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
-        break;
-      }
-      // For 3d: 30 entries /column
-      case (3): {
-        correction_matrix_.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
-        break;
-      }
-    }
+    correction_matrix_.reserve(
+        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_));
 
     // Cell pointer
     const auto& cells = mesh_->cells();

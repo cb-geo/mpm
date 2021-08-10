@@ -15,7 +15,8 @@ class AssemblerEigenSemiImplicitTwoPhase
     : public AssemblerEigenSemiImplicitNavierStokes<Tdim> {
  public:
   //! Constructor
-  AssemblerEigenSemiImplicitTwoPhase();
+  //! \param[in] node_neighbourhood Number of node neighbourhood considered
+  AssemblerEigenSemiImplicitTwoPhase(unsigned node_neighbourhood);
 
   //! Assemble coefficient matrix for two-phase predictor
   bool assemble_predictor_left(double dt) override;
@@ -64,6 +65,8 @@ class AssemblerEigenSemiImplicitTwoPhase
   using AssemblerBase<Tdim>::active_dof_;
   //! Mesh object
   using AssemblerBase<Tdim>::mesh_;
+  //! Number of sparse matrix container size
+  using AssemblerBase<Tdim>::sparse_row_size_;
   //! Logger
   using AssemblerEigenSemiImplicitNavierStokes<Tdim>::console_;
   //! Global node indices

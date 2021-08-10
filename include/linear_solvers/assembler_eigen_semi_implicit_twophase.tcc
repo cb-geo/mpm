@@ -1,8 +1,8 @@
 //! Construct a semi-implicit eigen matrix assembler
 template <unsigned Tdim>
 mpm::AssemblerEigenSemiImplicitTwoPhase<
-    Tdim>::AssemblerEigenSemiImplicitTwoPhase()
-    : mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>() {
+    Tdim>::AssemblerEigenSemiImplicitTwoPhase(unsigned node_neighbourhood)
+    : mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>(node_neighbourhood) {
   //! Logger
   console_ = spdlog::stdout_color_mt("AssemblerEigenSemiImplicitTwoPhase");
 }
@@ -23,20 +23,8 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_predictor_left(
       coefficient_matrix.resize(2 * active_dof_, 2 * active_dof_);
 
       // Reserve storage for sparse matrix
-      switch (Tdim) {
-        // For 2d: 10 entries /column
-        case (2): {
-          coefficient_matrix.reserve(
-              Eigen::VectorXi::Constant(2 * active_dof_, 2 * 10));
-          break;
-        }
-        // For 3d: 30 entries /column
-        case (3): {
-          coefficient_matrix.reserve(
-              Eigen::VectorXi::Constant(2 * active_dof_, 2 * 30));
-          break;
-        }
-      }
+      coefficient_matrix.reserve(
+          Eigen::VectorXi::Constant(2 * active_dof_, 2 * sparse_row_size_));
 
       // Cell pointer
       const auto& cells = mesh_->cells();
@@ -162,24 +150,10 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_poisson_right(
     liquid_poisson_right_matrix.setZero();
 
     // Reserve storage for sparse matrix
-    switch (Tdim) {
-      // For 2d: 10 entries /column
-      case (2): {
-        solid_poisson_right_matrix.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
-        liquid_poisson_right_matrix.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
-        break;
-      }
-      // For 3d: 30 entries /column
-      case (3): {
-        solid_poisson_right_matrix.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
-        liquid_poisson_right_matrix.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
-        break;
-      }
-    }
+    solid_poisson_right_matrix.reserve(
+        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_));
+    liquid_poisson_right_matrix.reserve(
+        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_));
 
     // Cell pointer
     const auto& cells = mesh_->cells();
@@ -268,20 +242,8 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<Tdim>::assemble_corrector_right(
     correction_matrix_.setZero();
 
     // Reserve storage for sparse matrix
-    switch (Tdim) {
-      // For 2d: 10 entries /column x 2 phase
-      case (2): {
-        correction_matrix_.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 2 * 10));
-        break;
-      }
-      // For 3d: 30 entries /column x 2 phase
-      case (3): {
-        correction_matrix_.reserve(
-            Eigen::VectorXi::Constant(active_dof_ * Tdim, 2 * 30));
-        break;
-      }
-    }
+    correction_matrix_.reserve(
+        Eigen::VectorXi::Constant(active_dof_ * Tdim, 2 * sparse_row_size_));
 
     // Cell pointer
     const auto& cells = mesh_->cells();
@@ -384,8 +346,8 @@ bool mpm::AssemblerEigenSemiImplicitTwoPhase<
     velocity_constraints_.setZero();
     velocity_constraints_.data().squeeze();
     velocity_constraints_.resize(active_dof_ * 2, Tdim);
-    velocity_constraints_.reserve(
-        Eigen::VectorXi::Constant(Tdim, triplet_list.size() + 10));
+    velocity_constraints_.reserve(Eigen::VectorXi::Constant(
+        Tdim, triplet_list.size() + sparse_row_size_));
     // Assemble the velocity constraints matrix
     velocity_constraints_.setFromTriplets(triplet_list.begin(),
                                           triplet_list.end());
