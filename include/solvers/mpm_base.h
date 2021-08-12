@@ -88,13 +88,20 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5_twophase(mpm::Index step, mpm::Index max_steps) override;
 
+  //! Domain decomposition
+  //! \param[in] initial_step Start of simulation or later steps
+  void mpi_domain_decompose(bool initial_step = false) override;
+
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
 
-  //! Domain decomposition
-  //! \param[in] initial_step Start of simulation or later steps
-  void mpi_domain_decompose(bool initial_step = false) override;
+  //! Particle entity sets
+  //! \param[in] check Check duplicates
+  void particle_entity_sets(bool check);
+
+  //! Particle velocity constraints
+  void particle_velocity_constraints();
 
  protected:
   //! Initialise implicit solver
@@ -158,13 +165,6 @@ class MPMBase : public MPM {
   void particles_volumes(const Json& mesh_prop,
                          const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
-  //! Particle velocity constraints
-  //! \param[in] mesh_prop Mesh properties
-  //! \param[in] particle_io Particle IO handle
-  void particle_velocity_constraints(
-      const Json& mesh_prop,
-      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
-
   //! Particles stresses
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] particle_io Particle IO handle
@@ -178,11 +178,6 @@ class MPMBase : public MPM {
   void particles_pore_pressures(
       const Json& mesh_prop,
       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
-
-  //! Particle entity sets
-  //! \param[in] mesh_prop Mesh properties
-  //! \param[in] check Check duplicates
-  void particle_entity_sets(const Json& mesh_prop, bool check);
 
   //! Initialise damping
   //! \param[in] damping_props Damping properties

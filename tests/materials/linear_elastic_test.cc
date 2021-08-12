@@ -71,8 +71,6 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
             Approx(jmaterial["density"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("poisson_ratio") ==
-            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
@@ -146,6 +144,20 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.00000000000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.00000000000000e+00).epsilon(Tolerance));
+  }
+
+  SECTION("LinearElastic check properties earthquake") {
+    unsigned id = 0;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
+
+    // Get P-Wave and S-Wave Velocities
+    REQUIRE(material->template property<double>("pwave_velocity") ==
+            Approx(116.023870223).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("swave_velocity") ==
+            Approx(62.0173672946).epsilon(Tolerance));
   }
 }
 
@@ -288,5 +300,19 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(7.69230769230769e+01).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(1.15384615384615e+02).epsilon(Tolerance));
+  }
+
+  SECTION("LinearElastic check properties earthquake") {
+    unsigned id = 0;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(id), jmaterial);
+
+    // Get P-Wave and S-Wave Velocities
+    REQUIRE(material->template property<double>("pwave_velocity") ==
+            Approx(116.023870223).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("swave_velocity") ==
+            Approx(62.0173672946).epsilon(Tolerance));
   }
 }

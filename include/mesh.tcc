@@ -960,6 +960,49 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
 #endif
 }
 
+//! Resume cell ranks and partitioned domain
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
+  // Get MPI rank
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  const unsigned rank_max = std::numeric_limits<unsigned>::max();
+  const unsigned ncells = this->ncells();
+  // Vector of cell ranks
+  std::vector<int> cell_ranks;
+  cell_ranks.resize(ncells);
+  // Fetch MPI rank if the cell has particles
+  unsigned i = 0;
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int cell_rank = 0;
+    if ((*citr)->nparticles() > 0) cell_rank = mpi_rank;
+    cell_ranks.at(i) = cell_rank;
+    ++i;
+  }
+
+  // MPI Receive cell ranks
+  std::vector<int> recv_ranks;
+  recv_ranks.resize(ncells);
+  MPI_Allreduce(cell_ranks.data(), recv_ranks.data(), ncells, MPI_INT, MPI_SUM,
+                MPI_COMM_WORLD);
+
+  // Assign MPI rank
+  unsigned j = 0;
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int recv_rank = recv_ranks.at(j);
+    (*citr)->rank(recv_rank);
+    ++j;
+  }
+
+  // Identify shared nodes across MPI domains
+  this->find_domain_shared_nodes();
+  // Identify ghost boundary cells
+  this->find_ghost_boundary_cells();
+
+#endif
+}
+
 //! Find shared nodes across MPI domains
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
@@ -1558,38 +1601,40 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
                  mpm::pod::particle::dst_offset, mpm::pod::particle::dst_sizes,
                  dst_buf.data());
 
-  // Vector of particles
-  Vector<ParticleBase<Tdim>> particles;
+  // Particle type
+  const std::string particle_type = (Tdim == 2) ? "P2D" : "P3D";
 
-  // Clear map of particles
-  map_particles_.clear();
+  // Iterate over all HDF5 particles
+  for (unsigned i = 0; i < nrecords; ++i) {
+    PODParticle pod_particle = dst_buf[i];
+    // Get particle's material from list of materials
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+    materials.emplace_back(materials_.at(pod_particle.material_id));
 
-  unsigned i = 0;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    if (i < nrecords) {
-      PODParticle particle = dst_buf[i];
-      // Get particle's material from list of materials
-      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
-      materials.emplace_back(materials_.at(particle.material_id));
+    // Particle id
+    mpm::Index pid = pod_particle.id;
+    // Initialise coordinates
+    Eigen::Matrix<double, Tdim, 1> coords;
+    coords.setZero();
 
-      // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, materials);
-      // Add particle to map
-      map_particles_.insert(particle.id, *pitr);
-      particles.add(*pitr);
-      ++i;
-    }
+    // Create particle
+    auto particle =
+        Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                const Eigen::Matrix<double, Tdim, 1>&>::instance()
+            ->create(particle_type, static_cast<mpm::Index>(pid), coords);
+
+    // Initialise particle with HDF5 data
+    particle->initialise_particle(pod_particle, materials);
+
+    // Add particle to mesh and check
+    bool insert_status = this->add_particle(particle, false);
+
+    // If insertion is successful
+    if (!insert_status)
+      throw std::runtime_error("Addition of particle to mesh failed!");
   }
   // close the file
   H5Fclose(file_id);
-
-  // Overwrite particles container
-  this->particles_ = particles;
-
-  // Remove associated cell for the particle
-  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
-    (*citr)->clear_particle_ids();
-
   return true;
 }
 
@@ -1618,39 +1663,41 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
                  mpm::pod::particletwophase::dst_offset,
                  mpm::pod::particletwophase::dst_sizes, dst_buf.data());
 
-  // Vector of particles
-  Vector<ParticleBase<Tdim>> particles;
+  // Particle type
+  const std::string particle_type = (Tdim == 2) ? "P2D2PHASE" : "P3D2PHASE";
 
-  // Clear map of particles
-  map_particles_.clear();
+  // Iterate over all HDF5 particles
+  for (unsigned i = 0; i < nrecords; ++i) {
+    PODParticleTwoPhase pod_particle = dst_buf[i];
+    // Get particle's material from list of materials
+    // Get particle's material from list of materials
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+    materials.emplace_back(materials_.at(pod_particle.material_id));
+    materials.emplace_back(materials_.at(pod_particle.liquid_material_id));
+    // Particle id
+    mpm::Index pid = pod_particle.id;
+    // Initialise coordinates
+    Eigen::Matrix<double, Tdim, 1> coords;
+    coords.setZero();
 
-  unsigned i = 0;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    if (i < nrecords) {
-      PODParticleTwoPhase particle = dst_buf[i];
-      // Get particle's material from list of materials
-      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
-      materials.emplace_back(materials_.at(particle.material_id));
-      materials.emplace_back(materials_.at(particle.liquid_material_id));
+    // Create particle
+    auto particle =
+        Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                const Eigen::Matrix<double, Tdim, 1>&>::instance()
+            ->create(particle_type, static_cast<mpm::Index>(pid), coords);
 
-      // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, materials);
-      // Add particle to map
-      map_particles_.insert(particle.id, *pitr);
-      particles.add(*pitr);
-      ++i;
-    }
+    // Initialise particle with HDF5 data
+    particle->initialise_particle(pod_particle, materials);
+
+    // Add particle to mesh and check
+    bool insert_status = this->add_particle(particle, false);
+
+    // If insertion is successful
+    if (!insert_status)
+      throw std::runtime_error("Addition of particle to mesh failed!");
   }
   // close the file
   H5Fclose(file_id);
-
-  // Overwrite particles container
-  this->particles_ = particles;
-
-  // Remove associated cell for the particle
-  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
-    (*citr)->clear_particle_ids();
-
   return true;
 }
 
