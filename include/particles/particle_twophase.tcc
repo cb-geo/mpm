@@ -186,7 +186,6 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(PODParticle& particle) {
   // Particle porosity and saturation
   this->porosity_ = twophase_particle->porosity;
   this->liquid_saturation_ = twophase_particle->liquid_saturation;
-  this->assign_permeability();
 
   // Liquid material id
   this->material_id_[mpm::ParticlePhase::Liquid] =
@@ -261,6 +260,10 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
       throw std::runtime_error("Material is invalid to assign to particle!");
     }
   }
+
+  // Assign permeability
+  this->assign_permeability();
+
   return status;
 }
 
