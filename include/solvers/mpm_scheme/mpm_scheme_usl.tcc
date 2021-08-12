@@ -16,6 +16,11 @@ inline void mpm::MPMSchemeUSL<Tdim>::postcompute_stress_strain(
   mpm::MPMScheme<Tdim>::compute_stress_strain(phase, pressure_smoothing);
 }
 
+//! Postcompute nodal kinematics - map mass and momentum to nodes
+template <unsigned Tdim>
+inline void mpm::MPMSchemeUSL<Tdim>::postcompute_nodal_kinematics(
+    unsigned phase) {}
+
 //! Stress update scheme
 template <unsigned Tdim>
 inline std::string mpm::MPMSchemeUSL<Tdim>::scheme() const {

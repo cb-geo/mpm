@@ -1,22 +1,28 @@
-#ifndef MPM_MPM_SCHEME_USL_H_
-#define MPM_MPM_SCHEME_USL_H_
+#ifndef MPM_MPM_SCHEME_MUSL_H_
+#define MPM_MPM_SCHEME_MUSL_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
+// Eigen
+#include "Eigen/Dense"
+
 #include "mpm_scheme.h"
 
 namespace mpm {
 
-//! MPMSchemeUSL class
-//! \brief MPMSchemeUSL Derived class for USL stress update scheme
+//! MPMSchemeMUSL class
+//! \brief MPMSchemeUSL Derived class for MUSL stress update scheme
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class MPMSchemeUSL : public MPMScheme<Tdim> {
+class MPMSchemeMUSL : public MPMScheme<Tdim> {
  public:
+  //! Define a vector of size dimension
+  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
+
   //! Default constructor with mesh class
-  MPMSchemeUSL(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
+  MPMSchemeMUSL(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
 
   //! Precompute stress
   //! \param[in] phase Phase to smooth postssure
@@ -47,9 +53,9 @@ class MPMSchemeUSL : public MPMScheme<Tdim> {
   //! Time increment
   using mpm::MPMScheme<Tdim>::dt_;
 
-};  // MPMSchemeUSL class
+};  // MPMSchemeMUSL class
 }  // namespace mpm
 
-#include "mpm_scheme_usl.tcc"
+#include "mpm_scheme_musl.tcc"
 
-#endif  // MPM_MPM_SCHEME_USL_H_
+#endif  // MPM_MPM_SCHEME_MUSL_H_

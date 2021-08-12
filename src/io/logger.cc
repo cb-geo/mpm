@@ -36,6 +36,10 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usf_logger =
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usl_logger =
     spdlog::stdout_color_st("MPMExplicitUSL");
 
+// Create a logger for MPM Explicit MUSL
+const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_musl_logger =
+    spdlog::stdout_color_st("MPMExplicitMUSL");
+
 // Create a logger for MPM Semi Implicit Navier Stokes
 const std::shared_ptr<spdlog::logger>
     mpm::Logger::mpm_semi_implicit_navier_stokes_logger =
