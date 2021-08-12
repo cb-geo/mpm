@@ -419,19 +419,25 @@ class Mesh {
   //! Read HDF5 particles with type name
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \param[in] typename Name of particle type name
+  //! \param[in] particle_type Particle type to be generated
   //! \retval status Status of reading HDF5 output
   bool read_particles_hdf5(const std::string& filename,
-                           const std::string& type_name);
+                           const std::string& type_name,
+                           const std::string& particle_type);
 
-  //! Read HDF5 particles
+  //! Read HDF5 particles for singlephase particle
   //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] particle_type Particle type to be generated
   //! \retval status Status of reading HDF5 output
-  bool read_particles_hdf5(const std::string& filename);
+  bool read_particles_hdf5(const std::string& filename,
+                           const std::string& particle_type);
 
   //! Read HDF5 particles for twophase particle
   //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] particle_type Particle type to be generated
   //! \retval status Status of reading HDF5 output
-  bool read_particles_hdf5_twophase(const std::string& filename);
+  bool read_particles_hdf5_twophase(const std::string& filename,
+                                    const std::string& particle_type);
 
   //! Return HDF5 particles
   //! \retval particles_hdf5 Vector of HDF5 particles

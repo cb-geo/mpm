@@ -1564,21 +1564,23 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5_twophase(
   return true;
 }
 
-//! Write particles to HDF5 with type name
+//! Read HDF5 particles with type name
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename,
-                                          const std::string& type_name) {
+                                          const std::string& type_name,
+                                          const std::string& particle_type) {
   bool status = false;
   if (type_name == "particles" || type_name == "fluid_particles")
-    status = this->read_particles_hdf5(filename);
+    status = this->read_particles_hdf5(filename, particle_type);
   else if (type_name == "twophase_particles")
-    status = this->read_particles_hdf5_twophase(filename);
+    status = this->read_particles_hdf5_twophase(filename, particle_type);
   return status;
 }
 
-//! Write particles to HDF5
+//! Read HDF5 particles for singlephase particle
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
+bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename,
+                                          const std::string& particle_type) {
 
   // Create a new file using default properties.
   hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1599,9 +1601,6 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
   H5TBread_table(file_id, "table", mpm::pod::particle::dst_size,
                  mpm::pod::particle::dst_offset, mpm::pod::particle::dst_sizes,
                  dst_buf.data());
-
-  // Particle type
-  const std::string particle_type = (Tdim == 2) ? "P2D" : "P3D";
 
   // Iterate over all HDF5 particles
   for (unsigned i = 0; i < nrecords; ++i) {
@@ -1637,10 +1636,10 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
   return true;
 }
 
-//! Write particles to HDF5 for twophase particles
+//! Read HDF5 particles for twophase particle
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
-    const std::string& filename) {
+    const std::string& filename, const std::string& particle_type) {
 
   // Create a new file using default properties.
   hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1661,9 +1660,6 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5_twophase(
   H5TBread_table(file_id, "table", mpm::pod::particletwophase::dst_size,
                  mpm::pod::particletwophase::dst_offset,
                  mpm::pod::particletwophase::dst_sizes, dst_buf.data());
-
-  // Particle type
-  const std::string particle_type = (Tdim == 2) ? "P2D2PHASE" : "P3D2PHASE";
 
   // Iterate over all HDF5 particles
   for (unsigned i = 0; i < nrecords; ++i) {

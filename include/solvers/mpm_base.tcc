@@ -473,7 +473,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
               .string();
 
       // Load particle information from file
-      mesh_->read_particles_hdf5(particles_file, attribute);
+      mesh_->read_particles_hdf5(particles_file, attribute, ptype);
     }
 
     // Clear all particle ids
