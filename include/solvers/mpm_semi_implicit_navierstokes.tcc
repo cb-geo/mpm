@@ -48,8 +48,38 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
   // Initialise mesh
   this->initialise_mesh();
 
-  // Initialise particles
-  this->initialise_particles();
+  // Check point resume
+  if (resume) {
+    this->initialise_particle_types();
+    bool check_resume = this->checkpoint_resume();
+    if (!check_resume) resume = false;
+  }
+
+  // Check point resume
+  if (resume) {
+    mesh_->resume_domain_cell_ranks();
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+#endif
+
+    //! Particle entity sets and velocity constraints
+    this->particle_entity_sets(false);
+    this->particle_velocity_constraints();
+
+  } else {
+    // Initialise particles
+    this->initialise_particles();
+
+    // Compute mass for single phase fluid
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+
+    // Domain decompose
+    bool initial_step = (resume == true) ? false : true;
+    this->mpi_domain_decompose(initial_step);
+  }
 
   // Initialise loading conditions
   this->initialise_loads();
@@ -61,21 +91,10 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     throw std::runtime_error("Initialisation of matrix failed");
   }
 
-  // Compute mass for single phase fluid
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
-
   // Assign beta to each particle
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_projection_parameter,
                 std::placeholders::_1, beta_));
-
-  // Check point resume
-  if (resume) this->checkpoint_resume();
-
-  // Domain decompose
-  bool initial_step = (resume == true) ? false : true;
-  this->mpi_domain_decompose(initial_step);
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop

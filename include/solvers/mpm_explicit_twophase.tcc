@@ -87,30 +87,48 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   // Initialise mesh
   this->initialise_mesh();
 
-  // Initialise particles
-  this->initialise_particles();
+  // Check point resume
+  if (resume) {
+    this->initialise_particle_types();
+    bool check_resume = this->checkpoint_resume();
+    if (!check_resume) resume = false;
+  }
+
+  // Resume or Initialise
+  if (resume) {
+    mesh_->resume_domain_cell_ranks();
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+#endif
+
+    //! Particle entity sets and velocity constraints
+    this->particle_entity_sets(false);
+    this->particle_velocity_constraints();
+  } else {
+    // Initialise particles
+    this->initialise_particles();
+
+    // Assign porosity
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::assign_porosity, std::placeholders::_1));
+
+    // Assign permeability
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::assign_permeability, std::placeholders::_1));
+
+    // Compute mass for each phase
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+
+    // Domain decompose
+    bool initial_step = (resume == true) ? false : true;
+    this->mpi_domain_decompose(initial_step);
+  }
 
   // Initialise loading conditions
   this->initialise_loads();
-
-  // Assign porosity
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::assign_porosity, std::placeholders::_1));
-
-  // Assign permeability
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::assign_permeability, std::placeholders::_1));
-
-  // Compute mass for each phase
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
-
-  // Check point resume
-  if (resume) this->checkpoint_resume();
-
-  // Domain decompose
-  bool initial_step = (resume == true) ? false : true;
-  this->mpi_domain_decompose(initial_step);
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
