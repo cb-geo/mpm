@@ -272,6 +272,20 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
                      .count());
 }
 
+// Initialise particle types
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::initialise_particle_types() {
+  // Get particles properties
+  auto json_particles = io_->json_object("particles");
+
+  for (const auto& json_particle : json_particles) {
+    // Gather particle types
+    auto particle_type =
+        json_particle["generator"]["particle_type"].template get<std::string>();
+    particle_types_.insert(particle_type);
+  }
+}
+
 // Initialise particles
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::initialise_particles() {
@@ -307,11 +321,10 @@ void mpm::MPMBase<Tdim>::initialise_particles() {
     if (!gen_status)
       std::runtime_error(
           "mpm::base::init_particles() Generate particles failed");
-    // Gather particle types
-    auto particle_type =
-        json_particle["generator"]["particle_type"].template get<std::string>();
-    particle_types_.insert(particle_type);
   }
+
+  // Gather particle types
+  this->initialise_particle_types();
 
   auto particles_gen_end = std::chrono::steady_clock::now();
   console_->info("Rank {} Generate particles: {} ms", mpi_rank,
