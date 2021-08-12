@@ -187,6 +187,22 @@ class Node : public NodeBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Update inertia at the nodes
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  void update_inertia(bool update, unsigned phase,
+                      const VectorDim& inertia) noexcept override;
+
+  //! Return inertia at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim inertia(unsigned phase) const override {
+    return inertia_.col(phase);
+  }
+
+  //! Compute velocity and acceleration from the momentum and inertia
+  void compute_velocity_acceleration() override;
+
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -200,11 +216,25 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(phase);
   }
 
+  //! Update velocity and acceleration by Newmark scheme
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  void update_velocity_acceleration_newmark(unsigned phase, double newmark_beta,
+                                            double newmark_gamma,
+                                            double dt) override;
+
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity(unsigned phase,
                                      double dt) noexcept override;
+
+  //! Return displacement at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);
+  };
 
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase
@@ -474,6 +504,10 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
+  //! Inertia
+  Eigen::Matrix<double, Tdim, Tnphases> inertia_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Pressure constraint

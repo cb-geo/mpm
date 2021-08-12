@@ -51,7 +51,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     if (analysis_.find("locate_particles") != analysis_.end())
       locate_particles_ = analysis_["locate_particles"].template get<bool>();
 
-    // Stress update method (USF/USL/MUSL)
+    // Stress update method (USF/USL/MUSL/Newmark)
     try {
       if (analysis_.find("mpm_scheme") != analysis_.end())
         stress_update_ = analysis_["mpm_scheme"].template get<std::string>();
@@ -82,6 +82,20 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     } catch (std::exception& exception) {
       console_->warn("{} #{}: Damping is not specified, using none as default",
                      __FILE__, __LINE__, exception.what());
+    }
+
+    // Parameters of Newmark scheme
+    try {
+      if (analysis_.find("newmark") != analysis_.end()) {
+        if (!initialise_newmark(analysis_.at("newmark")))
+          throw std::runtime_error(
+              "Parameters of Newmark scheme are not defined");
+      }
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: Parameters of Newmark scheme is not specified, using "
+          "beta = 0.25 and gamma = 0.5 as default",
+          __FILE__, __LINE__, exception.what());
     }
 
     // Math functions
@@ -1281,6 +1295,26 @@ bool mpm::MPMBase<Tdim>::initialise_damping(const Json& damping_props) {
   } catch (std::exception& exception) {
     console_->warn("#{}: Damping parameters are undefined {} ", __LINE__,
                    exception.what());
+    status = false;
+  }
+
+  return status;
+}
+
+// Initialise parameters of Newmark scheme
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::initialise_newmark(const Json& newmark_props) {
+
+  // Read newmark JSON object
+  bool status = true;
+  try {
+    // Read parameters of Newmark scheme
+    newmark_beta_ = newmark_props.at("beta").template get<double>();
+    newmark_gamma_ = newmark_props.at("gamma").template get<double>();
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Parameters of Newmark scheme are undefined {} ",
+                   __LINE__, exception.what());
     status = false;
   }
 

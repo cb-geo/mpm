@@ -152,6 +152,9 @@ class ParticleBase {
   //! Map particle mass and momentum to nodes
   virtual void map_mass_momentum_to_nodes() noexcept = 0;
 
+  //! Map particle mass, momentum and inertia to nodes
+  virtual void map_mass_momentum_inertia_to_nodes() noexcept = 0;
+
   //! Map multimaterial properties to nodes
   virtual void map_multimaterial_mass_momentum_to_nodes() noexcept = 0;
 
@@ -226,6 +229,9 @@ class ParticleBase {
   //! Compute strain
   virtual void compute_strain(double dt) noexcept = 0;
 
+  //! Compute strain using nodal displacement
+  virtual void compute_strain_newmark() noexcept = 0;
+
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
 
@@ -250,6 +256,9 @@ class ParticleBase {
   //! Map body force
   virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
 
+  //! Map inertial force
+  virtual void map_inertial_force() noexcept = 0;
+
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
 
@@ -263,6 +272,9 @@ class ParticleBase {
 
   //! Assign velocity
   virtual bool assign_velocity(const VectorDim& velocity) = 0;
+
+  //! Return acceleration
+  virtual VectorDim acceleration() const = 0;
 
   //! Return velocity
   virtual VectorDim velocity() const = 0;
@@ -281,6 +293,10 @@ class ParticleBase {
 
   //! Compute updated position
   virtual void compute_updated_position(
+      double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Compute updated position by Newmark scheme
+  virtual void compute_updated_position_newmark(
       double dt, bool velocity_update = false) noexcept = 0;
 
   //! Return scalar data of particles

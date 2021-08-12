@@ -50,7 +50,7 @@ typedef struct PODParticle {
 
 namespace pod {
 namespace particle {
-const hsize_t NFIELDS = 53;
+const hsize_t NFIELDS = 56;
 
 const size_t dst_size = sizeof(PODParticle);
 
