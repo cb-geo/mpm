@@ -125,6 +125,9 @@ class ParticleBase {
   //! Compute shape functions
   virtual void compute_shapefn() noexcept = 0;
 
+  //! Compute B matrix
+  virtual void compute_bmatrix() noexcept = 0;
+
   //! Assign volume
   virtual bool assign_volume(double volume) = 0;
 

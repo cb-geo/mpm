@@ -472,6 +472,103 @@ void mpm::Particle<Tdim>::compute_shapefn() noexcept {
                           this->natural_size_, zero);
 }
 
+// Compute B matrix
+template <>
+inline void mpm::Particle<1>::compute_bmatrix() noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get element ptr of a cell
+  const auto element = cell_->element_ptr();
+
+  // Zero matrix
+  Eigen::Matrix<double, 1, 1> zero = Eigen::Matrix<double, 1, 1>::Zero();
+
+  // Compute B matrix
+  std::vector<Eigen::MatrixXd> bmat;
+  bmat = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
+                          this->natural_size_, zero);
+
+  // Convert to MatrixXd
+  bmatrix_.resize(1,this->nodes_.size());
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    bmatrix_(0,i) = bmat[i](0, 0);
+  }
+}
+
+// Compute B matrix
+template <>
+inline void mpm::Particle<2>::compute_bmatrix() noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get element ptr of a cell
+  const auto element = cell_->element_ptr();
+
+  // Zero matrix
+  Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
+
+  // Compute B matrix
+  std::vector<Eigen::MatrixXd> bmat;
+  bmat = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
+                          this->natural_size_, zero);
+
+  // Convert to MatrixXd
+  bmatrix_.resize(3, 2*this->nodes_.size());
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    bmatrix_(0, 2*i) = bmat[i](0, 0);
+    bmatrix_(1, 2*i) = 0.;
+    bmatrix_(2, 2*i) = bmat[i](2, 0);
+
+    bmatrix_(0, 2*i+1) = 0.;
+    bmatrix_(1, 2*i+1) = bmat[i](1, 1);
+    bmatrix_(2, 2*i+1) = bmat[i](2, 1);
+   }
+}
+
+// Compute B matrix
+template <>
+inline void mpm::Particle<3>::compute_bmatrix() noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get element ptr of a cell
+  const auto element = cell_->element_ptr();
+
+  // Zero matrix
+  Eigen::Matrix<double, 3, 1> zero = Eigen::Matrix<double, 3, 1>::Zero();
+
+  // Compute B matrix
+  std::vector<Eigen::MatrixXd> bmat;
+  bmat = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
+                          this->natural_size_, zero);
+
+  // Convert to MatrixXd
+  bmatrix_.resize(6, 3*this->nodes_.size());
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    bmatrix_(0, 3*i) = bmat[i](0, 0);
+    bmatrix_(1, 3*i) = 0.;             
+    bmatrix_(2, 3*i) = 0.;                        
+    bmatrix_(3, 3*i) = bmat[i](3, 0);  
+    bmatrix_(4, 3*i) = 0.;             
+    bmatrix_(5, 3*i) = bmat[i](5, 0);
+
+    bmatrix_(0, 3*i+1) = 0.;
+    bmatrix_(1, 3*i+1) = bmat[i](1, 1);
+    bmatrix_(2, 3*i+1) = 0.;
+    bmatrix_(3, 3*i+1) = bmat[i](3, 1);
+    bmatrix_(4, 3*i+1) = bmat[i](4, 1);
+    bmatrix_(5, 3*i+1) = 0.;
+
+    bmatrix_(0, 3*i+2) = 0.;
+    bmatrix_(1, 3*i+2) = 0.;
+    bmatrix_(2, 3*i+2) = bmat[i](2, 2);
+    bmatrix_(3, 3*i+2) = 0.;
+    bmatrix_(4, 3*i+2) = bmat[i](4, 2);
+    bmatrix_(5, 3*i+2) = bmat[i](5, 2);
+  }
+}
+
 // Assign volume to the particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_volume(double volume) {

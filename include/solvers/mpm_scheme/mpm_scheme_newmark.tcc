@@ -4,6 +4,35 @@ mpm::MPMSchemeNewmark<Tdim>::MPMSchemeNewmark(
     const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt)
     : mpm::MPMScheme<Tdim>(mesh, dt) {}
 
+//! Initialize nodes, cells and shape functions
+template <unsigned Tdim>
+inline void mpm::MPMSchemeNewmark<Tdim>::initialise() {
+#pragma omp parallel sections
+  {
+    // Spawn a task for initialising nodes and cells
+#pragma omp section
+    {
+      // Initialise nodes
+      mesh_->iterate_over_nodes(
+          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
+
+      mesh_->iterate_over_cells(
+          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+    }
+    // Spawn a task for particles
+#pragma omp section
+    {
+      // Iterate over each particle to compute shapefn
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+
+      // Iterate over each particle to compute shapefn
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_bmatrix, std::placeholders::_1));
+    }
+  }  // Wait to complete
+}
+
 //! Compute nodal kinematics - map mass, momentum and inertia to nodes
 template <unsigned Tdim>
 inline void mpm::MPMSchemeNewmark<Tdim>::compute_nodal_kinematics(

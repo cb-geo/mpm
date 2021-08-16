@@ -105,6 +105,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   void compute_shapefn() noexcept override;
 
+  //! Compute B matrix of a particle, based on local coordinates
+  inline void compute_bmatrix() noexcept override;
+
   //! Assign volume
   //! \param[in] volume Volume of particle
   bool assign_volume(double volume) override;
@@ -463,6 +466,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::VectorXd shapefn_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
+  //! B matrix
+  Eigen::MatrixXd bmatrix_;
   //! dN/dX at cell centroid
   Eigen::MatrixXd dn_dx_centroid_;
   //! Logger

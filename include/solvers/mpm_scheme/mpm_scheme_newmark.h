@@ -18,6 +18,9 @@ class MPMSchemeNewmark : public MPMScheme<Tdim> {
   //! Default constructor with mesh class
   MPMSchemeNewmark(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
 
+  //! Intialize
+  inline void initialise() override;
+
   //! Compute nodal kinematics - map mass, momentum and inertia to nodes
   //! \param[in] phase Phase to smooth pressure
   virtual inline void compute_nodal_kinematics(unsigned phase) override;
