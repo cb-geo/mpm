@@ -39,13 +39,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   int mpi_rank = 0;
   int mpi_size = 1;
 
-#ifdef USE_MPI
-  // Get MPI rank
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  // Get number of MPI ranks
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-#endif
-
   // Phase
   const unsigned phase = 0;
 
@@ -73,11 +66,7 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   // Resume or Initialise
   if (resume) {
     mesh_->resume_domain_cell_ranks();
-#ifdef USE_MPI
-#ifdef USE_GRAPH_PARTITIONING
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
-#endif
+
     //! Particle entity sets and velocity constraints
     this->particle_entity_sets(false);
     this->particle_velocity_constraints();
@@ -109,14 +98,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   for (; step_ < nsteps_; ++step_) {
 
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
-
-#ifdef USE_MPI
-#ifdef USE_GRAPH_PARTITIONING
-    // Run load balancer at a specified frequency
-    if (step_ % nload_balance_steps_ == 0 && step_ != 0)
-      this->mpi_domain_decompose(false);
-#endif
-#endif
 
     // Inject particles
     mesh_->inject_particles(step_ * dt_);
@@ -160,13 +141,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);
-
-#ifdef USE_MPI
-#ifdef USE_GRAPH_PARTITIONING
-    mesh_->transfer_halo_particles();
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
-#endif
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs
