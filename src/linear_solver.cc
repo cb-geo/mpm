@@ -1,4 +1,5 @@
 #include "assembler_base.h"
+#include "assembler_eigen_implicit_linear.h"
 #include "assembler_eigen_semi_implicit_navierstokes.h"
 #include "assembler_eigen_semi_implicit_twophase.h"
 
@@ -7,6 +8,17 @@
 #include "solver_base.h"
 
 // Assembler collections
+// Asssembler 2D for Implicit Linear
+static Register<mpm::AssemblerBase<2>,
+                mpm::AssemblerEigenImplicitLinear<2>, unsigned>
+    assembler_eigen_implicit_linear_2d(
+        "EigenImplicitLinear2D");
+// Asssembler 3D for Implicit Linear
+static Register<mpm::AssemblerBase<3>,
+                mpm::AssemblerEigenImplicitLinear<3>, unsigned>
+    assembler_eigen_implicit_linear_3d(
+        "EigenImplicitLinear3D");
+
 // Asssembler 2D for NavierStokes
 static Register<mpm::AssemblerBase<2>,
                 mpm::AssemblerEigenSemiImplicitNavierStokes<2>, unsigned>
