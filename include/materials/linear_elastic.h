@@ -54,6 +54,16 @@ class LinearElastic : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
+  //! Compute constitutive relations matrix
+  //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
+  //! \param[in] particle Constant point to particle base
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval dmatrix Constitutive relations mattrix 
+  Matrix6x6 compute_dmatrix(const Vector6d& stress, const Vector6d& dstrain,
+                          const ParticleBase<Tdim>* ptr,
+                          mpm::dense_map* state_vars) override;
+
  protected:
   //! material id
   using Material<Tdim>::id_;
