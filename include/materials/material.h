@@ -83,11 +83,11 @@ class Material {
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \param[in] state_vars History-dependent state variables
-  //! \retval dmatrix Constitutive relations mattrix 
+  //! \retval dmatrix Constitutive relations mattrix
   virtual Matrix6x6 compute_dmatrix(const Vector6d& stress,
-                                   const Vector6d& dstrain,
-                                   const ParticleBase<Tdim>* ptr,
-                                   mpm::dense_map* state_vars);
+                                    const Vector6d& dstrain,
+                                    const ParticleBase<Tdim>* ptr,
+                                    mpm::dense_map* state_vars);
 
  protected:
   //! material id

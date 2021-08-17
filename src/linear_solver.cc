@@ -9,15 +9,13 @@
 
 // Assembler collections
 // Asssembler 2D for Implicit Linear
-static Register<mpm::AssemblerBase<2>,
-                mpm::AssemblerEigenImplicitLinear<2>, unsigned>
-    assembler_eigen_implicit_linear_2d(
-        "EigenImplicitLinear2D");
+static Register<mpm::AssemblerBase<2>, mpm::AssemblerEigenImplicitLinear<2>,
+                unsigned>
+    assembler_eigen_implicit_linear_2d("EigenImplicitLinear2D");
 // Asssembler 3D for Implicit Linear
-static Register<mpm::AssemblerBase<3>,
-                mpm::AssemblerEigenImplicitLinear<3>, unsigned>
-    assembler_eigen_implicit_linear_3d(
-        "EigenImplicitLinear3D");
+static Register<mpm::AssemblerBase<3>, mpm::AssemblerEigenImplicitLinear<3>,
+                unsigned>
+    assembler_eigen_implicit_linear_3d("EigenImplicitLinear3D");
 
 // Asssembler 2D for NavierStokes
 static Register<mpm::AssemblerBase<2>,

@@ -489,10 +489,10 @@ inline void mpm::Particle<1>::compute_bmatrix() noexcept {
                           this->natural_size_, zero);
 
   // Convert to MatrixXd
-  bmatrix_.resize(1,this->nodes_.size());
+  bmatrix_.resize(1, this->nodes_.size());
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    bmatrix_(0,i) = bmat[i](0, 0);
+    bmatrix_(0, i) = bmat[i](0, 0);
   }
 }
 
@@ -513,17 +513,17 @@ inline void mpm::Particle<2>::compute_bmatrix() noexcept {
                           this->natural_size_, zero);
 
   // Convert to MatrixXd
-  bmatrix_.resize(3, 2*this->nodes_.size());
+  bmatrix_.resize(3, 2 * this->nodes_.size());
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    bmatrix_(0, 2*i) = bmat[i](0, 0);
-    bmatrix_(1, 2*i) = 0.;
-    bmatrix_(2, 2*i) = bmat[i](2, 0);
+    bmatrix_(0, 2 * i) = bmat[i](0, 0);
+    bmatrix_(1, 2 * i) = 0.;
+    bmatrix_(2, 2 * i) = bmat[i](2, 0);
 
-    bmatrix_(0, 2*i+1) = 0.;
-    bmatrix_(1, 2*i+1) = bmat[i](1, 1);
-    bmatrix_(2, 2*i+1) = bmat[i](2, 1);
-   }
+    bmatrix_(0, 2 * i + 1) = 0.;
+    bmatrix_(1, 2 * i + 1) = bmat[i](1, 1);
+    bmatrix_(2, 2 * i + 1) = bmat[i](2, 1);
+  }
 }
 
 // Compute B matrix
@@ -543,29 +543,29 @@ inline void mpm::Particle<3>::compute_bmatrix() noexcept {
                           this->natural_size_, zero);
 
   // Convert to MatrixXd
-  bmatrix_.resize(6, 3*this->nodes_.size());
+  bmatrix_.resize(6, 3 * this->nodes_.size());
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    bmatrix_(0, 3*i) = bmat[i](0, 0);
-    bmatrix_(1, 3*i) = 0.;             
-    bmatrix_(2, 3*i) = 0.;                        
-    bmatrix_(3, 3*i) = bmat[i](3, 0);  
-    bmatrix_(4, 3*i) = 0.;             
-    bmatrix_(5, 3*i) = bmat[i](5, 0);
+    bmatrix_(0, 3 * i) = bmat[i](0, 0);
+    bmatrix_(1, 3 * i) = 0.;
+    bmatrix_(2, 3 * i) = 0.;
+    bmatrix_(3, 3 * i) = bmat[i](3, 0);
+    bmatrix_(4, 3 * i) = 0.;
+    bmatrix_(5, 3 * i) = bmat[i](5, 0);
 
-    bmatrix_(0, 3*i+1) = 0.;
-    bmatrix_(1, 3*i+1) = bmat[i](1, 1);
-    bmatrix_(2, 3*i+1) = 0.;
-    bmatrix_(3, 3*i+1) = bmat[i](3, 1);
-    bmatrix_(4, 3*i+1) = bmat[i](4, 1);
-    bmatrix_(5, 3*i+1) = 0.;
+    bmatrix_(0, 3 * i + 1) = 0.;
+    bmatrix_(1, 3 * i + 1) = bmat[i](1, 1);
+    bmatrix_(2, 3 * i + 1) = 0.;
+    bmatrix_(3, 3 * i + 1) = bmat[i](3, 1);
+    bmatrix_(4, 3 * i + 1) = bmat[i](4, 1);
+    bmatrix_(5, 3 * i + 1) = 0.;
 
-    bmatrix_(0, 3*i+2) = 0.;
-    bmatrix_(1, 3*i+2) = 0.;
-    bmatrix_(2, 3*i+2) = bmat[i](2, 2);
-    bmatrix_(3, 3*i+2) = 0.;
-    bmatrix_(4, 3*i+2) = bmat[i](4, 2);
-    bmatrix_(5, 3*i+2) = bmat[i](5, 2);
+    bmatrix_(0, 3 * i + 2) = 0.;
+    bmatrix_(1, 3 * i + 2) = 0.;
+    bmatrix_(2, 3 * i + 2) = bmat[i](2, 2);
+    bmatrix_(3, 3 * i + 2) = 0.;
+    bmatrix_(4, 3 * i + 2) = bmat[i](4, 2);
+    bmatrix_(5, 3 * i + 2) = bmat[i](5, 2);
   }
 }
 
@@ -985,15 +985,16 @@ inline bool mpm::Particle<Tdim>::map_material_stiffness_matrix_to_cell() {
     Eigen::MatrixXd dmatrix;
     dmatrix =
         (this->material())
-          ->compute_dmatrix(stress_, dstrain_, this,
-                           &state_variables_[mpm::ParticlePhase::Solid]);
+            ->compute_dmatrix(stress_, dstrain_, this,
+                              &state_variables_[mpm::ParticlePhase::Solid]);
 
     // Reduce constitutive relations matrix depending on the dimension
     Eigen::MatrixXd reduced_dmatrix;
     reduced_dmatrix = this->reduce_dmatrix(dmatrix);
 
     // Compute local material stiffness matrix
-    cell_->compute_local_material_stiffness_matrix(bmatrix_, reduced_dmatrix, volume_);
+    cell_->compute_local_material_stiffness_matrix(bmatrix_, reduced_dmatrix,
+                                                   volume_);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -1003,7 +1004,8 @@ inline bool mpm::Particle<Tdim>::map_material_stiffness_matrix_to_cell() {
 
 //! Reduce constitutive relations matrix depending on the dimension
 template <>
-inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept{
+inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(
+    const Eigen::MatrixXd& dmatrix) noexcept {
 
   // Convert to 1x1 matrix in 1D
   Eigen::MatrixXd dmatrix1x1;
@@ -1015,34 +1017,45 @@ inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(const Eigen::MatrixXd& d
 
 //! Reduce constitutive relations matrix depending on the dimension
 template <>
-inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept{
+inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(
+    const Eigen::MatrixXd& dmatrix) noexcept {
 
   // Convert to 3x3 matrix in 2D
   Eigen::MatrixXd dmatrix3x3;
   dmatrix3x3.resize(3, 3);
-  dmatrix3x3(0, 0) = dmatrix(0, 0); dmatrix3x3(0, 1) = dmatrix(0, 1); dmatrix3x3(0, 2) = 0.;
-  dmatrix3x3(1, 0) = dmatrix(1, 0); dmatrix3x3(1, 1) = dmatrix(1, 1); dmatrix3x3(1, 2) = 0.;
-  dmatrix3x3(2, 0) = 0.;            dmatrix3x3(2, 1) = 0.;            dmatrix3x3(2, 2) = dmatrix(4, 4);
+  dmatrix3x3(0, 0) = dmatrix(0, 0);
+  dmatrix3x3(0, 1) = dmatrix(0, 1);
+  dmatrix3x3(0, 2) = 0.;
+  dmatrix3x3(1, 0) = dmatrix(1, 0);
+  dmatrix3x3(1, 1) = dmatrix(1, 1);
+  dmatrix3x3(1, 2) = 0.;
+  dmatrix3x3(2, 0) = 0.;
+  dmatrix3x3(2, 1) = 0.;
+  dmatrix3x3(2, 2) = dmatrix(4, 4);
 
   return dmatrix3x3;
 }
 
 //! Reduce constitutive relations matrix depending on the dimension
 template <>
-inline Eigen::MatrixXd mpm::Particle<3>::reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept{
+inline Eigen::MatrixXd mpm::Particle<3>::reduce_dmatrix(
+    const Eigen::MatrixXd& dmatrix) noexcept {
   return dmatrix;
 }
 
 //! Map mass matrix to cell (used in poisson equation LHS)
 template <unsigned Tdim>
-inline bool mpm::Particle<Tdim>::map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma, double dt) {
+inline bool mpm::Particle<Tdim>::map_mass_matrix_to_cell(double newmark_beta,
+                                                         double newmark_gamma,
+                                                         double dt) {
   bool status = true;
   try {
     // Check if material ptr is valid
     assert(this->material() != nullptr);
 
     // Compute local mass matrix
-    cell_->compute_local_mass_matrix(shapefn_, mass_, newmark_beta, newmark_gamma, dt);
+    cell_->compute_local_mass_matrix(shapefn_, mass_, newmark_beta,
+                                     newmark_gamma, dt);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

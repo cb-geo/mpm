@@ -247,12 +247,13 @@ bool mpm::MPMImplicitLinear<Tdim>::reinitialise_matrix() {
     assembler_->assign_global_node_indices(nactive_node, nglobal_active_node);
 
     // TODO: Assign displacement constraints
-    //assembler_->assign_displacement_constraints(this->beta_,
+    // assembler_->assign_displacement_constraints(this->beta_,
     //                                        this->step_ * this->dt_);
 
     // Initialise element matrix
-    mesh_->iterate_over_cells(std::bind(
-        &mpm::Cell<Tdim>::initialise_element_stiffness_matrix, std::placeholders::_1));
+    mesh_->iterate_over_cells(
+        std::bind(&mpm::Cell<Tdim>::initialise_element_stiffness_matrix,
+                  std::placeholders::_1));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -267,25 +268,26 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
   bool status = true;
   try {
     // Compute local cell stiffness matrices
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_material_stiffness_matrix_to_cell,
-                  std::placeholders::_1));
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::map_material_stiffness_matrix_to_cell,
+        std::placeholders::_1));
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_matrix_to_cell,
                   std::placeholders::_1, newmark_beta_, newmark_gamma_, dt_));
 
     // TODO: Assemble global stiffness matrix
-    //assembler_->assemble_stiffness_matrix(dt_);
+    // assembler_->assemble_stiffness_matrix(dt_);
 
     // TODO: Assemble global residual force RHS vector
-    //assembler_->assemble_equilibrium_right(dt_);
+    // assembler_->assemble_equilibrium_right(dt_);
 
     // TODO: Apply displacement constraints
-    //assembler_->apply_displacement_constraints();
+    // assembler_->apply_displacement_constraints();
 
     // TODO: Solve matrix equation and assign solution to assembler
-    //assembler_->assign_displacement_increment(linear_solver_["displacement"]->solve(
-    //    assembler_->stiffness_matrix(), assembler_->residual_force_rhs_vector()));
+    // assembler_->assign_displacement_increment(linear_solver_["displacement"]->solve(
+    //    assembler_->stiffness_matrix(),
+    //    assembler_->residual_force_rhs_vector()));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

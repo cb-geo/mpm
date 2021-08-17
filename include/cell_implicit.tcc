@@ -19,8 +19,8 @@ bool mpm::Cell<Tdim>::initialise_element_stiffness_matrix() {
 //! Compute local material stiffness matrix
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_local_material_stiffness_matrix(
-    const Eigen::MatrixXd& bmatrix, const Eigen::MatrixXd& dmatrix, double pvolume,
-    double multiplier) noexcept {
+    const Eigen::MatrixXd& bmatrix, const Eigen::MatrixXd& dmatrix,
+    double pvolume, double multiplier) noexcept {
 
   std::lock_guard<std::mutex> guard(cell_mutex_);
   stiffness_matrix_ +=
@@ -36,8 +36,9 @@ inline void mpm::Cell<Tdim>::compute_local_mass_matrix(
   std::lock_guard<std::mutex> guard(cell_mutex_);
   for (unsigned i = 0; i < this->nnodes_; ++i) {
     for (unsigned j = 0; j < this->nnodes_; ++j) {
-      for( unsigned k = 0; k < Tdim; ++k ){
-        stiffness_matrix_(Tdim*i+k, Tdim*j+k) += shapefn(i) * shapefn(j);
+      for (unsigned k = 0; k < Tdim; ++k) {
+        stiffness_matrix_(Tdim * i + k, Tdim * j + k) +=
+            shapefn(i) * shapefn(j);
       }
     }
   }

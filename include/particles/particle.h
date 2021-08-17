@@ -215,7 +215,8 @@ class Particle : public ParticleBase<Tdim> {
   inline bool map_material_stiffness_matrix_to_cell() override;
 
   //! Map mass matrix to cell (used in equilibrium equation LHS)
-  inline bool map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma, double dt) override;
+  inline bool map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma,
+                                      double dt) override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
@@ -393,8 +394,10 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Reduce constitutive relations matrix depending on the dimension
   //! \param[in] dmatrix Constitutive relations matrix in 3D
-  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial dimension
-  inline Eigen::MatrixXd reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept;
+  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial
+  //! dimension
+  inline Eigen::MatrixXd reduce_dmatrix(
+      const Eigen::MatrixXd& dmatrix) noexcept;
 
   //! Compute strain rate
   //! \param[in] dn_dx The spatial gradient of shape function

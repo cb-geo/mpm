@@ -269,14 +269,16 @@ class ParticleBase {
   //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
   virtual inline bool map_material_stiffness_matrix_to_cell() {
     throw std::runtime_error(
-        "Calling the base class function (map_material_stiffness_matrix_to_cell) in "
+        "Calling the base class function "
+        "(map_material_stiffness_matrix_to_cell) in "
         "ParticleBase:: "
         "illegal operation!");
     return 0;
   }
 
   //! Map mass matrix to cell (used in equilibrium equation LHS)
-  virtual inline bool map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma, double dt) {
+  virtual inline bool map_mass_matrix_to_cell(double newmark_beta,
+                                              double newmark_gamma, double dt) {
     throw std::runtime_error(
         "Calling the base class function (map_mass_matrix_to_cell) in "
         "ParticleBase:: "
