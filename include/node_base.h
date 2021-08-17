@@ -311,6 +311,18 @@ class NodeBase {
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
   /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+
+  //! Update displacement increment at the node
+  //! \ingroup Implicit
+  virtual void update_displacement_increment(const Eigen::VectorXd& displacement_increment,
+                                 unsigned phase, unsigned nactive_node) = 0;
+
+  /**@{*/
+
+  /**
    * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/

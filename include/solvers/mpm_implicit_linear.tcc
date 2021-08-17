@@ -127,6 +127,15 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     // Compute equilibrium equation
     this->compute_equilibrium_equation();
 
+    // Assign displacement increment to nodes
+    const auto& active_nodes = mesh_->active_nodes();
+    const unsigned nactive_node = active_nodes.size();
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::update_displacement_increment,
+                  std::placeholders::_1, assembler_->displacement_increment(),
+                  phase, nactive_node),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
     // Update nodal velocity and acceleration -- Corrector step of Newmark
     // scheme
     mpm_scheme_->update_nodal_kinematics_newmark(phase, newmark_beta_,

@@ -316,6 +316,18 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+
+  //! Update displacement increment at the node
+  //! \ingroup Implicit
+  void update_displacement_increment(const Eigen::VectorXd& displacement_increment,
+                                 unsigned phase, unsigned nactive_node) override;
+
+  /**@{*/
+
+  /**
    * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/
@@ -560,6 +572,7 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
+#include "node_implicit.tcc"
 #include "node_multiphase.tcc"
 
 #endif  // MPM_NODE_H_
