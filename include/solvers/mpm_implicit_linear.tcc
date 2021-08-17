@@ -275,19 +275,20 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_matrix_to_cell,
                   std::placeholders::_1, newmark_beta_, newmark_gamma_, dt_));
 
-    // TODO: Assemble global stiffness matrix
-    // assembler_->assemble_stiffness_matrix(dt_);
+    // Assemble global stiffness matrix
+    assembler_->assemble_stiffness_matrix();
 
-    // TODO: Assemble global residual force RHS vector
-    // assembler_->assemble_equilibrium_right(dt_);
+    // Assemble global residual force RHS vector
+    assembler_->assemble_residual_force_right();
 
     // TODO: Apply displacement constraints
     // assembler_->apply_displacement_constraints();
 
-    // TODO: Solve matrix equation and assign solution to assembler
-    // assembler_->assign_displacement_increment(linear_solver_["displacement"]->solve(
-    //    assembler_->stiffness_matrix(),
-    //    assembler_->residual_force_rhs_vector()));
+    // Solve matrix equation and assign solution to assembler
+    assembler_->assign_displacement_increment(
+        linear_solver_["displacement"]->solve(
+            assembler_->stiffness_matrix(),
+            assembler_->residual_force_rhs_vector()));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
