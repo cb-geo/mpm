@@ -230,15 +230,30 @@ class Cell {
   //! \ingroup Implicit
   const Eigen::MatrixXd& stiffness_matrix() { return stiffness_matrix_; };
 
-  //! Compute local stiffness matrix (Used in equilibrium equation)
+  //! Compute local material stiffness matrix (Used in equilibrium equation)
   //! \ingroup Implicit
   //! \param[in] bmatrix B matrix
   //! \param[in] dmatrix constitutive relations matrix
+  //! \param[in] pvolume particle volume
   //! \param[in] multiplier multiplier
   void compute_local_material_stiffness_matrix(const Eigen::MatrixXd& bmatrix,
                                const Eigen::MatrixXd& dmatrix,
                                double pvolume,
                                double multiplier = 1.0) noexcept;
+
+  //! Compute local mass matrix (Used in equilibrium equation)
+  //! \ingroup Implicit
+  //! \param[in] shapefn shape function
+  //! \param[in] pmass particle mass
+  //! \param[in] nwemark_beta parameter beta of Newmark scheme
+  //! \param[in] nwemark_gamma parameter gamma of Newmark scheme
+  //! \param[in] multiplier multiplier
+  void compute_local_mass_matrix(const Eigen::VectorXd& shapefn,
+                                 double pmass,
+                                 double newmark_beta,
+                                 double nwmark_gamma,
+                                 double dt,
+                                 double multiplier = 1.0) noexcept;
   /**@}*/
 
   /**

@@ -296,6 +296,9 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_material_stiffness_matrix_to_cell,
                   std::placeholders::_1));
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_mass_matrix_to_cell,
+                  std::placeholders::_1, newmark_beta_, newmark_gamma_, dt_));
 
     // TODO: Assemble global stiffness matrix
     //assembler_->assemble_stiffness_matrix(dt_);

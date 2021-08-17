@@ -1003,7 +1003,7 @@ inline bool mpm::Particle<Tdim>::map_material_stiffness_matrix_to_cell() {
 
 //! Reduce constitutive relations matrix depending on the dimension
 template <>
-inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(Eigen::MatrixXd& dmatrix) noexcept{
+inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept{
 
   // Convert to 1x1 matrix in 1D
   Eigen::MatrixXd dmatrix1x1;
@@ -1015,7 +1015,7 @@ inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(Eigen::MatrixXd& dmatrix
 
 //! Reduce constitutive relations matrix depending on the dimension
 template <>
-inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(Eigen::MatrixXd& dmatrix) noexcept{
+inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept{
 
   // Convert to 3x3 matrix in 2D
   Eigen::MatrixXd dmatrix3x3;
@@ -1029,8 +1029,25 @@ inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(Eigen::MatrixXd& dmatrix
 
 //! Reduce constitutive relations matrix depending on the dimension
 template <>
-inline Eigen::MatrixXd mpm::Particle<3>::reduce_dmatrix(Eigen::MatrixXd& dmatrix) noexcept{
+inline Eigen::MatrixXd mpm::Particle<3>::reduce_dmatrix(const Eigen::MatrixXd& dmatrix) noexcept{
   return dmatrix;
+}
+
+//! Map mass matrix to cell (used in poisson equation LHS)
+template <unsigned Tdim>
+inline bool mpm::Particle<Tdim>::map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma, double dt) {
+  bool status = true;
+  try {
+    // Check if material ptr is valid
+    assert(this->material() != nullptr);
+
+    // Compute local mass matrix
+    cell_->compute_local_mass_matrix(shapefn_, mass_, newmark_beta, newmark_gamma, dt);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }
 
 // Assign velocity to the particle

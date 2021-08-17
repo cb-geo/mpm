@@ -275,6 +275,15 @@ class ParticleBase {
     return 0;
   }
 
+  //! Map mass matrix to cell (used in equilibrium equation LHS)
+  virtual inline bool map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma, double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (map_mass_matrix_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  }
+
   //! Map particle pressure to nodes
   virtual bool map_pressure_to_nodes(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
