@@ -30,12 +30,12 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_stiffness_matrix() {
   bool status = true;
   try {
     // Initialise stiffness matrix
-    stiffness_matrix_.resize(active_dof_ * Tdim, Tdim * active_dof_ * Tdim);
+    stiffness_matrix_.resize(active_dof_ * Tdim, active_dof_ * Tdim);
     stiffness_matrix_.setZero();
 
     // Reserve storage for sparse matrix
     stiffness_matrix_.reserve(
-        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_));
+        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_ * Tdim));
 
     // Cell pointer
     const auto& cells = mesh_->cells();
@@ -61,7 +61,7 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_stiffness_matrix() {
               for (unsigned l = 0; l < Tdim; ++l) {
                 stiffness_matrix_.coeffRef(
                     nactive_node * k + global_node_indices_.at(cid)(i),
-                    global_node_indices_.at(cid)(j)) +=
+                    nactive_node * l + global_node_indices_.at(cid)(j)) +=
                     cell_stiffness(nids.size() * i + k, nids.size() * j + l);
               }
             }
