@@ -265,6 +265,16 @@ class ParticleBase {
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
 
+  //! Implicit solver functions--------------------------------
+  //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
+  virtual inline bool map_material_stiffness_matrix_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function (map_material_stiffness_matrix_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  }
+
   //! Map particle pressure to nodes
   virtual bool map_pressure_to_nodes(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;

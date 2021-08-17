@@ -218,6 +218,30 @@ class Cell {
   unsigned previous_mpirank() const;
 
   /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+
+  //! Initialize local elemental stiffness matrices
+  //! \ingroup Implicit
+  bool initialise_element_stiffness_matrix();
+
+  //! Return local stiffness
+  //! \ingroup Implicit
+  const Eigen::MatrixXd& stiffness_matrix() { return stiffness_matrix_; };
+
+  //! Compute local stiffness matrix (Used in equilibrium equation)
+  //! \ingroup Implicit
+  //! \param[in] bmatrix B matrix
+  //! \param[in] dmatrix constitutive relations matrix
+  //! \param[in] multiplier multiplier
+  void compute_local_material_stiffness_matrix(const Eigen::MatrixXd& bmatrix,
+                               const Eigen::MatrixXd& dmatrix,
+                               double pvolume,
+                               double multiplier = 1.0) noexcept;
+  /**@}*/
+
+  /**
    * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/
@@ -416,6 +440,14 @@ class Cell {
   std::map<unsigned, Eigen::VectorXd> face_normals_;
 
   /**
+   * \defgroup SinglePhaseImplicitVariables Variables for single-phase implicit MPM
+   * @{
+   */
+  //! Local stiffness matrix
+  Eigen::MatrixXd stiffness_matrix_;
+  /**@}*/
+
+  /**
    * \defgroup MultiPhaseVariables Variables for multi-phase MPM
    * @{
    */
@@ -445,6 +477,7 @@ class Cell {
 }  // namespace mpm
 
 #include "cell.tcc"
+#include "cell_implicit.tcc"
 #include "cell_multiphase.tcc"
 
 #endif  // MPM_CELL_H_

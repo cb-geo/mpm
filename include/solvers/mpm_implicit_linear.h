@@ -7,6 +7,9 @@
 
 #include "mpm_base.h"
 
+#include "assembler_base.h"
+#include "solver_base.h"
+
 namespace mpm {
 
 //! MPMImplicitLinear class
@@ -26,7 +29,19 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
   //! \param[in] phase Phase to smooth pressure
   void compute_stress_strain(unsigned phase);
 
- protected:
+  //! Class private functions
+ private:
+  //! Initialise matrix
+  bool initialise_matrix();
+
+  //! Initialise matrix
+  bool reinitialise_matrix();
+
+  //! Compute equilibrium equation
+  bool compute_equilibrium_equation();
+
+  //! Class private variables
+ private:
   // Generate a unique id for the analysis
   using mpm::MPMBase<Tdim>::uuid_;
   //! Time step size
@@ -51,8 +66,6 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::mpm_scheme_;
   //! Stress update method
   using mpm::MPMBase<Tdim>::stress_update_;
-  //! Interface scheme
-  using mpm::MPMBase<Tdim>::contact_;
 
 #ifdef USE_GRAPH_PARTITIONING
   //! Graph
@@ -79,12 +92,16 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::newmark_gamma_;
   //! Locate particles
   using mpm::MPMBase<Tdim>::locate_particles_;
-
- private:
+  //! Nonlocal neighbourhood
+  using mpm::MPMBase<Tdim>::node_neighbourhood_;
   //! Pressure smoothing
   bool pressure_smoothing_{false};
-  //! Interface
-  bool interface_{false};
+  //! Assembler object
+  std::shared_ptr<mpm::AssemblerBase<Tdim>> assembler_;
+  //! Linear solver object
+  tsl::robin_map<std::string,
+                 std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>
+      linear_solver_;
 
 };  // MPMImplicitLinear class
 }  // namespace mpm

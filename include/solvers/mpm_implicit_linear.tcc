@@ -57,9 +57,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   // Pressure smoothing
   pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
-  // Interface
-  interface_ = io_->analysis_bool("interface");
-
   // Initialise material
   this->initialise_materials();
 
@@ -100,6 +97,13 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   // Initialise loading conditions
   this->initialise_loads();
 
+  // Initialise matrix
+  bool matrix_status = this->initialise_matrix();
+  if (!matrix_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of matrix failed");
+  }
+
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
   for (; step_ < nsteps_; ++step_) {
@@ -132,13 +136,15 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     mpm_scheme_->compute_forces(gravity_, phase, step_,
                                 set_node_concentrated_force_);
 
-    // TODO: Compute local stiffness matrix
+    // Reinitialise system matrix to construct equillibrium equation
+    bool matrix_reinitialization_status = this->reinitialise_matrix();
+    if (!matrix_reinitialization_status) {
+      status = false;
+      throw std::runtime_error("Reinitialisation of matrix failed");
+    }
 
-    // TODO: Assemble local matrix and vector to global system
-
-    // TODO: Solve linear equation
-
-    // TODO: Update nodal displacement using solution
+    // Compute equilibrium equation
+    this->compute_equilibrium_equation();
 
     // Update nodal velocity and acceleration -- Corrector step of Newmark
     // scheme
@@ -182,5 +188,131 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
                      solver_end - solver_begin)
                      .count());
 
+  return status;
+}
+
+// Implicit functions
+// Initialise matrix
+template <unsigned Tdim>
+bool mpm::MPMImplicitLinear<Tdim>::initialise_matrix() {
+  bool status = true;
+  try {
+    // Get matrix assembler type
+    std::string assembler_type = analysis_["linear_solver"]["assembler_type"]
+                                     .template get<std::string>();
+    // Create matrix assembler
+    assembler_ =
+        Factory<mpm::AssemblerBase<Tdim>, unsigned>::instance()->create(
+            assembler_type, std::move(node_neighbourhood_));
+
+    // Solver settings
+    if (analysis_["linear_solver"].contains("solver_settings") &&
+        analysis_["linear_solver"].at("solver_settings").is_array() &&
+        analysis_["linear_solver"].at("solver_settings").size() > 0) {
+      mpm::MPMBase<Tdim>::initialise_linear_solver(
+          analysis_["linear_solver"]["solver_settings"], linear_solver_);
+    }
+    // Default solver settings
+    else {
+      std::string solver_type = "IterativeEigen";
+      unsigned max_iter = 1000;
+      double tolerance = 1.E-7;
+
+      // In case the default settings are specified in json
+      if (analysis_["linear_solver"].contains("solver_type")) {
+        solver_type = analysis_["linear_solver"]["solver_type"]
+                          .template get<std::string>();
+      }
+      // Max iteration steps
+      if (analysis_["linear_solver"].contains("max_iter")) {
+        max_iter =
+            analysis_["linear_solver"]["max_iter"].template get<unsigned>();
+      }
+      // Tolerance
+      if (analysis_["linear_solver"].contains("tolerance")) {
+        tolerance =
+            analysis_["linear_solver"]["tolerance"].template get<double>();
+      }
+
+      // Create matrix solver
+      auto lin_solver =
+          Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                  double>::instance()
+              ->create(solver_type, std::move(max_iter), std::move(tolerance));
+      // Add solver set to map
+      linear_solver_.insert(
+          std::pair<
+              std::string,
+              std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>(
+              "displacement", lin_solver));
+    }
+
+    // Assign mesh pointer to assembler
+    assembler_->assign_mesh_pointer(mesh_);
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Reinitialise and resize matrices at the beginning of every time step
+template <unsigned Tdim>
+bool mpm::MPMImplicitLinear<Tdim>::reinitialise_matrix() {
+
+  bool status = true;
+  try {
+    // Assigning matrix id (in each MPI rank)
+    const auto nactive_node = mesh_->assign_active_nodes_id();
+
+    // Assigning matrix id globally (required for rank-to-global mapping)
+    unsigned nglobal_active_node = nactive_node;
+
+    // Assign global node indice
+    assembler_->assign_global_node_indices(nactive_node, nglobal_active_node);
+
+    // TODO: Assign displacement constraints
+    //assembler_->assign_displacement_constraints(this->beta_,
+    //                                        this->step_ * this->dt_);
+
+    // Initialise element matrix
+    mesh_->iterate_over_cells(std::bind(
+        &mpm::Cell<Tdim>::initialise_element_stiffness_matrix, std::placeholders::_1));
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute equilibrium equation
+template <unsigned Tdim>
+bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
+  bool status = true;
+  try {
+    // Compute local cell stiffness matrices
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_material_stiffness_matrix_to_cell,
+                  std::placeholders::_1));
+
+    // TODO: Assemble global stiffness matrix
+    //assembler_->assemble_stiffness_matrix(dt_);
+
+    // TODO: Assemble global residual force RHS vector
+    //assembler_->assemble_equilibrium_right(dt_);
+
+    // TODO: Apply displacement constraints
+    //assembler_->apply_displacement_constraints();
+
+    // TODO: Solve matrix equation and assign solution to assembler
+    //assembler_->assign_displacement_increment(linear_solver_["displacement"]->solve(
+    //    assembler_->stiffness_matrix(), assembler_->residual_force_rhs_vector()));
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }

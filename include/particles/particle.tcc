@@ -974,6 +974,65 @@ inline void mpm::Particle<3>::map_internal_force() noexcept {
   }
 }
 
+//! Map material stiffness matrix to cell (used in poisson equation LHS)
+template <unsigned Tdim>
+inline bool mpm::Particle<Tdim>::map_material_stiffness_matrix_to_cell() {
+  bool status = true;
+  try {
+    // Check if material ptr is valid
+    assert(this->material() != nullptr);
+    // Calculate constitutive relations matrix
+    Eigen::MatrixXd dmatrix;
+    dmatrix =
+        (this->material())
+          ->compute_dmatrix(stress_, dstrain_, this,
+                           &state_variables_[mpm::ParticlePhase::Solid]);
+
+    // Reduce constitutive relations matrix depending on the dimension
+    Eigen::MatrixXd reduced_dmatrix;
+    reduced_dmatrix = this->reduce_dmatrix(dmatrix);
+
+    // Compute local material stiffness matrix
+    cell_->compute_local_material_stiffness_matrix(bmatrix_, reduced_dmatrix, volume_);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Reduce constitutive relations matrix depending on the dimension
+template <>
+inline Eigen::MatrixXd mpm::Particle<1>::reduce_dmatrix(Eigen::MatrixXd& dmatrix) noexcept{
+
+  // Convert to 1x1 matrix in 1D
+  Eigen::MatrixXd dmatrix1x1;
+  dmatrix1x1.resize(1, 1);
+  dmatrix1x1(0, 0) = dmatrix(0, 0);
+
+  return dmatrix1x1;
+}
+
+//! Reduce constitutive relations matrix depending on the dimension
+template <>
+inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(Eigen::MatrixXd& dmatrix) noexcept{
+
+  // Convert to 3x3 matrix in 2D
+  Eigen::MatrixXd dmatrix3x3;
+  dmatrix3x3.resize(3, 3);
+  dmatrix3x3(0, 0) = dmatrix(0, 0); dmatrix3x3(0, 1) = dmatrix(0, 1); dmatrix3x3(0, 2) = 0.;
+  dmatrix3x3(1, 0) = dmatrix(1, 0); dmatrix3x3(1, 1) = dmatrix(1, 1); dmatrix3x3(1, 2) = 0.;
+  dmatrix3x3(2, 0) = 0.;            dmatrix3x3(2, 1) = 0.;            dmatrix3x3(2, 2) = dmatrix(4, 4);
+
+  return dmatrix3x3;
+}
+
+//! Reduce constitutive relations matrix depending on the dimension
+template <>
+inline Eigen::MatrixXd mpm::Particle<3>::reduce_dmatrix(Eigen::MatrixXd& dmatrix) noexcept{
+  return dmatrix;
+}
+
 // Assign velocity to the particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_velocity(
