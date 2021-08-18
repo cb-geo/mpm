@@ -67,6 +67,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Initialise properties
   void initialise() override;
 
+  //! Initialise displacement before predictor step of Newmark scheme
+  void initialise_displacement() override;
+
   //! Compute reference coordinates in a cell
   bool compute_reference_location() noexcept override;
 

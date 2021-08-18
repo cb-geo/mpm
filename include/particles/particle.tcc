@@ -282,6 +282,12 @@ void mpm::Particle<Tdim>::initialise_material(unsigned phase_size) {
   std::fill(state_variables_.begin(), state_variables_.end(), mpm::dense_map());
 }
 
+// Initialise particle displacement before predictor step of Newmark scheme
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::initialise_displacement() {
+  displacement_.setZero();
+}
+
 //! Assign material history variables
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_material_state_vars(

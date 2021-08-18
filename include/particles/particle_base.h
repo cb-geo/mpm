@@ -216,6 +216,9 @@ class ParticleBase {
   //! Initialise properties
   virtual void initialise() = 0;
 
+  //! Initialise displacement befere predictor step of Newmark scheme
+  virtual void initialise_displacement() = 0;
+
   //! Assign mass
   virtual void assign_mass(double mass) = 0;
 
