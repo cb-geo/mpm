@@ -62,7 +62,7 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_stiffness_matrix() {
                 stiffness_matrix_.coeffRef(
                     nactive_node * k + global_node_indices_.at(cid)(i),
                     nactive_node * l + global_node_indices_.at(cid)(j)) +=
-                    cell_stiffness(nids.size() * i + k, nids.size() * j + l);
+                    cell_stiffness(Tdim * i + k, Tdim * j + l);
               }
             }
           }
@@ -98,8 +98,8 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_residual_force_right() {
 
       for (unsigned i = 0; i < Tdim; ++i) {
         // Nodal residual force
-        residual_force_rhs_vector_(nactive_node * i + node_index) =
-            (*node_itr)->external_force(solid)(i) -
+        residual_force_rhs_vector_(nactive_node * i + node_index) +=
+            (*node_itr)->external_force(solid)(i) +
             (*node_itr)->internal_force(solid)(i);
       }
       node_index++;
