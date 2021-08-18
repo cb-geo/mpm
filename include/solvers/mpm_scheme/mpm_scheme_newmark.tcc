@@ -183,10 +183,6 @@ inline void mpm::MPMSchemeNewmark<Tdim>::compute_particle_kinematics(
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_newmark,
                 std::placeholders::_1, dt_, velocity_update));
-
-  // Apply particle velocity constraints
-  // TODO: Reconsider boundary constraints
-  mesh_->apply_particle_velocity_constraints();
 }
 
 //! Postcompute nodal kinematics - map mass and momentum to nodes

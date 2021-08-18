@@ -289,11 +289,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity_acceleration() {
           acceleration_.col(phase)(i) = 0.;
     }
   }
-
-  // Apply velocity constraints, which also sets acceleration to 0,
-  // when velocity is set.
-  // TODO: Reconsider velocity constraints
-  this->apply_velocity_constraints();
 }
 
 //! Update nodal acceleration
@@ -344,11 +339,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_velocity_acceleration_newmark(
   for (unsigned i = 0; i < acceleration_.rows(); ++i)
     if (std::abs(acceleration_.col(phase)(i)) < 1.E-15)
       acceleration_.col(phase)(i) = 0.;
-
-  // Apply velocity constraints, which also sets acceleration to 0,
-  // when velocity is set.
-  // TODO: Reconsider velocity constraints
-  this->apply_velocity_constraints();
 }
 
 //! Compute acceleration and velocity
@@ -406,7 +396,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
     this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
     // Apply velocity constraints, which also sets acceleration to 0,
     // when velocity is set.
-    // TODO: Reconsider velocity constraints
     this->apply_velocity_constraints();
 
     // Set a threshold
