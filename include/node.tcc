@@ -1,4 +1,5 @@
 #include <iostream>
+
 //! Constructor with id, coordinates and dof
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 mpm::Node<Tdim, Tdof, Tnphases>::Node(
@@ -350,7 +351,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
 // !Apply absorbing constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
-    unsigned dir, double delta, double h_min, double a, double b) {
+    unsigned dir, double delta, double h_min, double a, double b,
+    std::string position) {
   bool status = true;
   try {
 
@@ -372,6 +374,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
       Eigen::Matrix<double, Tdim, 1> material_displacement =
           this->property_handle_->property("displacements", prop_id_, *mat_id,
                                            Tdim);
+      material_displacement /= this->mass(*mat_id);
 
       // Wave velocity Eigen Matrix
       Eigen::Matrix<double, Tdim, 1> wave_velocity =
@@ -392,9 +395,24 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
             material_displacement.cwiseProduct(spring_constant);
 
         // Update external force
-        this->update_external_force(true, phase, -absorbing_traction_);
-        std::cout << "\n Absorbing Traction:  \n" << std::ends;
-        std::cout << absorbing_traction_ << std::ends;
+        if (Tdim == 2) {
+          Eigen::Matrix<double, Tdim, 1> absorbing_force_;
+          if (position == "corner") {
+            absorbing_force_ = 0.5 * h_min * absorbing_traction_;
+            this->update_external_force(true, phase, -absorbing_force_);
+          } else if (position == "bottom") {
+            double dir0 = 0.5 * h_min * absorbing_traction_(0);
+            double dir1 = 1.0 * h_min * absorbing_traction_(1);
+            absorbing_force_ << dir0, dir1;
+            this->update_external_force(true, phase, -absorbing_force_);
+          } else if (position == "side") {
+            double dir0 = 1.0 * h_min * absorbing_traction_(0);
+            double dir1 = 0.5 * h_min * absorbing_traction_(1);
+            absorbing_force_ << dir0, dir1;
+            this->update_external_force(true, phase, -absorbing_force_);
+          } else
+            throw std::runtime_error("Invalid absorbing boundary position");
+        }
       }
     }
   } catch (std::exception& exception) {

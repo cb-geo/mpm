@@ -59,10 +59,11 @@ class Constraints {
 
   //! Assign absorbing constraints to nodes
   //! \param[in] absorbing_constraints Constraint at node, dir, delta, h_min, a,
-  //! and b
+  //! b, and position
   bool assign_nodal_absorbing_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
-                                   double>>& absorbing_constraints);
+                                   double, std::string>>&
+          absorbing_constraints);
 
  private:
   //! Mesh object

@@ -15,9 +15,17 @@ class AbsorbingConstraint {
   //! \param[in] h_min Cell height
   //! \param[in] a Equation constant
   //! \param[in] b Equation constant
+  //! \param[in] position Nodal position along boundary
   AbsorbingConstraint(int setid, unsigned dir, double delta, double h_min,
-                      double a = 1, double b = 1)
-      : setid_{setid}, dir_{dir}, delta_{delta}, h_min_{h_min}, a_{a}, b_{b} {};
+                      double a = 1., double b = 1.,
+                      std::string position = "null")
+      : setid_{setid},
+        dir_{dir},
+        delta_{delta},
+        h_min_{h_min},
+        a_{a},
+        b_{b},
+        position_{position} {};
 
   // Set id
   int setid() const { return setid_; }
@@ -37,6 +45,9 @@ class AbsorbingConstraint {
   // Return b
   double b() const { return b_; }
 
+  // Return position
+  std::string position() const { return position_; }
+
  private:
   // ID
   int setid_;
@@ -50,6 +61,8 @@ class AbsorbingConstraint {
   double a_;
   // b
   double b_;
+  // Node position
+  std::string position_;
 };
 }  // namespace mpm
 #endif  // MPM_ABSORBING_CONSTRAINT_H_

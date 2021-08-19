@@ -964,9 +964,12 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
         double a = constraints.at("a").template get<double>();
         // b
         double b = constraints.at("b").template get<double>();
+        // position
+        std::string position =
+            constraints.at("position").template get<std::string>();
         // Add absorbing constraint to mesh
         auto absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
-            nset_id, dir, delta, h_min, a, b);
+            nset_id, dir, delta, h_min, a, b, position);
         bool absorbing_constraints =
             constraints_->assign_nodal_absorbing_constraint(
                 nset_id, absorbing_constraint);
@@ -974,13 +977,14 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
           throw std::runtime_error(
               "Nodal absorbing constraint is not properly assigned");
         absorbing_boundary_ = true;
-        absorbing_nset_id_ = nset_id;
-        absorbing_constraint_ = absorbing_constraint;
+        absorbing_nset_id_.emplace_back(nset_id);
+        absorbing_constraint_.emplace_back(absorbing_constraint);
         absorbing_dir_ = dir;
         absorbing_delta_ = delta;
         absorbing_h_min_ = h_min;
         absorbing_a_ = a;
         absorbing_b_ = b;
+        absorbing_position_ = position;
       }
     } else
       throw std::runtime_error("Absorbing constraints JSON not found");
@@ -994,11 +998,16 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
 // Apply nodal absorbing constraints
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::nodal_absorbing_constraints() {
-  bool absorbing_constraints = constraints_->assign_nodal_absorbing_constraint(
-      absorbing_nset_id_, absorbing_constraint_);
-  if (!absorbing_constraints)
-    throw std::runtime_error(
-        "Nodal absorbing constraint is not properly assigned");
+  for (int i = 0; i < absorbing_nset_id_.size(); i++) {
+    auto nset_id_ = absorbing_nset_id_.at(i);
+    auto a_constraint_ = absorbing_constraint_.at(i);
+    bool absorbing_constraints =
+        constraints_->assign_nodal_absorbing_constraint(nset_id_,
+                                                        a_constraint_);
+    if (!absorbing_constraints)
+      throw std::runtime_error(
+          "Nodal absorbing constraint is not properly assigned");
+  }
 }
 
 //! Cell entity sets

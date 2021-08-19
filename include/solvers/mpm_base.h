@@ -218,13 +218,14 @@ class MPMBase : public MPM {
   bool locate_particles_{true};
   //! Absorbing Boundary Variables
   bool absorbing_boundary_{false};
-  std::shared_ptr<mpm::AbsorbingConstraint> absorbing_constraint_;
+  std::vector<std::shared_ptr<mpm::AbsorbingConstraint>> absorbing_constraint_;
   unsigned absorbing_dir_{0};
-  int absorbing_nset_id_{0};
+  std::vector<int> absorbing_nset_id_;
   double absorbing_delta_{0.};
   double absorbing_h_min_{0.};
   double absorbing_a_{0.};
   double absorbing_b_{0.};
+  std::string absorbing_position_{"null"};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell

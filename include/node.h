@@ -217,11 +217,13 @@ class Node : public NodeBase<Tdim> {
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of absorbing constraint
   //! \param[in] delta Virtual viscous layer thickness
-  //! \param[in] a Equation constant
-  //! \param[in] a Equation constant
   //! \param[in] h_min Characteristic Length
+  //! \param[in] a Equation constant
+  //! \param[in] a Equation constant
+  //! \param[in] position Nodal position along boundary
   bool apply_absorbing_constraint(unsigned dir, double delta, double h_min,
-                                  double a, double b) override;
+                                  double a, double b,
+                                  std::string position) override;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node

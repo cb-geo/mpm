@@ -113,7 +113,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
     const std::shared_ptr<mpm::AbsorbingConstraint>& absorbing_constraint) {
   bool status = true;
   try {
-    int set_id = absorbing_constraint->setid();
+    // int set_id = absorbing_constraint->setid();
+    int set_id = nset_id;
     auto nset = mesh_->nodes(set_id);
     if (nset.size() == 0)
       throw std::runtime_error(
@@ -123,9 +124,11 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
     double h_min = absorbing_constraint->h_min();
     double a = absorbing_constraint->a();
     double b = absorbing_constraint->b();
+    std::string position = absorbing_constraint->position();
     if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b))
       for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
-        if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b))
+        if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b,
+                                                 position))
           throw std::runtime_error(
               "Failed to apply absorbing constraint at node");
       }
@@ -142,7 +145,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
-                                 double>>& absorbing_constraints) {
+                                 double, std::string>>& absorbing_constraints) {
   bool status = true;
   try {
     for (const auto& absorbing_constraint : absorbing_constraints) {
@@ -158,12 +161,19 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       double a = std::get<4>(absorbing_constraint);
       // b
       double b = std::get<5>(absorbing_constraint);
+      // Position
+      std::string position = std::get<6>(absorbing_constraint);
+      // delta check
       if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b)) {
-        // Apply constraint
-        if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min, a,
-                                                          b))
-          throw std::runtime_error(
-              "Nodal absorbing constraints assignment failed");
+        if (position == "side" or position == "bottom" or
+            position == "corner") {
+          // Apply constraint
+          if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min,
+                                                            a, b, position))
+            throw std::runtime_error(
+                "Nodal absorbing constraints assignment failed");
+        } else
+          throw std::runtime_error("Invalid position");
       } else
         throw std::runtime_error("Invalid value for delta");
     }

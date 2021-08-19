@@ -86,6 +86,7 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::absorbing_h_min_;
   using mpm::MPMBase<Tdim>::absorbing_a_;
   using mpm::MPMBase<Tdim>::absorbing_b_;
+  using mpm::MPMBase<Tdim>::absorbing_position_;
 
  private:
   //! Pressure smoothing
