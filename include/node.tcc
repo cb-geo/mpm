@@ -350,7 +350,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
     unsigned dir, double delta, double h_min, double a, double b,
-    std::string position) {
+    mpm::Position position) {
   bool status = true;
   try {
 
@@ -395,21 +395,24 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
         // Update external force
         if (Tdim == 2) {
           Eigen::Matrix<double, Tdim, 1> absorbing_force_;
-          if (position == "corner") {
-            absorbing_force_ = 0.5 * h_min * absorbing_traction_;
-            this->update_external_force(true, phase, -absorbing_force_);
-          } else if (position == "bottom") {
-            double dir0 = 0.5 * h_min * absorbing_traction_(0);
-            double dir1 = 1.0 * h_min * absorbing_traction_(1);
-            absorbing_force_ << dir0, dir1;
-            this->update_external_force(true, phase, -absorbing_force_);
-          } else if (position == "side") {
-            double dir0 = 1.0 * h_min * absorbing_traction_(0);
-            double dir1 = 0.5 * h_min * absorbing_traction_(1);
-            absorbing_force_ << dir0, dir1;
-            this->update_external_force(true, phase, -absorbing_force_);
-          } else
+          double force0 = 0.0;
+          double force1 = 0.0;
+          if (position == mpm::Position::Corner) {
+            force0 = 0.5 * h_min * absorbing_traction_(0);
+            force1 = 0.5 * h_min * absorbing_traction_(1);
+          } else if (position == mpm::Position::Bottom) {
+            force0 = 0.5 * h_min * absorbing_traction_(0);
+            force1 = 1.0 * h_min * absorbing_traction_(1);
+          } else if (position == mpm::Position::Side) {
+            force0 = 1.0 * h_min * absorbing_traction_(0);
+            force1 = 0.5 * h_min * absorbing_traction_(1);
+          } else {
             throw std::runtime_error("Invalid absorbing boundary position");
+          }
+          // clang-format off
+          absorbing_force_ << force0, force1;
+          // clang-format on
+          this->update_external_force(true, phase, -absorbing_force_);
         }
       }
     }

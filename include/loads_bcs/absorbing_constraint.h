@@ -1,6 +1,8 @@
 #ifndef MPM_ABSORBING_CONSTRAINT_H_
 #define MPM_ABSORBING_CONSTRAINT_H_
 
+#include "data_types.h"
+
 namespace mpm {
 
 //! AbsorbingConstraint class to store friction constraint on a set
@@ -18,7 +20,7 @@ class AbsorbingConstraint {
   //! \param[in] position Nodal position along boundary
   AbsorbingConstraint(int setid, unsigned dir, double delta, double h_min,
                       double a = 1., double b = 1.,
-                      std::string position = "null")
+                      mpm::Position position = mpm::Position::None)
       : setid_{setid},
         dir_{dir},
         delta_{delta},
@@ -46,7 +48,7 @@ class AbsorbingConstraint {
   double b() const { return b_; }
 
   // Return position
-  std::string position() const { return position_; }
+  mpm::Position position() const { return position_; }
 
  private:
   // ID
@@ -62,7 +64,7 @@ class AbsorbingConstraint {
   // b
   double b_;
   // Node position
-  std::string position_;
+  mpm::Position position_;
 };
 }  // namespace mpm
 #endif  // MPM_ABSORBING_CONSTRAINT_H_

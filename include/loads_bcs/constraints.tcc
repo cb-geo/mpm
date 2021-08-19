@@ -124,7 +124,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
     double h_min = absorbing_constraint->h_min();
     double a = absorbing_constraint->a();
     double b = absorbing_constraint->b();
-    std::string position = absorbing_constraint->position();
+    mpm::Position position = absorbing_constraint->position();
     if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b))
       for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
         if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b,
@@ -145,7 +145,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
-                                 double, std::string>>& absorbing_constraints) {
+                                 double, mpm::Position>>&
+        absorbing_constraints) {
   bool status = true;
   try {
     for (const auto& absorbing_constraint : absorbing_constraints) {
@@ -162,11 +163,12 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       // b
       double b = std::get<5>(absorbing_constraint);
       // Position
-      std::string position = std::get<6>(absorbing_constraint);
+      mpm::Position position = std::get<6>(absorbing_constraint);
       // delta check
       if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b)) {
-        if (position == "side" or position == "bottom" or
-            position == "corner") {
+        if (position == mpm::Position::Side or
+            position == mpm::Position::Corner or
+            position == mpm::Position::Bottom) {
           // Apply constraint
           if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min,
                                                             a, b, position))

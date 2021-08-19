@@ -34,6 +34,13 @@ inline double zero() {
   return 0.;
 }
 
+//! Position type
+//! None: No position is specified
+//! Side: Nodes along model vertical sides (left or right)
+//! Corner: Nodes at model corner
+//! Bottom: Nodes along model bottom
+enum class Position { None, Side, Corner, Bottom };
+
 }  // namespace mpm
 
 #endif  // MPM_DATA_TYPES_H_

@@ -62,7 +62,7 @@ class Constraints {
   //! b, and position
   bool assign_nodal_absorbing_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
-                                   double, std::string>>&
+                                   double, mpm::Position>>&
           absorbing_constraints);
 
  private:

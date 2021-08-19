@@ -215,7 +215,7 @@ class NodeBase {
   //! \param[in] position Nodal position along boundary
   virtual bool apply_absorbing_constraint(unsigned dir, double delta,
                                           double h_min, double a, double b,
-                                          std::string position) = 0;
+                                          mpm::Position position) = 0;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node

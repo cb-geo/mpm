@@ -967,9 +967,17 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
         // position
         std::string position =
             constraints.at("position").template get<std::string>();
+        if (position == "side")
+          position_ = mpm::Position::Side;
+        else if (position == "corner")
+          position_ = mpm::Position::Corner;
+        else if (position == "bottom")
+          position_ = mpm::Position::Bottom;
+        else
+          position_ = mpm::Position::None;
         // Add absorbing constraint to mesh
         auto absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
-            nset_id, dir, delta, h_min, a, b, position);
+            nset_id, dir, delta, h_min, a, b, position_);
         bool absorbing_constraints =
             constraints_->assign_nodal_absorbing_constraint(
                 nset_id, absorbing_constraint);

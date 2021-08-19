@@ -223,7 +223,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] position Nodal position along boundary
   bool apply_absorbing_constraint(unsigned dir, double delta, double h_min,
                                   double a, double b,
-                                  std::string position) override;
+                                  mpm::Position position) override;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
