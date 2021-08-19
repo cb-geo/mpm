@@ -1,5 +1,3 @@
-#include <iostream>
-
 //! Constructor with id, coordinates and dof
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 mpm::Node<Tdim, Tdof, Tnphases>::Node(
