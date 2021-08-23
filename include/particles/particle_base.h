@@ -126,7 +126,13 @@ class ParticleBase {
   virtual void compute_shapefn() noexcept = 0;
 
   //! Compute B matrix
-  virtual void compute_bmatrix() noexcept = 0;
+  virtual inline Eigen::MatrixXd compute_bmatrix(const Eigen::MatrixXd& dn_dx) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(compute_bmatrix) in "
+        "ParticleBase:: "
+        "illegal operation!");
+  }
 
   //! Assign volume
   virtual bool assign_volume(double volume) = 0;
