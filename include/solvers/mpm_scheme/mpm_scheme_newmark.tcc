@@ -116,7 +116,7 @@ inline void mpm::MPMSchemeNewmark<Tdim>::precompute_stress_strain(
 template <unsigned Tdim>
 inline void mpm::MPMSchemeNewmark<Tdim>::postcompute_stress_strain(
     unsigned phase, bool pressure_smoothing) {
-  mpm::MPMScheme<Tdim>::compute_stress_strain(phase, pressure_smoothing);
+  this->compute_stress_strain(phase, pressure_smoothing);
 }
 
 // Compute forces

@@ -852,7 +852,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_increment(
       Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    Eigen::Matrix<double, 3, 1> dsp = nodes_[i]->velocity(phase);
+    Eigen::Matrix<double, 3, 1> dsp = nodes_[i]->displacement(phase);
     strain_increment[0] += dn_dx(i, 0) * dsp[0];
     strain_increment[1] += dn_dx(i, 1) * dsp[1];
     strain_increment[2] += dn_dx(i, 2) * dsp[2];
