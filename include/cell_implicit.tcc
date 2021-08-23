@@ -38,7 +38,8 @@ inline void mpm::Cell<Tdim>::compute_local_mass_matrix(
     for (unsigned j = 0; j < this->nnodes_; ++j) {
       for (unsigned k = 0; k < Tdim; ++k) {
         stiffness_matrix_(Tdim * i + k, Tdim * j + k) +=
-            1./(newmark_beta * dt * dt) * shapefn(i) * shapefn(j) * multiplier * mass;
+            1. / (newmark_beta * dt * dt) * shapefn(i) * shapefn(j) *
+            multiplier * mass;
       }
     }
   }

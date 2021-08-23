@@ -322,8 +322,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Update displacement increment at the node
   //! \ingroup Implicit
-  void update_displacement_increment(const Eigen::VectorXd& displacement_increment,
-                                 unsigned phase, unsigned nactive_node) override;
+  void update_displacement_increment(
+      const Eigen::VectorXd& displacement_increment, unsigned phase,
+      unsigned nactive_node) override;
 
   /**@{*/
 

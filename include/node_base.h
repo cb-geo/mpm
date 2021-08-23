@@ -317,8 +317,9 @@ class NodeBase {
 
   //! Update displacement increment at the node
   //! \ingroup Implicit
-  virtual void update_displacement_increment(const Eigen::VectorXd& displacement_increment,
-                                 unsigned phase, unsigned nactive_node) = 0;
+  virtual void update_displacement_increment(
+      const Eigen::VectorXd& displacement_increment, unsigned phase,
+      unsigned nactive_node) = 0;
 
   /**@{*/
 

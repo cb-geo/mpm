@@ -27,8 +27,9 @@ inline void mpm::MPMSchemeNewmark<Tdim>::initialise() {
           &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
 
       // Iterate over each particle to initialise displacement
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::initialise_displacement, std::placeholders::_1));
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::initialise_displacement,
+                    std::placeholders::_1));
     }
   }  // Wait to complete
 }

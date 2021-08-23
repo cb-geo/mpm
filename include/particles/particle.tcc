@@ -480,7 +480,8 @@ void mpm::Particle<Tdim>::compute_shapefn() noexcept {
 
 // Compute B matrix
 template <>
-inline Eigen::MatrixXd mpm::Particle<1>::compute_bmatrix(const Eigen::MatrixXd& dn_dx) noexcept {
+inline Eigen::MatrixXd mpm::Particle<1>::compute_bmatrix(
+    const Eigen::MatrixXd& dn_dx) noexcept {
   Eigen::MatrixXd bmatrix;
   bmatrix.resize(1, this->nodes_.size());
   bmatrix.setZero();
@@ -493,7 +494,8 @@ inline Eigen::MatrixXd mpm::Particle<1>::compute_bmatrix(const Eigen::MatrixXd& 
 
 // Compute B matrix
 template <>
-inline Eigen::MatrixXd mpm::Particle<2>::compute_bmatrix(const Eigen::MatrixXd& dn_dx) noexcept {
+inline Eigen::MatrixXd mpm::Particle<2>::compute_bmatrix(
+    const Eigen::MatrixXd& dn_dx) noexcept {
   Eigen::MatrixXd bmatrix;
   bmatrix.resize(3, 2 * this->nodes_.size());
   bmatrix.setZero();
@@ -509,7 +511,8 @@ inline Eigen::MatrixXd mpm::Particle<2>::compute_bmatrix(const Eigen::MatrixXd& 
 
 // Compute B matrix
 template <>
-inline Eigen::MatrixXd mpm::Particle<3>::compute_bmatrix(const Eigen::MatrixXd& dn_dx) noexcept {
+inline Eigen::MatrixXd mpm::Particle<3>::compute_bmatrix(
+    const Eigen::MatrixXd& dn_dx) noexcept {
   Eigen::MatrixXd bmatrix;
   bmatrix.resize(6, 3 * this->nodes_.size());
   bmatrix.setZero();
