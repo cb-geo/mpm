@@ -320,6 +320,32 @@ class Node : public NodeBase<Tdim> {
    */
   /**@{*/
 
+  //! Assign displacement constraint for implicit solver
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \ingroup Implicit
+  //! \param[in] dir Direction of displacement constraint
+  //! \param[in] displacement Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_displacement_constraint(
+      const unsigned dir, const double displacement,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Return displacement constraint
+  //! \ingroup Implicit
+  double displacement_constraint(const unsigned dir,
+                                     const double current_time) const override{
+    double constraint = std::numeric_limits<double>::max();
+    if (displacement_constraints_.find(dir) != displacement_constraints_.end()) {
+      const double scalar =
+          (displacement_function_.find(dir) != displacement_function_.end())
+              ? displacement_function_.at(dir)->value(current_time)
+              : 1.0;
+
+      constraint = scalar * displacement_constraints_.at(dir);
+    }
+    return constraint;
+  }
+
   //! Update displacement increment at the node
   //! \ingroup Implicit
   void update_displacement_increment(
@@ -523,6 +549,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Displacement constraints
+  std::map<unsigned, double> displacement_constraints_;
   //! Pressure constraint
   std::map<unsigned, double> pressure_constraints_;
   //! Rotation matrix for general velocity constraints
@@ -535,6 +563,8 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Mathematical function for displacement
+  std::map<unsigned, std::shared_ptr<FunctionBase>> displacement_function_;
   //! Mathematical function for pressure
   std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Concentrated force

@@ -315,6 +315,21 @@ class NodeBase {
    */
   /**@{*/
 
+  //! Assign displacement constraint for implicit solver
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \ingroup Implicit
+  //! \param[in] dir Direction of displacement constraint
+  //! \param[in] displacement Applied pressure constraint
+  //! \param[in] function math function
+  virtual bool assign_displacement_constraint(
+      const unsigned dir, const double displacement,
+      const std::shared_ptr<FunctionBase>& function) = 0;
+
+  //! Return displacement constraint
+  //! \ingroup Implicit
+  virtual double displacement_constraint(const unsigned dir,
+                                     const double current_time) const = 0;
+
   //! Update displacement increment at the node
   //! \ingroup Implicit
   virtual void update_displacement_increment(

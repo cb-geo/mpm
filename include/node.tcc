@@ -753,3 +753,31 @@ void mpm::Node<Tdim, Tdof,
   }
   node_mutex_.unlock();
 }
+
+//! Assign displacement constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_displacement_constraint(
+    const unsigned dir, const double displacement,
+    const std::shared_ptr<FunctionBase>& function) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases
+    if (dir < (Tdim * Tnphases))
+      this->displacement_constraints_.insert(std::make_pair<unsigned, double>(
+          static_cast<unsigned>(dir), static_cast<double>(displacement)));
+    else
+      throw std::runtime_error("Constraint direction is out of bounds");
+
+    // Assign displacement function
+    if (function != nullptr)
+      this->displacement_function_.insert(
+          std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
+              static_cast<unsigned>(dir),
+              static_cast<std::shared_ptr<FunctionBase>>(function)));
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

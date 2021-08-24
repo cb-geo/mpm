@@ -8,6 +8,7 @@
 #include "mesh.h"
 #include "pressure_constraint.h"
 #include "velocity_constraint.h"
+#include "displacement_constraint.h"
 
 namespace mpm {
 
@@ -34,6 +35,18 @@ class Constraints {
   bool assign_nodal_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
+
+  //! Assign nodal displacement constraints for implicit solver
+  //! \param[in] setid Node set id
+  //! \param[in] displacement_constraints Displacement constraint at node, dir, velocity
+  bool assign_nodal_displacement_constraint(const std::shared_ptr<FunctionBase>& dfunction,
+      int set_id, const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint);
+
+  //! Assign displacement constraints to nodes
+  //! \param[in] displacement_constraints Constraint at node, dir, and velocity
+  bool assign_nodal_displacement_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          displacement_constraints);
 
   //! Assign nodal frictional constraints
   //! \param[in] setid Node set id

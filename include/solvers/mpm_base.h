@@ -141,6 +141,12 @@ class MPMBase : public MPM {
   void nodal_velocity_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
 
+  //! Nodal displacement constraints for implicit solver
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_displacement_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
   //! Nodal frictional constraints
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] mesh_io Mesh IO handle
