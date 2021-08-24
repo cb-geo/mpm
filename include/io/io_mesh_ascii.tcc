@@ -525,6 +525,52 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
   return constraints;
 }
 
+//! Return displacement constraints of nodes or particles
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, double>>
+    mpm::IOMeshAscii<Tdim>::read_displacement_constraints(
+        const std::string& displacement_constraints_file) {
+
+  // Nodal or particle displacement constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(displacement_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          // ID
+          mpm::Index id;
+          // Direction
+          unsigned dir;
+          // Velocity
+          double displacement;
+          while (istream.good()) {
+            // Read stream
+            istream >> id >> dir >> displacement;
+            constraints.emplace_back(std::make_tuple(id, dir, displacement));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read displacement constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
 //! Return friction constraints of particles
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, int, double>>
