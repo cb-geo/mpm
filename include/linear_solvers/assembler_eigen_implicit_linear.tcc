@@ -111,31 +111,33 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_residual_force_right() {
   return status;
 }
 
-//! TODO: Assign displacement constraints
+//! Assign displacement constraints
 template <unsigned Tdim>
 bool mpm::AssemblerEigenImplicitLinear<Tdim>::assign_displacement_constraints(
     double current_time) {
   bool status = false;
   try {
-    // // Resize pressure constraints vector
-    // pressure_constraints_.resize(active_dof_);
-    // pressure_constraints_.reserve(int(0.5 * active_dof_));
+    // Resize displacement constraints vector
+    displacement_constraints_.resize(active_dof_ * Tdim);
+    displacement_constraints_.reserve(int(0.5 * active_dof_ * Tdim));
 
-    // // Nodes container
-    // const auto& nodes = mesh_->active_nodes();
-    // // Iterate over nodes to get pressure constraints
-    // for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
-    //   // Assign total pressure constraint
-    //   const double pressure_constraint =
-    //       (*node)->pressure_constraint(0, current_time);
+    // Nodes container
+    const auto& nodes = mesh_->active_nodes();
+    // Iterate over nodes to get displacement constraints
+    for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
+      for(unsigned i = 0; i < Tdim; ++i){
+        // Assign total pressure constraint
+        const double displacement_constraint =
+            (*node)->displacement_constraint(i, current_time);
 
-    //   // Check if there is a pressure constraint
-    //   if (pressure_constraint != std::numeric_limits<double>::max()) {
-    //     // Insert the pressure constraints
-    //     pressure_constraints_.insert((*node)->active_id()) =
-    //         pressure_constraint;
-    //   }
-    // }
+        // Check if there is a displacement constraint
+        if (displacement_constraint != std::numeric_limits<double>::max()) {
+          // Insert the pressure constraints
+          displacement_constraints_.insert(active_dof_ * i + (*node)->active_id()) =
+              displacement_constraint;
+        }
+      }
+    }
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -143,42 +145,26 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assign_displacement_constraints(
   return status;
 }
 
-//! TODO: Apply displacement constraints vector
+//! Apply displacement constraints vector
 template <unsigned Tdim>
 void mpm::AssemblerEigenImplicitLinear<Tdim>::apply_displacement_constraints() {
-  //   try {
-  //     // Modify poisson_rhs_vector_
-  //     poisson_rhs_vector_ -= laplacian_matrix_ * pressure_constraints_;
+    try {
+      // Modify residual_force_rhs_vector_
+      residual_force_rhs_vector_ -= stiffness_matrix_ * displacement_constraints_;
 
-  //     // Apply free surface
-  //     if (!free_surface_.empty()) {
-  //       const auto& nodes = mesh_->nodes();
-  //       for (const auto& free_node : free_surface_) {
-  //         const auto column_index = nodes[free_node]->active_id();
-  //         // Modify poisson_rhs_vector
-  //         poisson_rhs_vector_(column_index) = 0;
-  //         // Modify laplacian_matrix
-  //         laplacian_matrix_.row(column_index) *= 0;
-  //         laplacian_matrix_.col(column_index) *= 0;
-  //         laplacian_matrix_.coeffRef(column_index, column_index) = 1;
-  //       }
-  //       // Clear the vector
-  //       free_surface_.clear();
-  //     }
+      // Apply displacement constraints
+      for (Eigen::SparseVector<double>::InnerIterator
+      it(displacement_constraints_);
+           it; ++it) {
+        // Modify residual force_rhs_vector
+        residual_force_rhs_vector_(it.index()) = it.value();
+        // Modify stiffness_matrix
+        stiffness_matrix_.row(it.index()) *= 0;
+        stiffness_matrix_.col(it.index()) *= 0;
+        stiffness_matrix_.coeffRef(it.index(), it.index()) = 1;
+      }
 
-  //     // Apply pressure constraints
-  //     for (Eigen::SparseVector<double>::InnerIterator
-  //     it(pressure_constraints_);
-  //          it; ++it) {
-  //       // Modify poisson_rhs_vector
-  //       poisson_rhs_vector_(it.index()) = it.value();
-  //       // Modify laplacian_matrix
-  //       laplacian_matrix_.row(it.index()) *= 0;
-  //       laplacian_matrix_.col(it.index()) *= 0;
-  //       laplacian_matrix_.coeffRef(it.index(), it.index()) = 1;
-  //     }
-
-  //   } catch (std::exception& exception) {
-  //     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   }
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    }
 }

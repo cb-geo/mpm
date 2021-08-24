@@ -255,9 +255,8 @@ bool mpm::MPMImplicitLinear<Tdim>::reinitialise_matrix() {
     // Assign global node indice
     assembler_->assign_global_node_indices(nactive_node, nglobal_active_node);
 
-    // TODO: Assign displacement constraints
-    // assembler_->assign_displacement_constraints(this->beta_,
-    //                                        this->step_ * this->dt_);
+    // Assign displacement constraints
+    assembler_->assign_displacement_constraints(this->step_ * this->dt_);
 
     // Initialise element matrix
     mesh_->iterate_over_cells(
@@ -290,8 +289,8 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
     // Assemble global residual force RHS vector
     assembler_->assemble_residual_force_right();
 
-    // TODO: Apply displacement constraints
-    // assembler_->apply_displacement_constraints();
+    // Apply displacement constraints
+    assembler_->apply_displacement_constraints();
 
     // Solve matrix equation and assign solution to assembler
     assembler_->assign_displacement_increment(
