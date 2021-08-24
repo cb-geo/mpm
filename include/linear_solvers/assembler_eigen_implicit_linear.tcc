@@ -125,7 +125,7 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assign_displacement_constraints(
     const auto& nodes = mesh_->active_nodes();
     // Iterate over nodes to get displacement constraints
     for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
-      for(unsigned i = 0; i < Tdim; ++i){
+      for (unsigned i = 0; i < Tdim; ++i) {
         // Assign total pressure constraint
         const double displacement_constraint =
             (*node)->displacement_constraint(i, current_time);
@@ -133,8 +133,8 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assign_displacement_constraints(
         // Check if there is a displacement constraint
         if (displacement_constraint != std::numeric_limits<double>::max()) {
           // Insert the pressure constraints
-          displacement_constraints_.insert(active_dof_ * i + (*node)->active_id()) =
-              displacement_constraint;
+          displacement_constraints_.insert(
+              active_dof_ * i + (*node)->active_id()) = displacement_constraint;
         }
       }
     }
@@ -148,23 +148,23 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assign_displacement_constraints(
 //! Apply displacement constraints vector
 template <unsigned Tdim>
 void mpm::AssemblerEigenImplicitLinear<Tdim>::apply_displacement_constraints() {
-    try {
-      // Modify residual_force_rhs_vector_
-      residual_force_rhs_vector_ -= stiffness_matrix_ * displacement_constraints_;
+  try {
+    // Modify residual_force_rhs_vector_
+    residual_force_rhs_vector_ -= stiffness_matrix_ * displacement_constraints_;
 
-      // Apply displacement constraints
-      for (Eigen::SparseVector<double>::InnerIterator
-      it(displacement_constraints_);
-           it; ++it) {
-        // Modify residual force_rhs_vector
-        residual_force_rhs_vector_(it.index()) = it.value();
-        // Modify stiffness_matrix
-        stiffness_matrix_.row(it.index()) *= 0;
-        stiffness_matrix_.col(it.index()) *= 0;
-        stiffness_matrix_.coeffRef(it.index(), it.index()) = 1;
-      }
-
-    } catch (std::exception& exception) {
-      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    // Apply displacement constraints
+    for (Eigen::SparseVector<double>::InnerIterator it(
+             displacement_constraints_);
+         it; ++it) {
+      // Modify residual force_rhs_vector
+      residual_force_rhs_vector_(it.index()) = it.value();
+      // Modify stiffness_matrix
+      stiffness_matrix_.row(it.index()) *= 0;
+      stiffness_matrix_.col(it.index()) *= 0;
+      stiffness_matrix_.coeffRef(it.index(), it.index()) = 1;
     }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
 }

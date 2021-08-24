@@ -3,12 +3,12 @@
 
 #include <memory>
 
+#include "displacement_constraint.h"
 #include "friction_constraint.h"
 #include "logger.h"
 #include "mesh.h"
 #include "pressure_constraint.h"
 #include "velocity_constraint.h"
-#include "displacement_constraint.h"
 
 namespace mpm {
 
@@ -38,9 +38,11 @@ class Constraints {
 
   //! Assign nodal displacement constraints for implicit solver
   //! \param[in] setid Node set id
-  //! \param[in] displacement_constraints Displacement constraint at node, dir, velocity
-  bool assign_nodal_displacement_constraint(const std::shared_ptr<FunctionBase>& dfunction,
-      int set_id, const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint);
+  //! \param[in] displacement_constraints Displacement constraint at node, dir,
+  //! velocity
+  bool assign_nodal_displacement_constraint(
+      const std::shared_ptr<FunctionBase>& dfunction, int set_id,
+      const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint);
 
   //! Assign displacement constraints to nodes
   //! \param[in] displacement_constraints Constraint at node, dir, and velocity

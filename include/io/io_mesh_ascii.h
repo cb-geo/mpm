@@ -93,7 +93,8 @@ class IOMeshAscii : public IOMesh<Tdim> {
           const std::string& velocity_constraints_file) override;
 
   //! Read displacement constraints file for implicit solver
-  //! \param[in] displacement_constraints_files file name with displacement constraints
+  //! \param[in] displacement_constraints_files file name with displacement
+  //! constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_displacement_constraints(
           const std::string& displacement_constraints_file) override;

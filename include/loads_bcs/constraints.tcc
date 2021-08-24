@@ -53,8 +53,9 @@ bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraints(
 
 //! Assign nodal displacement constraints
 template <unsigned Tdim>
-bool mpm::Constraints<Tdim>::assign_nodal_displacement_constraint(const std::shared_ptr<FunctionBase>& dfunction, 
-    int set_id, const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint) {
+bool mpm::Constraints<Tdim>::assign_nodal_displacement_constraint(
+    const std::shared_ptr<FunctionBase>& dfunction, int set_id,
+    const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint) {
   bool status = true;
   try {
     int set_id = dconstraint->setid();
@@ -66,7 +67,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_displacement_constraint(const std::sha
     unsigned dir = dconstraint->dir();
     double displacement = dconstraint->displacement();
     for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
-      if (!(*nitr)->assign_displacement_constraint(dir, displacement, dfunction))
+      if (!(*nitr)->assign_displacement_constraint(dir, displacement,
+                                                   dfunction))
         throw std::runtime_error(
             "Failed to initialise displacement constraint at node");
     }
@@ -93,7 +95,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_displacement_constraints(
       double displacement = std::get<2>(displacement_constraint);
 
       // Apply constraint
-      if (!mesh_->node(nid)->assign_displacement_constraint(dir, displacement, nullptr))
+      if (!mesh_->node(nid)->assign_displacement_constraint(dir, displacement,
+                                                            nullptr))
         throw std::runtime_error(
             "Nodal displacement constraints assignment failed");
     }

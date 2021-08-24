@@ -328,7 +328,7 @@ class NodeBase {
   //! Return displacement constraint
   //! \ingroup Implicit
   virtual double displacement_constraint(const unsigned dir,
-                                     const double current_time) const = 0;
+                                         const double current_time) const = 0;
 
   //! Update displacement increment at the node
   //! \ingroup Implicit

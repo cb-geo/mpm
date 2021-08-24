@@ -104,7 +104,8 @@ class IOMesh {
           const std::string& velocity_constraints_file) = 0;
 
   //! Read displacement constraints file
-  //! \param[in] displacement_constraints_files file name with displacement constraints
+  //! \param[in] displacement_constraints_files file name with displacement
+  //! constraints
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_displacement_constraints(
           const std::string& displacement_constraints_file) = 0;

@@ -333,9 +333,10 @@ class Node : public NodeBase<Tdim> {
   //! Return displacement constraint
   //! \ingroup Implicit
   double displacement_constraint(const unsigned dir,
-                                     const double current_time) const override{
+                                 const double current_time) const override {
     double constraint = std::numeric_limits<double>::max();
-    if (displacement_constraints_.find(dir) != displacement_constraints_.end()) {
+    if (displacement_constraints_.find(dir) !=
+        displacement_constraints_.end()) {
       const double scalar =
           (displacement_function_.find(dir) != displacement_function_.end())
               ? displacement_function_.at(dir)->value(current_time)

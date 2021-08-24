@@ -974,10 +974,12 @@ void mpm::MPMBase<Tdim>::nodal_displacement_constraints(
           // Direction
           unsigned dir = constraints.at("dir").template get<unsigned>();
           // Displacement
-          double displacement = constraints.at("displacement").template get<double>();
+          double displacement =
+              constraints.at("displacement").template get<double>();
           // Add displacement constraint to mesh
           auto displacement_constraint =
-              std::make_shared<mpm::DisplacementConstraint>(nset_id, dir, displacement);
+              std::make_shared<mpm::DisplacementConstraint>(nset_id, dir,
+                                                            displacement);
           bool displacement_constraints =
               constraints_->assign_nodal_displacement_constraint(
                   dfunction, nset_id, displacement_constraint);

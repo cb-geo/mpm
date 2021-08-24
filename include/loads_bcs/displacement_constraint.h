@@ -4,8 +4,9 @@
 namespace mpm {
 
 //! DisplacementConstraint class to store displacement constraint on a set
-//! \brief DisplacementConstraint class to store a displacement constraint on a set
-//! \details DisplacementConstraint stores the displacement constraint as a static value
+//! \brief DisplacementConstraint class to store a displacement constraint on a
+//! set \details DisplacementConstraint stores the displacement constraint as a
+//! static value
 class DisplacementConstraint {
  public:
   // Constructor
