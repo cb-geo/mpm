@@ -109,8 +109,7 @@ class Particle : public ParticleBase<Tdim> {
   void compute_shapefn() noexcept override;
 
   //! Compute B matrix of a particle, based on local coordinates
-  inline Eigen::MatrixXd compute_bmatrix(
-      const Eigen::MatrixXd& dn_dx) noexcept override;
+  inline Eigen::MatrixXd compute_bmatrix() noexcept override;
 
   //! Assign volume
   //! \param[in] volume Volume of particle

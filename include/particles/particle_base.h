@@ -126,7 +126,7 @@ class ParticleBase {
   virtual void compute_shapefn() noexcept = 0;
 
   //! Compute B matrix
-  virtual inline Eigen::MatrixXd compute_bmatrix(const Eigen::MatrixXd& dn_dx) {
+  virtual inline Eigen::MatrixXd compute_bmatrix() {
     throw std::runtime_error(
         "Calling the base class function "
         "(compute_bmatrix) in "
