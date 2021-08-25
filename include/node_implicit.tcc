@@ -43,24 +43,24 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_velocity_acceleration_newmark(
     unsigned phase, double newmark_beta, double newmark_gamma, double dt) {
   const double tolerance = 1.E-16;
-  VectorDim velocity_pre;
-  VectorDim acceleration_pre;
   //! Compute velocity and acceleration at the previous time step
+  VectorDim previous_velocity;
+  VectorDim previous_acceleration;
   if (mass_(phase) > tolerance) {
-    velocity_pre = momentum_.col(phase) / mass_(phase);
-    acceleration_pre = inertia_.col(phase) / mass_(phase);
+    previous_velocity = momentum_.col(phase) / mass_(phase);
+    previous_acceleration = inertia_.col(phase) / mass_(phase);
   }
 
   //! Update of velocity and acceleration
   velocity_.col(phase) =
       newmark_gamma / newmark_beta / dt * displacement_.col(phase) -
-      (newmark_gamma / newmark_beta - 1.) * velocity_pre -
-      0.5 * dt * (newmark_gamma / newmark_beta - 2.) * acceleration_pre;
+      (newmark_gamma / newmark_beta - 1.) * previous_velocity -
+      0.5 * dt * (newmark_gamma / newmark_beta - 2.) * previous_acceleration;
 
   acceleration_.col(phase) =
       1. / newmark_beta / dt / dt * displacement_.col(phase) -
-      1. / newmark_beta / dt * velocity_pre -
-      (0.5 / newmark_beta - 1.) * acceleration_pre;
+      1. / newmark_beta / dt * previous_velocity -
+      (0.5 / newmark_beta - 1.) * previous_acceleration;
 
   // Check to see if value is below threshold
   for (unsigned i = 0; i < velocity_.rows(); ++i)
