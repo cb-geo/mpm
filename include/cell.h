@@ -243,13 +243,10 @@ class Cell {
   //! Compute local mass matrix (Used in equilibrium equation)
   //! \ingroup Implicit
   //! \param[in] shapefn shape function
-  //! \param[in] pmass particle mass
-  //! \param[in] nwemark_beta parameter beta of Newmark scheme
-  //! \param[in] nwemark_gamma parameter gamma of Newmark scheme
+  //! \param[in] pvolume particle volume
   //! \param[in] multiplier multiplier
-  void compute_local_mass_matrix(const Eigen::VectorXd& shapefn, double pmass,
-                                 double newmark_beta, double nwmark_gamma,
-                                 double dt, double multiplier = 1.0) noexcept;
+  void compute_local_mass_matrix(const Eigen::VectorXd& shapefn, double pvolume,
+                                 double multiplier = 1.0) noexcept;
   /**@}*/
 
   /**

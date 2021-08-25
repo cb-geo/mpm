@@ -218,8 +218,7 @@ class Particle : public ParticleBase<Tdim> {
   inline bool map_material_stiffness_matrix_to_cell() override;
 
   //! Map mass matrix to cell (used in equilibrium equation LHS)
-  inline bool map_mass_matrix_to_cell(double newmark_beta, double newmark_gamma,
-                                      double dt) override;
+  inline bool map_mass_matrix_to_cell(double multiplier) override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity

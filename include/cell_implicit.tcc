@@ -30,16 +30,15 @@ void mpm::Cell<Tdim>::compute_local_material_stiffness_matrix(
 //! Compute local mass matrix
 template <unsigned Tdim>
 inline void mpm::Cell<Tdim>::compute_local_mass_matrix(
-    const Eigen::VectorXd& shapefn, double mass, double newmark_beta,
-    double newmark_gamma, double dt, double multiplier) noexcept {
+    const Eigen::VectorXd& shapefn, double pvolume,
+    double multiplier) noexcept {
 
   std::lock_guard<std::mutex> guard(cell_mutex_);
   for (unsigned i = 0; i < this->nnodes_; ++i) {
     for (unsigned j = 0; j < this->nnodes_; ++j) {
       for (unsigned k = 0; k < Tdim; ++k) {
         stiffness_matrix_(Tdim * i + k, Tdim * j + k) +=
-            1. / (newmark_beta * dt * dt) * shapefn(i) * shapefn(j) *
-            multiplier * mass;
+            shapefn(i) * shapefn(j) * multiplier * pvolume;
       }
     }
   }
