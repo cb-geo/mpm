@@ -553,7 +553,7 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
           mpm::Index id;
           // Direction
           unsigned dir;
-          // Velocity
+          // Displacement
           double displacement;
           while (istream.good()) {
             // Read stream
