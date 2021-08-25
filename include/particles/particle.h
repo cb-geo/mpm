@@ -405,30 +405,38 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase_size The material phase size
   void initialise_material(unsigned phase_size = 1);
 
-  //! Reduce constitutive relations matrix depending on the dimension
-  //! \param[in] dmatrix Constitutive relations matrix in 3D
-  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial
-  //! dimension
-  inline Eigen::MatrixXd reduce_dmatrix(
-      const Eigen::MatrixXd& dmatrix) noexcept;
-
   //! Compute strain rate
+  //! \ingroup Implicit
   //! \param[in] dn_dx The spatial gradient of shape function
   //! \param[in] phase Index to indicate phase
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
+  //! Compute pack size
+  //! \retval pack size of serialized object
+  virtual int compute_pack_size() const;
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Reduce constitutive relations matrix depending on the dimension
+  //! \ingroup Implicit
+  //! \param[in] dmatrix Constitutive relations matrix in 3D
+  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial
+  //! dimension
+  inline Eigen::MatrixXd reduce_dmatrix(
+      const Eigen::MatrixXd& dmatrix) noexcept;
+
   //! Compute strain increment
+  //! \ingroup Implicit
   //! \param[in] dn_dx The spatial gradient of shape function
   //! \param[in] phase Index to indicate phase
   //! \retval strain increment at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_increment(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
-
-  //! Compute pack size
-  //! \retval pack size of serialized object
-  virtual int compute_pack_size() const;
+  /**@}*/
 
   //! particle id
   using ParticleBase<Tdim>::id_;
@@ -518,5 +526,6 @@ class Particle : public ParticleBase<Tdim> {
 }  // namespace mpm
 
 #include "particle.tcc"
+#include "particle_implicit.tcc"
 
 #endif  // MPM_PARTICLE_H__
