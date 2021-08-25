@@ -364,9 +364,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \ingroup Implicit
   void map_mass_momentum_inertia_to_nodes() noexcept override;
 
-  //! Initialise displacement before predictor step of Newmark scheme
+  //! Initialise displacement and strain rate at the beginning of time step
   //! \ingroup Implicit
-  void initialise_displacement() override;
+  void initialise_displacement_strain_rate() override;
 
   //! Map inertial force
   //! \ingroup Implicit

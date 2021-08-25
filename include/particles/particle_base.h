@@ -365,9 +365,9 @@ class ParticleBase {
   //! \ingroup Implicit
   virtual void map_mass_momentum_inertia_to_nodes() noexcept = 0;
 
-  //! Initialise displacement befere predictor step of Newmark scheme
+  //! Initialise displacement and strain rate at the beginning of time step
   //! \ingroup Implicit
-  virtual void initialise_displacement() = 0;
+  virtual void initialise_displacement_strain_rate() = 0;
 
   //! Map inertial force
   //! \ingroup Implicit

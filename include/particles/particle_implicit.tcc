@@ -11,10 +11,12 @@ void mpm::Particle<Tdim>::map_mass_momentum_inertia_to_nodes() noexcept {
   }
 }
 
-// Initialise particle displacement before predictor step of Newmark scheme
+// Initialise particle displacement and strain rate at the beginning of time
+// step
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::initialise_displacement() {
+void mpm::Particle<Tdim>::initialise_displacement_strain_rate() {
   displacement_.setZero();
+  strain_rate_.setZero();
 }
 
 //! Map inertial force
@@ -236,21 +238,24 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_increment(
 // Compute strain of the particle using nodal displacement
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_strain_newmark() noexcept {
-  // Assign strain increment
-  strain_rate_ =
+  // Compute total strain increment within time step
+  const Eigen::Matrix<double, 6, 1> strain_increment =
       this->compute_strain_increment(dn_dx_, mpm::ParticlePhase::Solid);
-  // Update strain += latest dstrain - previous dstrain
-  strain_ += strain_rate_ - dstrain_;
-  // Update dstrain
-  dstrain_ = strain_rate_;
+  // Update dstrain = latest total strain increment - previous total strain
+  // increment
+  dstrain_ = strain_increment - strain_rate_;
+  // Update total strain increment within time step
+  strain_rate_ = strain_increment;
+  // Update strain += dstrain
+  strain_ += dstrain_;
 
   // Compute at centroid
   // Strain rate for reduced integration
-  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
+  const Eigen::Matrix<double, 6, 1> strain_increment_centroid =
       this->compute_strain_increment(dn_dx_centroid_,
                                      mpm::ParticlePhase::Solid);
 
   // Assign volumetric strain at centroid
-  dvolumetric_strain_ = strain_rate_centroid.head(Tdim).sum();
+  dvolumetric_strain_ = strain_increment_centroid.head(Tdim).sum();
   volumetric_strain_centroid_ += dvolumetric_strain_;
 }
