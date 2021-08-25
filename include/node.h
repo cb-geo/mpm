@@ -187,22 +187,6 @@ class Node : public NodeBase<Tdim> {
     return velocity_.col(phase);
   }
 
-  //! Update inertia at the nodes
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] inertia Inertia from the particles in a cell
-  void update_inertia(bool update, unsigned phase,
-                      const VectorDim& inertia) noexcept override;
-
-  //! Return inertia at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  VectorDim inertia(unsigned phase) const override {
-    return inertia_.col(phase);
-  }
-
-  //! Compute velocity and acceleration from the momentum and inertia
-  void compute_velocity_acceleration() override;
-
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -216,25 +200,11 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(phase);
   }
 
-  //! Update velocity and acceleration by Newmark scheme
-  //! \param[in] newmark_beta Parameter beta of Newmark scheme
-  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
-  //! \param[in] dt Time-step
-  void update_velocity_acceleration_newmark(unsigned phase, double newmark_beta,
-                                            double newmark_gamma,
-                                            double dt) override;
-
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity(unsigned phase,
                                      double dt) noexcept override;
-
-  //! Return displacement at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  VectorDim displacement(unsigned phase) const override {
-    return displacement_.col(phase);
-  };
 
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase
@@ -319,6 +289,40 @@ class Node : public NodeBase<Tdim> {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
+  //! Update inertia at the nodes
+  //! \ingroup Implicit
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  void update_inertia(bool update, unsigned phase,
+                      const VectorDim& inertia) noexcept override;
+
+  //! Return inertia at a given node for a given phase
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim inertia(unsigned phase) const override {
+    return inertia_.col(phase);
+  }
+
+  //! Compute velocity and acceleration from the momentum and inertia
+  //! \ingroup Implicit
+  void compute_velocity_acceleration() override;
+
+  //! Return displacement at a given node for a given phase
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);
+  };
+
+  //! Update velocity and acceleration by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  void update_velocity_acceleration_newmark(unsigned phase, double newmark_beta,
+                                            double newmark_gamma,
+                                            double dt) override;
 
   //! Assign displacement constraint for implicit solver
   //! Directions can take values between 0 and Dim * Nphases
@@ -352,7 +356,6 @@ class Node : public NodeBase<Tdim> {
   void update_displacement_increment(
       const Eigen::VectorXd& displacement_increment, unsigned phase,
       unsigned nactive_node) override;
-
   /**@{*/
 
   /**
@@ -544,14 +547,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
-  //! Inertia
-  Eigen::Matrix<double, Tdim, Tnphases> inertia_;
-  //! Displacement
-  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
-  //! Displacement constraints
-  std::map<unsigned, double> displacement_constraints_;
   //! Pressure constraint
   std::map<unsigned, double> pressure_constraints_;
   //! Rotation matrix for general velocity constraints
@@ -564,8 +561,6 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
-  //! Mathematical function for displacement
-  std::map<unsigned, std::shared_ptr<FunctionBase>> displacement_function_;
   //! Mathematical function for pressure
   std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Concentrated force
@@ -582,6 +577,20 @@ class Node : public NodeBase<Tdim> {
   Index active_id_{std::numeric_limits<Index>::max()};
   //! Global index for active node (globally)
   Index global_active_id_{std::numeric_limits<Index>::max()};
+
+  /**
+   * \defgroup ImplicitVariables Variables dealing with implicit MPM
+   */
+  /**@{*/
+  //! Inertia
+  Eigen::Matrix<double, Tdim, Tnphases> inertia_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
+  //! Displacement constraints
+  std::map<unsigned, double> displacement_constraints_;
+  //! Mathematical function for displacement
+  std::map<unsigned, std::shared_ptr<FunctionBase>> displacement_function_;
+  /**@}*/
 
   /**
    * \defgroup MultiPhaseVariables Variables for multi-phase MPM

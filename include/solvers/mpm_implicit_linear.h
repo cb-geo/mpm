@@ -31,14 +31,22 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
 
   //! Class private functions
  private:
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
   //! Initialise matrix
+  //! \ingroup Implicit
   bool initialise_matrix();
 
   //! Initialise matrix
+  //! \ingroup Implicit
   bool reinitialise_matrix();
 
   //! Compute equilibrium equation
+  //! \ingroup Implicit
   bool compute_equilibrium_equation();
+  /**@}*/
 
   //! Class private variables
  private:
@@ -86,22 +94,28 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::damping_type_;
   //! Damping factor
   using mpm::MPMBase<Tdim>::damping_factor_;
-  //! Parameter beta of Newmark scheme
-  using mpm::MPMBase<Tdim>::newmark_beta_;
-  //! Parameter gamma of Newmark scheme
-  using mpm::MPMBase<Tdim>::newmark_gamma_;
   //! Locate particles
   using mpm::MPMBase<Tdim>::locate_particles_;
   //! Nonlocal neighbourhood
   using mpm::MPMBase<Tdim>::node_neighbourhood_;
   //! Pressure smoothing
   bool pressure_smoothing_{false};
+
+  /**
+   * \defgroup ImplicitVariables Variables dealing with implicit MPM
+   */
+  /**@{*/
+  //! Parameter beta of Newmark scheme
+  using mpm::MPMBase<Tdim>::newmark_beta_;
+  //! Parameter gamma of Newmark scheme
+  using mpm::MPMBase<Tdim>::newmark_gamma_;
   //! Assembler object
   std::shared_ptr<mpm::AssemblerBase<Tdim>> assembler_;
   //! Linear solver object
   tsl::robin_map<std::string,
                  std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>
       linear_solver_;
+  /**@}*/
 
 };  // MPMImplicitLinear class
 }  // namespace mpm

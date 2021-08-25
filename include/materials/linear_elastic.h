@@ -54,7 +54,13 @@ class LinearElastic : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+
   //! Compute constitutive relations matrix
+  //! \ingroup Implicit
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
@@ -63,6 +69,7 @@ class LinearElastic : public Material<Tdim> {
   Matrix6x6 compute_dmatrix(const Vector6d& stress, const Vector6d& dstrain,
                             const ParticleBase<Tdim>* ptr,
                             mpm::dense_map* state_vars) override;
+  /**@}*/
 
  protected:
   //! material id

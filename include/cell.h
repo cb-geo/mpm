@@ -448,7 +448,7 @@ class Cell {
   std::map<unsigned, Eigen::VectorXd> face_normals_;
 
   /**
-   * \defgroup SinglePhaseImplicitVariables Variables for single-phase implicit
+   * \defgroup ImplicitVariables Variables for single-phase implicit
    * MPM
    * @{
    */

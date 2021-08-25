@@ -183,20 +183,6 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim velocity(unsigned phase) const = 0;
 
-  //! Update nodal inertia
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] inertia Inertia from the particles in a cell
-  virtual void update_inertia(bool update, unsigned phase,
-                              const VectorDim& inertia) noexcept = 0;
-
-  //! Return inertia
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim inertia(unsigned phase) const = 0;
-
-  //! Compute velocity and acceleration from the momentum and inertia
-  virtual void compute_velocity_acceleration() = 0;
-
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -212,19 +198,6 @@ class NodeBase {
   //! \param[in] dt Time-step
   virtual bool compute_acceleration_velocity(unsigned phase,
                                              double dt) noexcept = 0;
-
-  //! Return displacement
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim displacement(unsigned phase) const = 0;
-
-  //! Update velocity and acceleration by Newmark scheme
-  //! \param[in] newmark_beta Parameter beta of Newmark scheme
-  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
-  //! \param[in] dt Time-step
-  virtual void update_velocity_acceleration_newmark(unsigned phase,
-                                                    double newmark_beta,
-                                                    double newmark_gamma,
-                                                    double dt) = 0;
 
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase
@@ -314,6 +287,37 @@ class NodeBase {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
+  //! Update nodal inertia
+  //! \ingroup Implicit
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  virtual void update_inertia(bool update, unsigned phase,
+                              const VectorDim& inertia) noexcept = 0;
+
+  //! Return inertia
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim inertia(unsigned phase) const = 0;
+
+  //! Compute velocity and acceleration from the momentum and inertia
+  //! \ingroup Implicit
+  virtual void compute_velocity_acceleration() = 0;
+
+  //! Return displacement
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim displacement(unsigned phase) const = 0;
+
+  //! Update velocity and acceleration by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  virtual void update_velocity_acceleration_newmark(unsigned phase,
+                                                    double newmark_beta,
+                                                    double newmark_gamma,
+                                                    double dt) = 0;
 
   //! Assign displacement constraint for implicit solver
   //! Directions can take values between 0 and Dim * Nphases
@@ -335,7 +339,6 @@ class NodeBase {
   virtual void update_displacement_increment(
       const Eigen::VectorXd& displacement_increment, unsigned phase,
       unsigned nactive_node) = 0;
-
   /**@{*/
 
   /**

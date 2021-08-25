@@ -64,8 +64,12 @@ class AssemblerBase {
   virtual bool assign_global_node_indices(unsigned nactive_node,
                                           unsigned nglobal_active_node) = 0;
 
-  //! Implicit functions--------------------------------------------------------
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
   //! Return stiffness matrix
+  //! \ingroup Implicit
   virtual Eigen::SparseMatrix<double>& stiffness_matrix() {
     throw std::runtime_error(
         "Calling the base class function (stiffness_matrix) in "
@@ -73,6 +77,7 @@ class AssemblerBase {
   };
 
   //! Assemble stiffness matrix
+  //! \ingroup Implicit
   virtual bool assemble_stiffness_matrix() {
     throw std::runtime_error(
         "Calling the base class function (assemble_stiffness_matrix) in "
@@ -81,6 +86,7 @@ class AssemblerBase {
   };
 
   //! Return residual force RHS vector
+  //! \ingroup Implicit
   virtual Eigen::VectorXd& residual_force_rhs_vector() {
     throw std::runtime_error(
         "Calling the base class function (residual_force_rhs_vector) in "
@@ -88,6 +94,7 @@ class AssemblerBase {
   };
 
   //! Assemble residual force RHS vector
+  //! \ingroup Implicit
   virtual bool assemble_residual_force_right() {
     throw std::runtime_error(
         "Calling the base class function (assemble_residual_force_right) in "
@@ -96,6 +103,7 @@ class AssemblerBase {
   };
 
   //! Assign displacement constraints
+  //! \ingroup Implicit
   virtual bool assign_displacement_constraints(double current_time) {
     throw std::runtime_error(
         "Calling the base class function (assign_displacement_constraints) in "
@@ -104,6 +112,7 @@ class AssemblerBase {
   };
 
   //! Apply displacement constraints to equilibrium equation
+  //! \ingroup Implicit
   virtual void apply_displacement_constraints() {
     throw std::runtime_error(
         "Calling the base class function (apply_displacement_constraints) in "
@@ -111,6 +120,7 @@ class AssemblerBase {
   };
 
   //! Return displacement increment
+  //! \ingroup Implicit
   virtual Eigen::VectorXd& displacement_increment() {
     throw std::runtime_error(
         "Calling the base class function (displacement_increment) in "
@@ -118,12 +128,14 @@ class AssemblerBase {
   };
 
   //! Assign displacement increment
+  //! \ingroup Implicit
   virtual void assign_displacement_increment(
       const Eigen::VectorXd& displacement_increment) {
     throw std::runtime_error(
         "Calling the base class function (assign_displacement_increment) in "
         "AssemblerBase:: illegal operation!");
   };
+  /**@{*/
 
   //! Navier-Stokes
   //! functions-------------------------------------------------------- Return

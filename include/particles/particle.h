@@ -67,9 +67,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Initialise properties
   void initialise() override;
 
-  //! Initialise displacement before predictor step of Newmark scheme
-  void initialise_displacement() override;
-
   //! Compute reference coordinates in a cell
   bool compute_reference_location() noexcept override;
 
@@ -139,9 +136,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Map particle mass and momentum to nodes
   void map_mass_momentum_to_nodes() noexcept override;
 
-  //! Map particle mass, momentum and inertia to nodes
-  void map_mass_momentum_inertia_to_nodes() noexcept override;
-
   //! Map multimaterial properties to nodes
   void map_multimaterial_mass_momentum_to_nodes() noexcept override;
 
@@ -168,10 +162,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute strain
   //! \param[in] dt Analysis time step
   void compute_strain(double dt) noexcept override;
-
-  //! Compute strain using nodal displacement
-  //! \param[in] dt Analysis time step
-  void compute_strain_newmark() noexcept override;
 
   //! Return strain of the particle
   Eigen::Matrix<double, 6, 1> strain() const override { return strain_; }
@@ -207,26 +197,13 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(const VectorDim& pgravity) noexcept override;
 
-  //! Map inertial force
-  void map_inertial_force() noexcept override;
-
   //! Map internal force
   inline void map_internal_force() noexcept override;
-
-  //! Implicit solver functions--------------------------------
-  //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
-  inline bool map_material_stiffness_matrix_to_cell() override;
-
-  //! Map mass matrix to cell (used in equilibrium equation LHS)
-  inline bool map_mass_matrix_to_cell(double multiplier) override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
   bool assign_velocity(const VectorDim& velocity) override;
-
-  //! Return acceleration of the particle
-  VectorDim acceleration() const override { return acceleration_; }
 
   //! Return velocity of the particle
   VectorDim velocity() const override { return velocity_; }
@@ -269,12 +246,6 @@ class Particle : public ParticleBase<Tdim> {
   void assign_state_variable(
       const std::string& var, double value,
       unsigned phase = mpm::ParticlePhase::Solid) override;
-
-  //! Compute updated position of the particle by Newmark scheme
-  //! \param[in] dt Analysis time step
-  //! \param[in] velocity_update Update particle velocity from nodal vel
-  void compute_updated_position_newmark(
-      double dt, bool velocity_update = false) noexcept override;
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -385,6 +356,46 @@ class Particle : public ParticleBase<Tdim> {
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
 
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Map particle mass, momentum and inertia to nodes
+  //! \ingroup Implicit
+  void map_mass_momentum_inertia_to_nodes() noexcept override;
+
+  //! Initialise displacement before predictor step of Newmark scheme
+  //! \ingroup Implicit
+  void initialise_displacement() override;
+
+  //! Map inertial force
+  //! \ingroup Implicit
+  void map_inertial_force() noexcept override;
+
+  //! Return acceleration of the particle
+  //! \ingroup Implicit
+  VectorDim acceleration() const override { return acceleration_; }
+
+  //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
+  //! \ingroup Implicit
+  inline bool map_material_stiffness_matrix_to_cell() override;
+
+  //! Map mass matrix to cell (used in equilibrium equation LHS)
+  //! \ingroup Implicit
+  //! \param[in] multiplier multiplier for mass and Newmark parameters
+  inline bool map_mass_matrix_to_cell(double multiplier) override;
+
+  //! Compute updated position of the particle by Newmark scheme
+  //! \param[in] dt Analysis time step
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  void compute_updated_position_newmark(
+      double dt, bool velocity_update = false) noexcept override;
+
+  //! Compute strain using nodal displacement
+  //! \ingroup Implicit
+  void compute_strain_newmark() noexcept override;
+  /**@}*/
+
  protected:
   //! Initialise particle material container
   //! \details This function allocate memory and initialise the material related
@@ -463,8 +474,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, 1> dstrain_;
-  //! Acceleration
-  Eigen::Matrix<double, Tdim, 1> acceleration_;
   //! Velocity
   Eigen::Matrix<double, Tdim, 1> velocity_;
   //! Displacement
@@ -496,6 +505,14 @@ class Particle : public ParticleBase<Tdim> {
       tensor_properties_;
   //! Pack size
   unsigned pack_size_{0};
+
+  /**
+   * \defgroup ImplicitVariables Variables dealing with implicit MPM
+   */
+  /**@{*/
+  //! Acceleration
+  Eigen::Matrix<double, Tdim, 1> acceleration_;
+  /**@}*/
 
 };  // Particle class
 }  // namespace mpm

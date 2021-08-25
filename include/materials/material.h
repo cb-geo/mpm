@@ -78,7 +78,13 @@ class Material {
                                   const ParticleBase<Tdim>* ptr,
                                   mpm::dense_map* state_vars) = 0;
 
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+
   //! Compute constitutive relations matrix
+  //! \ingroup Implicit
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
@@ -88,6 +94,8 @@ class Material {
                                     const Vector6d& dstrain,
                                     const ParticleBase<Tdim>* ptr,
                                     mpm::dense_map* state_vars);
+
+  /**@}*/
 
  protected:
   //! material id

@@ -161,9 +161,6 @@ class ParticleBase {
   //! Map particle mass and momentum to nodes
   virtual void map_mass_momentum_to_nodes() noexcept = 0;
 
-  //! Map particle mass, momentum and inertia to nodes
-  virtual void map_mass_momentum_inertia_to_nodes() noexcept = 0;
-
   //! Map multimaterial properties to nodes
   virtual void map_multimaterial_mass_momentum_to_nodes() noexcept = 0;
 
@@ -222,9 +219,6 @@ class ParticleBase {
   //! Initialise properties
   virtual void initialise() = 0;
 
-  //! Initialise displacement befere predictor step of Newmark scheme
-  virtual void initialise_displacement() = 0;
-
   //! Assign mass
   virtual void assign_mass(double mass) = 0;
 
@@ -240,9 +234,6 @@ class ParticleBase {
 
   //! Compute strain
   virtual void compute_strain(double dt) noexcept = 0;
-
-  //! Compute strain using nodal displacement
-  virtual void compute_strain_newmark() noexcept = 0;
 
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
@@ -268,31 +259,8 @@ class ParticleBase {
   //! Map body force
   virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
 
-  //! Map inertial force
-  virtual void map_inertial_force() noexcept = 0;
-
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
-
-  //! Implicit solver functions--------------------------------
-  //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
-  virtual inline bool map_material_stiffness_matrix_to_cell() {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(map_material_stiffness_matrix_to_cell) in "
-        "ParticleBase:: "
-        "illegal operation!");
-    return 0;
-  }
-
-  //! Map mass matrix to cell (used in equilibrium equation LHS)
-  virtual inline bool map_mass_matrix_to_cell(double multiplier) {
-    throw std::runtime_error(
-        "Calling the base class function (map_mass_matrix_to_cell) in "
-        "ParticleBase:: "
-        "illegal operation!");
-    return 0;
-  }
 
   //! Map particle pressure to nodes
   virtual bool map_pressure_to_nodes(
@@ -304,9 +272,6 @@ class ParticleBase {
 
   //! Assign velocity
   virtual bool assign_velocity(const VectorDim& velocity) = 0;
-
-  //! Return acceleration
-  virtual VectorDim acceleration() const = 0;
 
   //! Return velocity
   virtual VectorDim velocity() const = 0;
@@ -325,10 +290,6 @@ class ParticleBase {
 
   //! Compute updated position
   virtual void compute_updated_position(
-      double dt, bool velocity_update = false) noexcept = 0;
-
-  //! Compute updated position by Newmark scheme
-  virtual void compute_updated_position_newmark(
       double dt, bool velocity_update = false) noexcept = 0;
 
   //! Return scalar data of particles
@@ -395,6 +356,60 @@ class ParticleBase {
   virtual void deserialize(
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Map particle mass, momentum and inertia to nodes
+  //! \ingroup Implicit
+  virtual void map_mass_momentum_inertia_to_nodes() noexcept = 0;
+
+  //! Initialise displacement befere predictor step of Newmark scheme
+  //! \ingroup Implicit
+  virtual void initialise_displacement() = 0;
+
+  //! Map inertial force
+  //! \ingroup Implicit
+  virtual void map_inertial_force() noexcept = 0;
+
+  //! Return acceleration
+  //! \ingroup Implicit
+  virtual VectorDim acceleration() const = 0;
+
+  //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
+  //! \ingroup Implicit
+  virtual inline bool map_material_stiffness_matrix_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(map_material_stiffness_matrix_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  }
+
+  //! Map mass matrix to cell (used in equilibrium equation LHS)
+  //! \ingroup Implicit
+  //! \param[in] multiplier multiplier for mass and Newmark parameters
+  virtual inline bool map_mass_matrix_to_cell(double multiplier) {
+    throw std::runtime_error(
+        "Calling the base class function (map_mass_matrix_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  }
+
+  //! Compute updated position by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] dt Analysis time step
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  virtual void compute_updated_position_newmark(
+      double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Compute strain using nodal displacement
+  //! \ingroup Implicit
+  virtual void compute_strain_newmark() noexcept = 0;
+  /**@}*/
 
   //! Navier-Stokes functions----------------------------------
   //! Assigning beta parameter to particle
