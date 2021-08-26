@@ -114,7 +114,8 @@ inline Eigen::MatrixXd mpm::Particle<3>::reduce_dmatrix(
 
 //! Map mass matrix to cell (used in poisson equation LHS)
 template <unsigned Tdim>
-inline bool mpm::Particle<Tdim>::map_mass_matrix_to_cell(double multiplier) {
+inline bool mpm::Particle<Tdim>::map_mass_matrix_to_cell(double newmark_beta,
+                                                         double dt) {
   bool status = true;
   try {
     // Check if material ptr is valid
@@ -122,7 +123,7 @@ inline bool mpm::Particle<Tdim>::map_mass_matrix_to_cell(double multiplier) {
 
     // Compute local mass matrix
     cell_->compute_local_mass_matrix(shapefn_, volume_,
-                                     mass_density_ * multiplier);
+                                     mass_density_ / (newmark_beta * dt * dt));
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

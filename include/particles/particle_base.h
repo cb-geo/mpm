@@ -390,8 +390,9 @@ class ParticleBase {
 
   //! Map mass matrix to cell (used in equilibrium equation LHS)
   //! \ingroup Implicit
-  //! \param[in] multiplier multiplier for mass and Newmark parameters
-  virtual inline bool map_mass_matrix_to_cell(double multiplier) {
+  //! \param[in] newmark_beta parameter beta of Newmark scheme
+  //! \param[in] dt parameter beta of Newmark scheme
+  inline bool map_mass_matrix_to_cell(double newmark_beta, double dt) {
     throw std::runtime_error(
         "Calling the base class function (map_mass_matrix_to_cell) in "
         "ParticleBase:: "

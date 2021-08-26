@@ -382,8 +382,9 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Map mass matrix to cell (used in equilibrium equation LHS)
   //! \ingroup Implicit
-  //! \param[in] multiplier multiplier for mass and Newmark parameters
-  inline bool map_mass_matrix_to_cell(double multiplier) override;
+  //! \param[in] newmark_beta parameter beta of Newmark scheme
+  //! \param[in] dt parameter beta of Newmark scheme
+  inline bool map_mass_matrix_to_cell(double newmark_beta, double dt) override;
 
   //! Compute updated position of the particle by Newmark scheme
   //! \param[in] dt Analysis time step
