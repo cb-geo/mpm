@@ -289,6 +289,10 @@ class Node : public NodeBase<Tdim> {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
+  //! Initialise nodal properties for implicit solver
+  //! \ingroup Impolicit
+  void initialise_implicit() noexcept override;
+
   //! Update inertia at the nodes
   //! \ingroup Implicit
   //! \param[in] update A boolean to update (true) or assign (false)

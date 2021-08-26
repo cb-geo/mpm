@@ -35,8 +35,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   free_surface_ = false;
   pressure_increment_ = 0.;
   correction_force_.setZero();
-  inertia_.setZero();
-  displacement_.setZero();
   status_ = false;
   solving_status_ = false;
   material_ids_.clear();

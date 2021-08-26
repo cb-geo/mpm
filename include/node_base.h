@@ -287,6 +287,10 @@ class NodeBase {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
+  //! Initialise nodal properties for implicit solver
+  //! \ingroup Implicit
+  virtual void initialise_implicit() noexcept = 0;
+
   //! Update nodal inertia
   //! \ingroup Implicit
   //! \param[in] update A boolean to update (true) or assign (false)

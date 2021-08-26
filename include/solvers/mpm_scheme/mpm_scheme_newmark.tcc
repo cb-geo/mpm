@@ -13,8 +13,8 @@ inline void mpm::MPMSchemeNewmark<Tdim>::initialise() {
 #pragma omp section
     {
       // Initialise nodes
-      mesh_->iterate_over_nodes(
-          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
+      mesh_->iterate_over_nodes(std::bind(
+          &mpm::NodeBase<Tdim>::initialise_implicit, std::placeholders::_1));
 
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
