@@ -9,25 +9,6 @@ mpm::MPMImplicitLinear<Tdim>::MPMImplicitLinear(const std::shared_ptr<IO>& io)
   mpm_scheme_ = std::make_shared<mpm::MPMSchemeNewmark<Tdim>>(mesh_, dt_);
 }
 
-//! MPM Implicit Linear compute stress strain
-template <unsigned Tdim>
-void mpm::MPMImplicitLinear<Tdim>::compute_stress_strain(unsigned phase) {
-  // Iterate over each particle to calculate strain
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
-
-  // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
-
-  // Pressure smoothing
-  if (pressure_smoothing_) this->pressure_smoothing(phase);
-
-  // Iterate over each particle to compute stress
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
-}
-
 //! MPM Implicit Linear solver
 template <unsigned Tdim>
 bool mpm::MPMImplicitLinear<Tdim>::solve() {

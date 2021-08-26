@@ -25,10 +25,6 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
   //! Solve
   bool solve() override;
 
-  //! Compute stress strain
-  //! \param[in] phase Phase to smooth pressure
-  void compute_stress_strain(unsigned phase);
-
   //! Class private functions
  private:
   /**
