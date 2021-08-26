@@ -25,11 +25,6 @@ inline void mpm::MPMSchemeNewmark<Tdim>::initialise() {
       // Iterate over each particle to compute shapefn
       mesh_->iterate_over_particles(std::bind(
           &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
-
-      // Iterate over each particle to initialise displacement and strain rate
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::initialise_displacement_strain_rate,
-          std::placeholders::_1));
     }
   }  // Wait to complete
 }
@@ -183,7 +178,7 @@ inline void mpm::MPMSchemeNewmark<Tdim>::compute_particle_kinematics(
   // Iterate over each particle to compute updated position
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_newmark,
-                std::placeholders::_1, dt_, velocity_update));
+                std::placeholders::_1, dt_));
 }
 
 //! Postcompute nodal kinematics - map mass and momentum to nodes

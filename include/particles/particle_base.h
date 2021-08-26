@@ -365,10 +365,6 @@ class ParticleBase {
   //! \ingroup Implicit
   virtual void map_mass_momentum_inertia_to_nodes() noexcept = 0;
 
-  //! Initialise displacement and strain rate at the beginning of time step
-  //! \ingroup Implicit
-  virtual void initialise_displacement_strain_rate() = 0;
-
   //! Map inertial force
   //! \ingroup Implicit
   virtual void map_inertial_force() noexcept = 0;
@@ -392,7 +388,7 @@ class ParticleBase {
   //! \ingroup Implicit
   //! \param[in] newmark_beta parameter beta of Newmark scheme
   //! \param[in] dt parameter beta of Newmark scheme
-  inline bool map_mass_matrix_to_cell(double newmark_beta, double dt) {
+  virtual inline bool map_mass_matrix_to_cell(double newmark_beta, double dt) {
     throw std::runtime_error(
         "Calling the base class function (map_mass_matrix_to_cell) in "
         "ParticleBase:: "
@@ -400,16 +396,14 @@ class ParticleBase {
     return 0;
   }
 
-  //! Compute updated position by Newmark scheme
-  //! \ingroup Implicit
-  //! \param[in] dt Analysis time step
-  //! \param[in] velocity_update Update particle velocity from nodal vel
-  virtual void compute_updated_position_newmark(
-      double dt, bool velocity_update = false) noexcept = 0;
-
   //! Compute strain using nodal displacement
   //! \ingroup Implicit
   virtual void compute_strain_newmark() noexcept = 0;
+
+  //! Compute updated position by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] dt Analysis time step
+  virtual void compute_updated_position_newmark(double dt) noexcept = 0;
   /**@}*/
 
   //! Navier-Stokes functions----------------------------------

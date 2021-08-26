@@ -364,10 +364,6 @@ class Particle : public ParticleBase<Tdim> {
   //! \ingroup Implicit
   void map_mass_momentum_inertia_to_nodes() noexcept override;
 
-  //! Initialise displacement and strain rate at the beginning of time step
-  //! \ingroup Implicit
-  void initialise_displacement_strain_rate() override;
-
   //! Map inertial force
   //! \ingroup Implicit
   void map_inertial_force() noexcept override;
@@ -386,15 +382,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt parameter beta of Newmark scheme
   inline bool map_mass_matrix_to_cell(double newmark_beta, double dt) override;
 
-  //! Compute updated position of the particle by Newmark scheme
-  //! \param[in] dt Analysis time step
-  //! \param[in] velocity_update Update particle velocity from nodal vel
-  void compute_updated_position_newmark(
-      double dt, bool velocity_update = false) noexcept override;
-
   //! Compute strain using nodal displacement
   //! \ingroup Implicit
   void compute_strain_newmark() noexcept override;
+
+  //! Compute updated position of the particle by Newmark scheme
+  //! \param[in] dt Analysis time step
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  void compute_updated_position_newmark(double dt) noexcept override;
   /**@}*/
 
  protected:

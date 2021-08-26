@@ -141,12 +141,12 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     mpm_scheme_->update_nodal_kinematics_newmark(phase, newmark_beta_,
                                                  newmark_gamma_);
 
+    // Update stress and strain
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
+
     // Particle kinematics
     mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
                                              damping_factor_);
-
-    // Update stress and strain
-    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);
@@ -281,7 +281,7 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
         std::placeholders::_1));
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_matrix_to_cell,
-                  std::placeholders::_1, 1. / (newmark_beta_ * dt_ * dt_)));
+                  std::placeholders::_1, newmark_beta_, dt_));
 
     // Assemble global stiffness matrix
     assembler_->assemble_stiffness_matrix();
