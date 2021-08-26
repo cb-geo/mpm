@@ -198,11 +198,6 @@ class MPMBase : public MPM {
   //! \param[in] mesh_io Mesh IO handle
   void nodal_displacement_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
-
-  //! Initialise parameters of Newmark scheme
-  //! \ingroup Implicit
-  //! \param[in] newmark_props Newmark scheme properties
-  bool initialise_newmark(const Json& newmark_props);
   /**@}*/
 
  protected:
@@ -261,16 +256,6 @@ class MPMBase : public MPM {
   bool locate_particles_{true};
   //! Nonlocal node neighbourhood
   unsigned node_neighbourhood_{0};
-
-  /**
-   * \defgroup Implicit Variables dealing with implicit MPM
-   */
-  /**@{*/
-  //! Parameter beta of Newmark scheme
-  double newmark_beta_{0.25};
-  //! Parameter gamma of Newmark scheme
-  double newmark_gamma_{0.5};
-  /**@}*/
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell

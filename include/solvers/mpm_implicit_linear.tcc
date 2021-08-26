@@ -7,6 +7,20 @@ mpm::MPMImplicitLinear<Tdim>::MPMImplicitLinear(const std::shared_ptr<IO>& io)
   //! Stress update
   stress_update_ = "newmark";
   mpm_scheme_ = std::make_shared<mpm::MPMSchemeNewmark<Tdim>>(mesh_, dt_);
+
+  // Parameters of Newmark scheme
+  try {
+    if (mpm_scheme_->scheme() == "newmark"){
+      if (!initialise_newmark(analysis_.at("newmark")))
+        throw std::runtime_error(
+            "Parameters of Newmark scheme are not defined");
+    }
+  } catch (std::exception& exception) {
+    console_->warn(
+        "{} #{}: Parameters of Newmark scheme is not specified, using "
+        "beta = 0.25 and gamma = 0.5 as default",
+        __FILE__, __LINE__, exception.what());
+  }
 }
 
 //! MPM Implicit Linear solver
@@ -155,7 +169,26 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   return status;
 }
 
-// Implicit functions
+// Initialise parameters of Newmark scheme
+template <unsigned Tdim>
+bool mpm::MPMImplicitLinear<Tdim>::initialise_newmark(const Json& newmark_props) {
+
+  // Read newmark JSON object
+  bool status = true;
+  try {
+    // Read parameters of Newmark scheme
+    newmark_beta_ = newmark_props.at("beta").template get<double>();
+    newmark_gamma_ = newmark_props.at("gamma").template get<double>();
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Parameters of Newmark scheme are undefined {} ",
+                   __LINE__, exception.what());
+    status = false;
+  }
+
+  return status;
+}
+
 // Initialise matrix
 template <unsigned Tdim>
 bool mpm::MPMImplicitLinear<Tdim>::initialise_matrix() {

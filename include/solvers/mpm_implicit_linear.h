@@ -31,6 +31,11 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
+  //! Initialise parameters of Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] newmark_props Newmark scheme properties
+  bool initialise_newmark(const Json& newmark_props);
+
   //! Initialise matrix
   //! \ingroup Implicit
   bool initialise_matrix();
@@ -102,9 +107,9 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
    */
   /**@{*/
   //! Parameter beta of Newmark scheme
-  using mpm::MPMBase<Tdim>::newmark_beta_;
+  double newmark_beta_{0.25};
   //! Parameter gamma of Newmark scheme
-  using mpm::MPMBase<Tdim>::newmark_gamma_;
+  double newmark_gamma_{0.5};
   //! Assembler object
   std::shared_ptr<mpm::AssemblerBase<Tdim>> assembler_;
   //! Linear solver object
