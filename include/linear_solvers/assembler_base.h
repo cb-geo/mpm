@@ -62,7 +62,7 @@ class AssemblerBase {
 
   //! Create a pair between nodes and index in Matrix / Vector
   bool assign_global_node_indices(unsigned nactive_node,
-                                          unsigned nglobal_active_node);
+                                  unsigned nglobal_active_node);
 
   /**
    * \defgroup Implicit Functions dealing with implicit MPM

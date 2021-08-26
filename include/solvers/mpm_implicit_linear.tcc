@@ -10,7 +10,7 @@ mpm::MPMImplicitLinear<Tdim>::MPMImplicitLinear(const std::shared_ptr<IO>& io)
 
   // Parameters of Newmark scheme
   try {
-    if (mpm_scheme_->scheme() == "newmark"){
+    if (mpm_scheme_->scheme() == "newmark") {
       if (!initialise_newmark(analysis_.at("newmark")))
         throw std::runtime_error(
             "Parameters of Newmark scheme are not defined");
@@ -171,7 +171,8 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
 
 // Initialise parameters of Newmark scheme
 template <unsigned Tdim>
-bool mpm::MPMImplicitLinear<Tdim>::initialise_newmark(const Json& newmark_props) {
+bool mpm::MPMImplicitLinear<Tdim>::initialise_newmark(
+    const Json& newmark_props) {
 
   // Read newmark JSON object
   bool status = true;

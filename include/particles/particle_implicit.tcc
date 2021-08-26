@@ -152,7 +152,8 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_increment(
     Eigen::Matrix<double, 2, 1> displacement = nodes_[i]->displacement(phase);
     strain_increment[0] += dn_dx(i, 0) * displacement[0];
     strain_increment[1] += dn_dx(i, 1) * displacement[1];
-    strain_increment[3] += dn_dx(i, 1) * displacement[0] + dn_dx(i, 0) * displacement[1];
+    strain_increment[3] +=
+        dn_dx(i, 1) * displacement[0] + dn_dx(i, 0) * displacement[1];
   }
 
   if (std::fabs(strain_increment[0]) < 1.E-15) strain_increment[0] = 0.;
@@ -174,9 +175,12 @@ inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_increment(
     strain_increment[0] += dn_dx(i, 0) * displacement[0];
     strain_increment[1] += dn_dx(i, 1) * displacement[1];
     strain_increment[2] += dn_dx(i, 2) * displacement[2];
-    strain_increment[3] += dn_dx(i, 1) * displacement[0] + dn_dx(i, 0) * displacement[1];
-    strain_increment[4] += dn_dx(i, 2) * displacement[1] + dn_dx(i, 1) * displacement[2];
-    strain_increment[5] += dn_dx(i, 2) * displacement[0] + dn_dx(i, 0) * displacement[2];
+    strain_increment[3] +=
+        dn_dx(i, 1) * displacement[0] + dn_dx(i, 0) * displacement[1];
+    strain_increment[4] +=
+        dn_dx(i, 2) * displacement[1] + dn_dx(i, 1) * displacement[2];
+    strain_increment[5] +=
+        dn_dx(i, 2) * displacement[0] + dn_dx(i, 0) * displacement[2];
   }
 
   for (unsigned i = 0; i < strain_increment.size(); ++i)
