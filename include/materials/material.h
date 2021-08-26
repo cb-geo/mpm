@@ -82,7 +82,6 @@ class Material {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
-
   //! Compute constitutive relations matrix
   //! \ingroup Implicit
   //! \param[in] stress Stress
@@ -93,8 +92,13 @@ class Material {
   virtual Matrix6x6 compute_dmatrix(const Vector6d& stress,
                                     const Vector6d& dstrain,
                                     const ParticleBase<Tdim>* ptr,
-                                    mpm::dense_map* state_vars);
-
+                                    mpm::dense_map* state_vars) {
+    auto error = Matrix6x6::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (compute_dmatrix) in "
+        "Material:: illegal operation!");
+    return error;
+  };
   /**@}*/
 
  protected:

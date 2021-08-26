@@ -92,13 +92,6 @@ class IOMeshAscii : public IOMesh<Tdim> {
       read_velocity_constraints(
           const std::string& velocity_constraints_file) override;
 
-  //! Read displacement constraints file for implicit solver
-  //! \param[in] displacement_constraints_files file name with displacement
-  //! constraints
-  std::vector<std::tuple<mpm::Index, unsigned, double>>
-      read_displacement_constraints(
-          const std::string& displacement_constraints_file) override;
-
   //! Read friction constraints file
   //! \param[in] friction_constraints_files file name with frictions
   std::vector<std::tuple<mpm::Index, unsigned, int, double>>
@@ -109,6 +102,19 @@ class IOMeshAscii : public IOMesh<Tdim> {
   //! \param[in] forces_files file name with nodal concentrated force
   std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) override;
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Read displacement constraints file for implicit solver
+  //! \ingroup Implicit
+  //! \param[in] displacement_constraints_files file name with displacement
+  //! constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_displacement_constraints(
+          const std::string& displacement_constraints_file) override;
+  /**@}*/
 
  private:
   //! Logger

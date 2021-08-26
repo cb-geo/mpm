@@ -363,15 +363,33 @@ class ParticleBase {
   /**@{*/
   //! Map particle mass, momentum and inertia to nodes
   //! \ingroup Implicit
-  virtual void map_mass_momentum_inertia_to_nodes() noexcept = 0;
+  virtual void map_mass_momentum_inertia_to_nodes() {
+    throw std::runtime_error(
+        "Calling the base class function (map_mass_momentum_inertia_to_nodes) "
+        "in "
+        "ParticleBase:: "
+        "illegal operation!");
+  }
 
   //! Map inertial force
   //! \ingroup Implicit
-  virtual void map_inertial_force() noexcept = 0;
+  virtual void map_inertial_force() {
+    throw std::runtime_error(
+        "Calling the base class function (map_inertial_force) in "
+        "ParticleBase:: "
+        "illegal operation!");
+  }
 
   //! Return acceleration
   //! \ingroup Implicit
-  virtual VectorDim acceleration() const = 0;
+  virtual VectorDim acceleration() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (acceleration) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return error;
+  }
 
   //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
   //! \ingroup Implicit
@@ -398,12 +416,22 @@ class ParticleBase {
 
   //! Compute strain using nodal displacement
   //! \ingroup Implicit
-  virtual void compute_strain_newmark() noexcept = 0;
+  virtual void compute_strain_newmark() {
+    throw std::runtime_error(
+        "Calling the base class function (compute_strain_newmark) in "
+        "ParticleBase:: "
+        "illegal operation!");
+  }
 
   //! Compute updated position by Newmark scheme
   //! \ingroup Implicit
   //! \param[in] dt Analysis time step
-  virtual void compute_updated_position_newmark(double dt) noexcept = 0;
+  virtual void compute_updated_position_newmark(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (compute_updated_position_newmark) in "
+        "ParticleBase:: "
+        "illegal operation!");
+  }
   /**@}*/
 
   //! Navier-Stokes functions----------------------------------
