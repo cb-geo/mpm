@@ -61,8 +61,8 @@ class AssemblerBase {
   }
 
   //! Create a pair between nodes and index in Matrix / Vector
-  virtual bool assign_global_node_indices(unsigned nactive_node,
-                                          unsigned nglobal_active_node) = 0;
+  bool assign_global_node_indices(unsigned nactive_node,
+                                          unsigned nglobal_active_node);
 
   /**
    * \defgroup Implicit Functions dealing with implicit MPM
@@ -299,7 +299,12 @@ class AssemblerBase {
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Number of sparse matrix container size
   unsigned sparse_row_size_;
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
+  //! Global node indices
+  std::vector<Eigen::VectorXi> global_node_indices_;
 };
 }  // namespace mpm
 
+#include "assembler_base.tcc"
 #endif  // MPM_ASSEMBLER_BASE_H_

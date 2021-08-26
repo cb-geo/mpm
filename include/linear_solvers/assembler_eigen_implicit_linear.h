@@ -18,10 +18,6 @@ class AssemblerEigenImplicitLinear : public AssemblerBase<Tdim> {
   //! \param[in] node_neighbourhood Number of node neighbourhood considered
   AssemblerEigenImplicitLinear(unsigned node_neighbourhood);
 
-  //! Create a pair between nodes and index in Matrix / Vector
-  bool assign_global_node_indices(unsigned nactive_node,
-                                  unsigned nglobal_active_node) override;
-
   /**
    * \defgroup Implicit Functions dealing with implicit MPM
    */
@@ -84,9 +80,9 @@ class AssemblerEigenImplicitLinear : public AssemblerBase<Tdim> {
   //! Number of sparse matrix container size
   using AssemblerBase<Tdim>::sparse_row_size_;
   //! Logger
-  std::shared_ptr<spdlog::logger> console_;
+  using AssemblerBase<Tdim>::console_;
   //! Global node indices
-  std::vector<Eigen::VectorXi> global_node_indices_;
+  using AssemblerBase<Tdim>::global_node_indices_;
   //! Number of total active_dof in all rank
   unsigned global_active_dof_;
   //! Rank to Global mapper

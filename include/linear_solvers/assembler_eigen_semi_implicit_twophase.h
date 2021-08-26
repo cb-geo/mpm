@@ -68,9 +68,9 @@ class AssemblerEigenSemiImplicitTwoPhase
   //! Number of sparse matrix container size
   using AssemblerBase<Tdim>::sparse_row_size_;
   //! Logger
-  using AssemblerEigenSemiImplicitNavierStokes<Tdim>::console_;
+  using AssemblerBase<Tdim>::console_;
   //! Global node indices
-  using AssemblerEigenSemiImplicitNavierStokes<Tdim>::global_node_indices_;
+  using AssemblerBase<Tdim>::global_node_indices_;
   //! Poisson RHS vector
   using AssemblerEigenSemiImplicitNavierStokes<Tdim>::poisson_rhs_vector_;
   //! Pressure constraints
