@@ -94,12 +94,12 @@ inline Eigen::MatrixXd mpm::Particle<2>::reduce_dmatrix(
   dmatrix3x3.resize(3, 3);
   dmatrix3x3(0, 0) = dmatrix(0, 0);
   dmatrix3x3(0, 1) = dmatrix(0, 1);
-  dmatrix3x3(0, 2) = 0.;
+  dmatrix3x3(0, 2) = dmatrix(0, 4);
   dmatrix3x3(1, 0) = dmatrix(1, 0);
   dmatrix3x3(1, 1) = dmatrix(1, 1);
-  dmatrix3x3(1, 2) = 0.;
-  dmatrix3x3(2, 0) = 0.;
-  dmatrix3x3(2, 1) = 0.;
+  dmatrix3x3(1, 2) = dmatrix(1, 4);
+  dmatrix3x3(2, 0) = dmatrix(4, 0);
+  dmatrix3x3(2, 1) = dmatrix(4, 1);
   dmatrix3x3(2, 2) = dmatrix(4, 4);
 
   return dmatrix3x3;
