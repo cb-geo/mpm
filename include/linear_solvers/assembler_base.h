@@ -303,6 +303,10 @@ class AssemblerBase {
   std::shared_ptr<spdlog::logger> console_;
   //! Global node indices
   std::vector<Eigen::VectorXi> global_node_indices_;
+  //! Number of total active_dof in all rank
+  unsigned global_active_dof_;
+  //! Rank to Global mapper
+  std::vector<int> rank_global_mapper_;
 };
 }  // namespace mpm
 

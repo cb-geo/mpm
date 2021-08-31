@@ -84,9 +84,9 @@ class AssemblerEigenImplicitLinear : public AssemblerBase<Tdim> {
   //! Global node indices
   using AssemblerBase<Tdim>::global_node_indices_;
   //! Number of total active_dof in all rank
-  unsigned global_active_dof_;
+  using AssemblerBase<Tdim>::global_active_dof_;
   //! Rank to Global mapper
-  std::vector<int> rank_global_mapper_;
+  using AssemblerBase<Tdim>::rank_global_mapper_;
 
   /**
    * \defgroup ImplicitVariables Variables dealing with implicit MPM

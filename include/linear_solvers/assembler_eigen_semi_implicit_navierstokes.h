@@ -93,9 +93,9 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! correction_matrix
   Eigen::SparseMatrix<double> correction_matrix_;
   //! Number of total active_dof in all rank
-  unsigned global_active_dof_;
+  using AssemblerBase<Tdim>::global_active_dof_;
   //! Rank to Global mapper
-  std::vector<int> rank_global_mapper_;
+  using AssemblerBase<Tdim>::rank_global_mapper_;
 };
 }  // namespace mpm
 
