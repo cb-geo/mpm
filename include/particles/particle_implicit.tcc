@@ -203,7 +203,7 @@ void mpm::Particle<Tdim>::compute_strain_newmark() noexcept {
                                      mpm::ParticlePhase::Solid);
 
   // Assign volumetric strain at centroid
-  dvolumetric_strain_ = strain_increment_centroid.head(Tdim).sum();
+  dvolumetric_strain_ = dstrain_.head(Tdim).sum();
   volumetric_strain_centroid_ += dvolumetric_strain_;
 }
 
