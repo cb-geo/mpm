@@ -472,58 +472,6 @@ void mpm::Particle<Tdim>::compute_shapefn() noexcept {
                           this->natural_size_, zero);
 }
 
-// Compute B matrix
-template <>
-inline Eigen::MatrixXd mpm::Particle<1>::compute_bmatrix() noexcept {
-  Eigen::MatrixXd bmatrix;
-  bmatrix.resize(1, this->nodes_.size());
-  bmatrix.setZero();
-
-  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    bmatrix(0, i) = dn_dx_(i, 0);
-  }
-  return bmatrix;
-}
-
-// Compute B matrix
-template <>
-inline Eigen::MatrixXd mpm::Particle<2>::compute_bmatrix() noexcept {
-  Eigen::MatrixXd bmatrix;
-  bmatrix.resize(3, 2 * this->nodes_.size());
-  bmatrix.setZero();
-
-  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    bmatrix(0, 2 * i) = dn_dx_(i, 0);
-    bmatrix(2, 2 * i) = dn_dx_(i, 1);
-    bmatrix(1, 2 * i + 1) = dn_dx_(i, 1);
-    bmatrix(2, 2 * i + 1) = dn_dx_(i, 0);
-  }
-  return bmatrix;
-}
-
-// Compute B matrix
-template <>
-inline Eigen::MatrixXd mpm::Particle<3>::compute_bmatrix() noexcept {
-  Eigen::MatrixXd bmatrix;
-  bmatrix.resize(6, 3 * this->nodes_.size());
-  bmatrix.setZero();
-
-  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-    bmatrix(0, 3 * i) = dn_dx_(i, 0);
-    bmatrix(3, 3 * i) = dn_dx_(i, 1);
-    bmatrix(5, 3 * i) = dn_dx_(i, 2);
-
-    bmatrix(1, 3 * i + 1) = dn_dx_(i, 1);
-    bmatrix(3, 3 * i + 1) = dn_dx_(i, 0);
-    bmatrix(4, 3 * i + 1) = dn_dx_(i, 2);
-
-    bmatrix(2, 3 * i + 2) = dn_dx_(i, 2);
-    bmatrix(4, 3 * i + 2) = dn_dx_(i, 1);
-    bmatrix(5, 3 * i + 2) = dn_dx_(i, 0);
-  }
-  return bmatrix;
-}
-
 // Assign volume to the particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_volume(double volume) {

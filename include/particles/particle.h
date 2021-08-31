@@ -105,9 +105,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   void compute_shapefn() noexcept override;
 
-  //! Compute B matrix of a particle, based on local coordinates
-  inline Eigen::MatrixXd compute_bmatrix() noexcept override;
-
   //! Assign volume
   //! \param[in] volume Volume of particle
   bool assign_volume(double volume) override;
@@ -375,6 +372,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
   //! \ingroup Implicit
   inline bool map_material_stiffness_matrix_to_cell() override;
+
+  //! Compute B matrix of a particle, based on local coordinates
+  inline Eigen::MatrixXd compute_bmatrix() noexcept override;
 
   //! Map mass matrix to cell (used in equilibrium equation LHS)
   //! \ingroup Implicit
