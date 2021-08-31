@@ -78,10 +78,6 @@ class Material {
                                   const ParticleBase<Tdim>* ptr,
                                   mpm::dense_map* state_vars) = 0;
 
-  /**
-   * \defgroup Implicit Functions dealing with implicit MPM
-   */
-  /**@{*/
   //! Compute constitutive relations matrix
   //! \ingroup Implicit
   //! \param[in] stress Stress
@@ -99,7 +95,6 @@ class Material {
         "Material:: illegal operation!");
     return error;
   };
-  /**@}*/
 
  protected:
   //! material id
