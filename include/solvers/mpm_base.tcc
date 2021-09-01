@@ -455,6 +455,9 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
 
+    // Gather particle types
+    this->initialise_particle_types();
+
     if (!analysis_["resume"]["resume"].template get<bool>())
       throw std::runtime_error("Resume analysis option is disabled!");
 
