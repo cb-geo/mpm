@@ -127,6 +127,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
   auto cell_type = "ED2Q4";
   auto io_type = "Ascii2D";
   auto assembler_type = "EigenSemiImplicitTwoPhase2D";
+  std::string entity_set_name = "entity_sets_0";
   std::string material = "LinearElastic2D";
   std::string liquid_material = "Newtonian2D";
   std::vector<double> gravity{{0., -9.81}};
@@ -146,13 +147,14 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
     liquid_material = "Newtonian3D";
     gravity.clear();
     gravity = {0., 0., -9.81};
+    entity_set_name = "entity_sets_1";
   }
 
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
       {"mesh",
        {{"mesh", "mesh-" + dimension + ".txt"},
-        {"entity_sets", "entity_sets_0.json"},
+        {"entity_sets", entity_set_name + ".json"},
         {"io_type", io_type},
         {"check_duplicates", true},
         {"isoparametric", false},
@@ -160,7 +162,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
         {"boundary_conditions",
          {{"velocity_constraints", {{"file", "velocity-constraints.txt"}}},
           {"pressure_constraints",
-           {{{"phase_id", 1}, {"file", "pore-pressure-constraints.txt"}}}},
+           {{{"phase_id", 1}, {"nset_id", 1}, {"pressure", 0.0}}}},
           {"friction_constraints", {{"file", "friction-constraints.txt"}}}}},
         {"cell_type", cell_type}}},
       {"particles",
@@ -273,15 +275,26 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
 // Write JSON Entity Set
 bool write_entity_set() {
   // JSON Entity Sets
-  Json json_file = {
+  Json json_file0 = {
       {"particle_sets",
        {{{"id", 2},
-         {"set", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}}}}}};
+         {"set", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}}}}},
+      {"node_sets", {{{"id", 1}, {"set", {4, 5}}}}}};
+
+  Json json_file1 = {
+      {"particle_sets",
+       {{{"id", 2},
+         {"set", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}}}}},
+      {"node_sets", {{{"id", 1}, {"set", {8, 9, 10, 11}}}}}};
 
   // Dump JSON as an input file to be read
   std::ofstream file;
   file.open("entity_sets_0.json");
-  file << json_file.dump(2);
+  file << json_file0.dump(2);
+  file.close();
+
+  file.open("entity_sets_1.json");
+  file << json_file1.dump(2);
   file.close();
 
   return true;
@@ -351,12 +364,6 @@ bool write_mesh_2d() {
   file_constraints.open("velocity-constraints.txt");
   file_constraints << 0 << "\t" << 1 << "\t" << 0 << "\n";
   file_constraints << 1 << "\t" << 1 << "\t" << 0 << "\n";
-  file_constraints.close();
-
-  // Dump mesh pressure constraints
-  file_constraints.open("pore-pressure-constraints.txt");
-  file_constraints << 4 << "\t" << 0 << "\n";
-  file_constraints << 5 << "\t" << 0 << "\n";
   file_constraints.close();
 
   return true;
@@ -502,14 +509,6 @@ bool write_mesh_3d() {
   file_constraints << 1 << "\t" << 3 << "\t" << 0 << "\n";
   file_constraints << 2 << "\t" << 3 << "\t" << 0 << "\n";
   file_constraints << 3 << "\t" << 3 << "\t" << 0 << "\n";
-  file_constraints.close();
-
-  // Dump mesh pressure constraints
-  file_constraints.open("pore-pressure-constraints.txt");
-  file_constraints << 8 << "\t" << 0 << "\n";
-  file_constraints << 9 << "\t" << 0 << "\n";
-  file_constraints << 10 << "\t" << 0 << "\n";
-  file_constraints << 11 << "\t" << 0 << "\n";
   file_constraints.close();
 
   return true;
