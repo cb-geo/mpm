@@ -145,7 +145,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] pressure Applied pressure constraint
   //! \param[in] function math function
   bool assign_pressure_constraint(
-      const unsigned phase, const double pressure,
+      unsigned phase, double pressure,
       const std::shared_ptr<FunctionBase>& function) override;
 
   //! Apply pressure constraint

@@ -211,7 +211,7 @@ class NodeBase {
   //! \param[in] pressure Applied pressure constraint
   //! \param[in] function math function
   virtual bool assign_pressure_constraint(
-      const unsigned phase, double pressure,
+      unsigned phase, double pressure,
       const std::shared_ptr<FunctionBase>& function) = 0;
 
   //! Assign velocity constraint

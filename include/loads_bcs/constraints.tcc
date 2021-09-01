@@ -109,8 +109,8 @@ bool mpm::Constraints<Tdim>::assign_nodal_friction_constraints(
 //! Assign nodal pressure constraints
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_pressure_constraint(
-    const std::shared_ptr<FunctionBase>& mfunction, int set_id,
-    const unsigned phase, const double pconstraint) {
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned phase,
+    double pconstraint) {
   bool status = true;
   try {
     auto nset = mesh_->nodes(set_id);
