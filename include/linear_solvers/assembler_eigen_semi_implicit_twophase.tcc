@@ -4,7 +4,8 @@ mpm::AssemblerEigenSemiImplicitTwoPhase<
     Tdim>::AssemblerEigenSemiImplicitTwoPhase(unsigned node_neighbourhood)
     : mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>(node_neighbourhood) {
   //! Logger
-  console_ = spdlog::stdout_color_mt("AssemblerEigenSemiImplicitTwoPhase");
+  std::string logger = "AssemblerEigenSemiImplicitTwoPhase::";
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
 //! Assemble coefficient matrix for two-phase predictor
