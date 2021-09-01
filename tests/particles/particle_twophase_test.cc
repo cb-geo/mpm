@@ -1303,6 +1303,8 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
           REQUIRE_NOTHROW(particle->assign_state_variable("phi", 30.));
           REQUIRE(particle->state_variable("phi") == 30.);
           // Assign and read pressure though MC does not contain pressure
+          REQUIRE_NOTHROW(
+              particle->assign_pressure(30., mpm::ParticlePhase::Liquid));
           REQUIRE(std::isnan(particle->pressure()) == true);
         }
 
@@ -2756,6 +2758,8 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
           REQUIRE_NOTHROW(particle->assign_state_variable("phi", 30.));
           REQUIRE(particle->state_variable("phi") == 30.);
           // Assign and read pressure though MC does not contain pressure
+          REQUIRE_NOTHROW(
+              particle->assign_pressure(30., mpm::ParticlePhase::Liquid));
           REQUIRE(std::isnan(particle->pressure()) == true);
         }
 

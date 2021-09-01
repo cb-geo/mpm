@@ -1234,14 +1234,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Add pressure constraint to mesh
           REQUIRE(constraints->assign_nodal_pressure_constraint(
                       mfunction, set_id, 0, pressure) == true);
-          REQUIRE(constraints->assign_nodal_pressure_constraint(
-                      mfunction, set_id, 1, pressure) == true);
 
           // Add pressure constraint to all nodes in mesh
           REQUIRE(constraints->assign_nodal_pressure_constraint(
                       mfunction, -1, 0, pressure) == true);
-          REQUIRE(constraints->assign_nodal_pressure_constraint(
-                      mfunction, -1, 1, pressure) == true);
         }
 
         SECTION("Check assign friction constraints to nodes") {
@@ -1346,7 +1342,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           REQUIRE(constraints->assign_nodal_pressure_constraints(
                       0, pressure_constraints) == true);
           REQUIRE(constraints->assign_nodal_pressure_constraints(
-                      1, pressure_constraints) == true);
+                      1, pressure_constraints) == false);
         }
 
         // Test assign nodes concentrated_forces
