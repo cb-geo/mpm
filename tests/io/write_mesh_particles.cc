@@ -116,7 +116,9 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
 // Write JSON Configuration file for twophase
 bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
                          const std::string& mpm_scheme,
-                         const std::string& file_name) {
+                         const std::string& file_name,
+                         const std::string& free_surface_type,
+                         const std::string& linear_solver_type) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
@@ -124,6 +126,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
   auto node_type = "N2D2P";
   auto cell_type = "ED2Q4";
   auto io_type = "Ascii2D";
+  auto assembler_type = "EigenSemiImplicitTwoPhase2D";
   std::string material = "LinearElastic2D";
   std::string liquid_material = "Newtonian2D";
   std::vector<double> gravity{{0., -9.81}};
@@ -137,6 +140,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
     particle_type = "P3D2PHASE";
     node_type = "N3D2P";
     cell_type = "ED3H8";
+    assembler_type = "EigenSemiImplicitTwoPhase3D";
     io_type = "Ascii3D";
     material = "LinearElastic3D";
     liquid_material = "Newtonian3D";
@@ -155,6 +159,8 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
         {"node_type", node_type},
         {"boundary_conditions",
          {{"velocity_constraints", {{"file", "velocity-constraints.txt"}}},
+          {"pressure_constraints",
+           {{{"phase_id", 1}, {"file", "pore-pressure-constraints.txt"}}}},
           {"friction_constraints", {{"file", "friction-constraints.txt"}}}}},
         {"cell_type", cell_type}}},
       {"particles",
@@ -188,7 +194,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
          {"k_z", 0.001}},
         {{"id", 2},
          {"type", liquid_material},
-         {"density", 2300.},
+         {"density", 1000.},
          {"bulk_modulus", 1.E+9},
          {"mu", 0.3},
          {"dynamic_viscosity", 0.}}}},
@@ -227,6 +233,26 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
          {{"resume", resume},
           {"uuid", file_name + "-" + dimension},
           {"step", 5}}},
+        {"semi_implicit", {{"beta", 1}, {"integration", "mp"}}},
+        {"free_surface_detection",
+         {{"type", free_surface_type}, {"volume_tolerance", 0.25}}},
+        {"linear_solver",
+         {{"assembler_type", assembler_type},
+          {"solver_settings",
+           {{{"dof", "pressure"},
+             {"solver_type", linear_solver_type},
+             {"sub_solver_type", "cg"},
+             {"preconditioner_type", "none"},
+             {"max_iter", 100},
+             {"tolerance", 1E-5},
+             {"verbosity", 0}},
+            {{"dof", "acceleration"},
+             {"solver_type", linear_solver_type},
+             {"sub_solver_type", "lscg"},
+             {"preconditioner_type", "none"},
+             {"max_iter", 100},
+             {"tolerance", 1E-5},
+             {"verbosity", 0}}}}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
@@ -323,7 +349,14 @@ bool write_mesh_2d() {
   // Dump mesh velocity constraints
   std::ofstream file_constraints;
   file_constraints.open("velocity-constraints.txt");
-  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints << 0 << "\t" << 1 << "\t" << 0 << "\n";
+  file_constraints << 1 << "\t" << 1 << "\t" << 0 << "\n";
+  file_constraints.close();
+
+  // Dump mesh pressure constraints
+  file_constraints.open("pore-pressure-constraints.txt");
+  file_constraints << 4 << "\t" << 0 << "\n";
+  file_constraints << 5 << "\t" << 0 << "\n";
   file_constraints.close();
 
   return true;
@@ -465,7 +498,18 @@ bool write_mesh_3d() {
   // Dump mesh velocity constraints
   std::ofstream file_constraints;
   file_constraints.open("velocity-constraints.txt");
-  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints << 0 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints << 1 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints << 2 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints << 3 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints.close();
+
+  // Dump mesh pressure constraints
+  file_constraints.open("pore-pressure-constraints.txt");
+  file_constraints << 8 << "\t" << 0 << "\n";
+  file_constraints << 9 << "\t" << 0 << "\n";
+  file_constraints << 10 << "\t" << 0 << "\n";
+  file_constraints << 11 << "\t" << 0 << "\n";
   file_constraints.close();
 
   return true;
