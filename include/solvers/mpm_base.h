@@ -59,9 +59,6 @@ class MPMBase : public MPM {
   //! Initialise particles
   void initialise_particles() override;
 
-  //! Initialise particle types
-  void initialise_particle_types() override;
-
   //! Initialise materials
   void initialise_materials() override;
 
@@ -187,6 +184,9 @@ class MPMBase : public MPM {
   //! Initialise damping
   //! \param[in] damping_props Damping properties
   bool initialise_damping(const Json& damping_props);
+
+  //! Initialise particle types
+  void initialise_particle_types();
 
   /**
    * \defgroup Implicit Functions dealing with implicit MPM
