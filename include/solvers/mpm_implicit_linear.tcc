@@ -332,24 +332,17 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
 #ifdef USE_MPI
     // Assign global active dof to solver
     linear_solver_["displacement"]->assign_global_active_dof(
-        3 * assembler_->global_active_dof());
+        Tdim * assembler_->global_active_dof());
 
     // Prepare rank global mapper
-    auto predictor_rgm = assembler_->rank_global_mapper();
-    auto predictor_rgm_y = assembler_->rank_global_mapper();
-    auto predictor_rgm_z = assembler_->rank_global_mapper();
-    std::for_each(
-        predictor_rgm_y.begin(), predictor_rgm_y.end(),
-        [size = assembler_->global_active_dof()](int& rgm) { rgm += size; });
-    std::for_each(predictor_rgm_z.begin(), predictor_rgm_z.end(),
-                  [size = assembler_->global_active_dof()](int& rgm) {
-                    rgm += 2 * size;
-                  });
-    predictor_rgm.insert(predictor_rgm.end(), predictor_rgm_y.begin(),
-                         predictor_rgm_y.end());
-    predictor_rgm.insert(predictor_rgm.end(), predictor_rgm_z.begin(),
-                         predictor_rgm_z.end());
-
+    std::vector<int> predictor_rgm;
+    for (unsigned dir = 0; dir < Tdim; ++dir) {
+      auto dir_rgm = assembler_->rank_global_mapper();
+      std::for_each(dir_rgm.begin(), dir_rgm.end(),
+                    [size = assembler_->global_active_dof(),
+                     dir = dir](int& rgm) { rgm += dir * size; });
+      predictor_rgm.insert(predictor_rgm.end(), dir_rgm.begin(), dir_rgm.end());
+    }
     // Assign rank global mapper to solver
     linear_solver_["displacement"]->assign_rank_global_mapper(predictor_rgm);
 #endif
