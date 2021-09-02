@@ -3079,5 +3079,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE_THROWS(particle->liquid_mass());
     REQUIRE_THROWS(particle->liquid_velocity());
     REQUIRE_THROWS(particle->porosity());
+    REQUIRE_THROWS(particle->map_drag_matrix_to_cell());
   }
 }
