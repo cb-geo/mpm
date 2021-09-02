@@ -154,10 +154,20 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Try to update pressure to 2000, should throw and keep to 1000.
-      pressure = 1000.;
-      const double pmass = 1.5;
       node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Check pressure constraints
+      SECTION("Check nodal pressure constraints") {
+        // Check assign pressure constraint
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NSolid, 8000,
+                                                 nullptr) == true);
+        // Check apply pressure constraint
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::NSolid));
+        // Check pressure
+        REQUIRE(node->pressure(mpm::NodePhase::NSolid) ==
+                Approx(8000).epsilon(Tolerance));
+      }
     }
 
     SECTION("Check external force") {
@@ -621,10 +631,20 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Try to update pressure to 2000, should throw and keep to 1000.
-      pressure = 1000.;
-      const double pmass = 1.5;
       node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Check pressure constraints
+      SECTION("Check nodal pressure constraints") {
+        // Check assign pressure constraint
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NSolid, 8000,
+                                                 nullptr) == true);
+        // Check apply pressure constraint
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::NSolid));
+        // Check pressure
+        REQUIRE(node->pressure(mpm::NodePhase::NSolid) ==
+                Approx(8000).epsilon(Tolerance));
+      }
     }
 
     SECTION("Check volume") {
@@ -1225,10 +1245,20 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Try to update pressure to 2000, should throw and keep to 1000.
-      pressure = 1000.;
-      const double pmass = 1.5;
       node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Check pressure constraints
+      SECTION("Check nodal pressure constraints") {
+        // Check assign pressure constraint
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NSolid, 8000,
+                                                 nullptr) == true);
+        // Check apply pressure constraint
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::NSolid));
+        // Check pressure
+        REQUIRE(node->pressure(mpm::NodePhase::NSolid) ==
+                Approx(8000).epsilon(Tolerance));
+      }
     }
 
     SECTION("Check external force") {

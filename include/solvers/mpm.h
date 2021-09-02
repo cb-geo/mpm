@@ -49,6 +49,9 @@ class MPM {
   // Initialise particles
   virtual void initialise_particles() = 0;
 
+  // Initialise particle types
+  virtual void initialise_particle_types() = 0;
+
   // Initialise materials
   virtual void initialise_materials() = 0;
 
@@ -66,6 +69,9 @@ class MPM {
 
   //! Write HDF5 files
   virtual void write_hdf5(mpm::Index step, mpm::Index max_steps) = 0;
+
+  //! Write HDF5 files for twophase particles
+  virtual void write_hdf5_twophase(mpm::Index step, mpm::Index max_steps) = 0;
 
 #ifdef USE_VTK
   //! Write VTK files

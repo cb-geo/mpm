@@ -4,12 +4,12 @@
 
 #include "cell.h"
 #include "element.h"
-#include "hdf5_particle.h"
 #include "hexahedron_element.h"
 #include "material.h"
 #include "mesh.h"
 #include "node.h"
 #include "particle.h"
+#include "pod_particle.h"
 #include "quadrilateral_element.h"
 
 //! \brief Check particle cell crossing for 2D case

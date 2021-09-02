@@ -41,6 +41,9 @@ option(MPM_BUILD_TESTING "enable testing for mpm" ON)
 # Halo exchange
 option(HALO_EXCHANGE "Enable halo exchange" OFF)
 
+# PETSC
+option(USE_PETSC "Use PETSC solver library" OFF)
+
 # CMake Modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -71,6 +74,7 @@ if (HDF5_FOUND)
   include_directories(${HDF5_INCLUDE_DIRS})
   link_libraries(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_HL_LIBRARIES})
   add_definitions(${HDF5_DEFINITIONS})
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
 endif()
 
 # OpenMP
@@ -97,6 +101,15 @@ if (MKL_FOUND)
   endif()
 endif()
 
+# PETSc
+if (USE_PETSC)
+  find_package(PETSc COMPONENTS C)
+endif()
+if (PETSC_FOUND)
+  include_directories(${PETSC_INC})
+  link_libraries(${PETSC_LIB})
+  add_definitions("-DUSE_PETSC")
+endif()
 
 # KaHIP
 if (MPI_FOUND)
@@ -131,6 +144,7 @@ endif()
 # Include directories
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
+  ${mpm_SOURCE_DIR}/include/contacts/
   ${mpm_SOURCE_DIR}/include/containers/
   ${mpm_SOURCE_DIR}/include/elements/
   ${mpm_SOURCE_DIR}/include/elements/2d
@@ -138,12 +152,14 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/include/io/
-  ${mpm_SOURCE_DIR}/include/contacts/
+  ${mpm_SOURCE_DIR}/include/linear_solvers/
   ${mpm_SOURCE_DIR}/include/loads_bcs/
   ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/
+  ${mpm_SOURCE_DIR}/include/particles/pod_particles
   ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/include/solvers/mpm_scheme/
+  ${mpm_SOURCE_DIR}/include/utilities/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -157,12 +173,14 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
-  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
+  ${mpm_SOURCE_DIR}/src/pod_particle.cc
+  ${mpm_SOURCE_DIR}/src/pod_particle_twophase.cc
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
   ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc
+  ${mpm_SOURCE_DIR}/src/linear_solver.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/nodal_properties.cc
@@ -200,6 +218,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
     ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
+    ${mpm_SOURCE_DIR}/tests/functions/radial_basis_function_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/interface_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
@@ -207,6 +226,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
+    ${mpm_SOURCE_DIR}/tests/linear_solver_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/modified_cam_clay_test.cc
@@ -214,27 +234,39 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/materials/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/norsand_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/material_utility_test.cc
+    ${mpm_SOURCE_DIR}/tests/mesh_free_surface_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/nodal_properties_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_map_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_cell_crossing_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_serialize_deserialize_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_serialize_deserialize_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_musl_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_musl_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usf_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usf_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_navierstokes_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_navierstokes_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_twophase_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_twophase_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
-    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_map_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_serialize_deserialize_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
   add_executable(mpmtest ${mpm_src} ${test_src})
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)

@@ -39,3 +39,18 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usl_logger =
 // Create a logger for MPM Explicit MUSL
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_musl_logger =
     spdlog::stdout_color_st("MPMExplicitMUSL");
+
+// Create a logger for MPM Semi Implicit Navier Stokes
+const std::shared_ptr<spdlog::logger>
+    mpm::Logger::mpm_semi_implicit_navier_stokes_logger =
+        spdlog::stdout_color_st("MPMSemiImplicitNavierStokes");
+
+// Create a logger for MPM Explicit Two Phase
+const std::shared_ptr<spdlog::logger>
+    mpm::Logger::mpm_explicit_two_phase_logger =
+        spdlog::stdout_color_st("MPMExplicitTwoPhase");
+
+// Create a logger for MPM Semi Implicit Two Phase
+const std::shared_ptr<spdlog::logger>
+    mpm::Logger::mpm_semi_implicit_two_phase_logger =
+        spdlog::stdout_color_st("MPMSemiImplicitTwoPhase");

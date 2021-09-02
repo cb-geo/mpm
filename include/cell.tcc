@@ -412,7 +412,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     if (indices.size() == 3) {
       //   2 0
       //     |\
-      //     | \  
+      //     | \
       //   c |  \ b
       //     |   \
       //     |    \

@@ -217,6 +217,156 @@ class Cell {
   //! Return previous mpi rank
   unsigned previous_mpirank() const;
 
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Assign solving status
+  //! \ingroup MultiPhase
+  //! \param[in] status Cell solving status for parallel free-surface detection
+  void assign_solving_status(bool status) { solving_status_ = status; }
+
+  //! Return solving status of a cell: active (if a particle is present in all
+  //! MPI rank)
+  //! \ingroup MultiPhase
+  bool solving_status() const { return solving_status_; }
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  //! \param[in] free_surface boolean indicating free surface cell
+  void assign_free_surface(bool free_surface) { free_surface_ = free_surface; };
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  //! \retval free_surface_ indicating free surface cell
+  bool free_surface() const { return free_surface_; };
+
+  //! Assign volume traction to node
+  //! \ingroup MultiPhase
+  //! \param[in] volume_fraction cell volume fraction
+  void assign_volume_fraction(double volume_fraction) {
+    volume_fraction_ = volume_fraction;
+  };
+
+  //! Return cell volume fraction
+  //! \ingroup MultiPhase
+  //! \retval volume_fraction_ cell volume fraction
+  double volume_fraction() const { return volume_fraction_; };
+
+  //! Map cell volume to the nodes
+  //! \ingroup MultiPhase
+  //! \param[in] phase to map volume
+  void map_cell_volume_to_nodes(unsigned phase);
+
+  //! Initialize local elemental matrices
+  //! \ingroup MultiPhase
+  bool initialise_element_matrix();
+
+  //! Initialize local elemental matrices for two-phase one-point solver
+  //! \ingroup MultiPhase
+  bool initialise_element_matrix_twophase();
+
+  //! Return local node indices
+  //! \ingroup MultiPhase
+  Eigen::VectorXi local_node_indices();
+
+  //! Return drag matrix for two-phase one-point solver
+  //! \ingroup MultiPhase
+  //! \param[in] dir Desired direction
+  const Eigen::MatrixXd& drag_matrix(unsigned dir) {
+    return drag_matrix_[dir];
+  };
+
+  //! Compute local matrix for drag force coupling for two-phase one-point
+  //! solver
+  //! \ingroup MultiPhase
+  //! \param[in] shapefn Shape function
+  //! \param[in] pvolume Volume weight
+  //! \param[in] multiplier Drag force multiplier
+  void compute_local_drag_matrix(const Eigen::VectorXd& shapefn, double pvolume,
+                                 const VectorDim& multiplier) noexcept;
+
+  //! Return local laplacian
+  //! \ingroup MultiPhase
+  const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
+
+  //! Compute local laplacian matrix (Used in poisson equation)
+  //! \ingroup MultiPhase
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  //! \param[in] multiplier multiplier
+  void compute_local_laplacian(const Eigen::MatrixXd& grad_shapefn,
+                               double pvolume,
+                               double multiplier = 1.0) noexcept;
+
+  //! Return local laplacian RHS matrix
+  //! \ingroup MultiPhase
+  const Eigen::MatrixXd& poisson_right_matrix() {
+    return poisson_right_matrix_;
+  };
+
+  //! Return local laplacian RHS matrix for twophase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Phase identifier
+  const Eigen::MatrixXd& poisson_right_matrix(unsigned phase) {
+    return poisson_right_matrix_twophase_[phase];
+  };
+
+  //! Compute local poisson RHS matrix (Used in poisson equation)
+  //! \ingroup MultiPhase
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_poisson_right(const Eigen::VectorXd& shapefn,
+                                   const Eigen::MatrixXd& grad_shapefn,
+                                   double pvolume,
+                                   double multiplier = 1.0) noexcept;
+
+  //! Compute local poisson RHS matrix (Used in poisson equation)
+  //! \ingroup MultiPhase
+  //! \param[in] phase Phase identifier
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_poisson_right_twophase(unsigned phase,
+                                            const Eigen::VectorXd& shapefn,
+                                            const Eigen::MatrixXd& grad_shapefn,
+                                            double pvolume,
+                                            double multiplier = 1.0) noexcept;
+
+  //! Return local correction matrix
+  //! \ingroup MultiPhase
+  const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
+
+  //! Return local correction matrix for two phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Phase identifier
+  const Eigen::MatrixXd& correction_matrix(unsigned phase) {
+    return correction_matrix_twophase_[phase];
+  };
+
+  //! Compute local correction matrix (Used to correct velocity)
+  //! \ingroup MultiPhase
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
+                                       const Eigen::MatrixXd& grad_shapefn,
+                                       double pvolume) noexcept;
+
+  //! Compute local correction matrix for two phase (Used to correct velocity)
+  //! \param[in] phase Phase identifier
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_correction_matrix_twophase(
+      unsigned phase, const Eigen::VectorXd& shapefn,
+      const Eigen::MatrixXd& grad_shapefn, double pvolume,
+      double multiplier = 1.0) noexcept;
+
+  /**@}*/
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -264,11 +414,37 @@ class Cell {
   //! Normal of face
   //! first-> face_id, second->vector of the normal
   std::map<unsigned, Eigen::VectorXd> face_normals_;
+
+  /**
+   * \defgroup MultiPhaseVariables Variables for multi-phase MPM
+   * @{
+   */
+  //! Solving status
+  bool solving_status_{false};
+  //! Free surface bool
+  bool free_surface_{false};
+  //! Volume fraction
+  double volume_fraction_{0.0};
+  //! Local laplacian matrix
+  Eigen::MatrixXd laplacian_matrix_;
+  //! Local poisson RHS matrix
+  Eigen::MatrixXd poisson_right_matrix_;
+  //! Local correction RHS matrix
+  Eigen::MatrixXd correction_matrix_;
+  //! Drag force coefficient
+  std::vector<Eigen::MatrixXd> drag_matrix_;
+  //! Local poisson RHS matrix for twophase
+  std::vector<Eigen::MatrixXd> poisson_right_matrix_twophase_;
+  //! Local poisson RHS matrix for twophase
+  std::vector<Eigen::MatrixXd> correction_matrix_twophase_;
+  /**@}*/
+
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
 }  // namespace mpm
 
 #include "cell.tcc"
+#include "cell_multiphase.tcc"
 
 #endif  // MPM_CELL_H_

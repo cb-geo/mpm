@@ -9,6 +9,18 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
                          const std::string& mpm_scheme,
                          const std::string& file_name);
 
+// Write JSON Configuration file for navier stokes
+bool write_json_unitcell_navierstokes(
+    unsigned dim, const std::string& analysis, const std::string& mpm_scheme,
+    const std::string& file_name, const std::string& free_surface_type = "none",
+    const std::string& linear_solver_type = "none");
+
+// Write JSON Configuration file for two-phase
+bool write_json_unitcell_twophase(
+    unsigned dim, const std::string& analysis, const std::string& mpm_scheme,
+    const std::string& file_name, const std::string& free_surface_type = "none",
+    const std::string& linear_solver_type = "none");
+
 // Write Mesh file in 2D
 bool write_mesh_2d_unitcell();
 // Write particles file in 2D

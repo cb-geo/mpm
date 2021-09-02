@@ -30,6 +30,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       // Vector variables
       {"displacements", VariableType::Vector},
       {"velocities", VariableType::Vector},
+      {"normals", VariableType::Vector},
       // Tensor variables
       {"strains", VariableType::Tensor},
       {"stresses", VariableType::Tensor}};
@@ -236,6 +237,9 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
   // Read and assign friction constraints
   this->nodal_frictional_constraints(mesh_props, mesh_io);
 
+  // Read and assign pressure constraints
+  this->nodal_pressure_constraints(mesh_props, mesh_io);
+
   // Initialise cell
   auto cells_begin = std::chrono::steady_clock::now();
   // Shape function name
@@ -266,6 +270,20 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      cells_end - cells_begin)
                      .count());
+}
+
+// Initialise particle types
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::initialise_particle_types() {
+  // Get particles properties
+  auto json_particles = io_->json_object("particles");
+
+  for (const auto& json_particle : json_particles) {
+    // Gather particle types
+    auto particle_type =
+        json_particle["generator"]["particle_type"].template get<std::string>();
+    particle_types_.insert(particle_type);
+  }
 }
 
 // Initialise particles
@@ -304,6 +322,9 @@ void mpm::MPMBase<Tdim>::initialise_particles() {
       std::runtime_error(
           "mpm::base::init_particles() Generate particles failed");
   }
+
+  // Gather particle types
+  this->initialise_particle_types();
 
   auto particles_gen_end = std::chrono::steady_clock::now();
   console_->info("Rank {} Generate particles: {} ms", mpi_rank,
@@ -347,6 +368,9 @@ void mpm::MPMBase<Tdim>::initialise_particles() {
 
   // Read and assign particles stresses
   this->particles_stresses(mesh_props, particle_io);
+
+  // Read and assign particles initial pore pressure
+  this->particles_pore_pressures(mesh_props, particle_io);
 
   auto particles_volume_end = std::chrono::steady_clock::now();
   console_->info("Rank {} Read volume, velocity and stresses: {} ms", mpi_rank,
@@ -426,13 +450,13 @@ template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::checkpoint_resume() {
   bool checkpoint = true;
   try {
-    // TODO: Set phase
-    const unsigned phase = 0;
-
     int mpi_rank = 0;
 #ifdef USE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
+
+    // Gather particle types
+    this->initialise_particle_types();
 
     if (!analysis_["resume"]["resume"].template get<bool>())
       throw std::runtime_error("Resume analysis option is disabled!");
@@ -443,15 +467,17 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     this->step_ = analysis_["resume"]["step"].template get<mpm::Index>();
 
     // Input particle h5 file for resume
-    std::string attribute = "particles";
-    std::string extension = ".h5";
+    for (const auto ptype : particle_types_) {
+      std::string attribute = mpm::ParticlePODTypeName.at(ptype);
+      std::string extension = ".h5";
 
-    auto particles_file =
-        io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
-            .string();
+      auto particles_file =
+          io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
+              .string();
 
-    // Load particle information from file
-    mesh_->read_particles_hdf5(phase, particles_file);
+      // Load particle information from file
+      mesh_->read_particles_hdf5(particles_file, attribute, ptype);
+    }
 
     // Clear all particle ids
     mesh_->iterate_over_cells(
@@ -480,15 +506,31 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 //! Write HDF5 files
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
-  // Write input geometry to vtk file
-  std::string attribute = "particles";
+  // Write hdf5 file for single phase particle
+  for (const auto ptype : particle_types_) {
+    std::string attribute = mpm::ParticlePODTypeName.at(ptype);
+    std::string extension = ".h5";
+
+    auto particles_file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+
+    // Load particle information from file
+    mesh_->write_particles_hdf5(particles_file);
+  }
+}
+
+//! Write HDF5 files for twophase particles
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::write_hdf5_twophase(mpm::Index step,
+                                             mpm::Index max_steps) {
+  // Write hdf5 file for single phase particle
+  std::string attribute = "twophase_particles";
   std::string extension = ".h5";
 
   auto particles_file =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
 
-  const unsigned phase = 0;
-  mesh_->write_particles_hdf5(phase, particles_file);
+  mesh_->write_particles_hdf5_twophase(particles_file);
 }
 
 #ifdef USE_VTK
@@ -937,6 +979,58 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
   }
 }
 
+// Nodal pressure constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign pressure constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("pressure_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+
+      // Iterate over pressure constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["pressure_constraints"]) {
+        // Pore pressure constraint phase indice
+        unsigned constraint_phase = constraints["phase_id"];
+
+        // Pore pressure constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+          std::string pressure_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool ppressure_constraints =
+              constraints_->assign_nodal_pressure_constraints(
+                  constraint_phase,
+                  mesh_io->read_pressure_constraints(
+                      io_->file_name(pressure_constraints_file)));
+          if (!ppressure_constraints)
+            throw std::runtime_error(
+                "Pore pressure constraints are not properly assigned");
+        } else {
+          // Get the math function
+          std::shared_ptr<FunctionBase> pfunction = nullptr;
+          if (constraints.find("math_function_id") != constraints.end())
+            pfunction = math_functions_.at(
+                constraints.at("math_function_id").template get<unsigned>());
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Pressure
+          double pressure = constraints.at("pressure").template get<double>();
+          // Add pressure constraint to mesh
+          constraints_->assign_nodal_pressure_constraint(
+              pfunction, nset_id, constraint_phase, pressure);
+        }
+      }
+    } else
+      throw std::runtime_error("Pressure constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Nodal pressure constraints are undefined {} ",
+                   __LINE__, exception.what());
+  }
+}
+
 //! Cell entity sets
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::cell_entity_sets(const Json& mesh_props,
@@ -1084,6 +1178,68 @@ void mpm::MPMBase<Tdim>::particles_stresses(
   }
 }
 
+// Particles pore pressures
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particles_pore_pressures(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    if (mesh_props.find("particles_pore_pressures") != mesh_props.end()) {
+      // Get generator type
+      const std::string type = mesh_props["particles_pore_pressures"]["type"]
+                                   .template get<std::string>();
+      // Assign initial pore pressure by file
+      if (type == "file") {
+        std::string fparticles_pore_pressures =
+            mesh_props["particles_pore_pressures"]["location"]
+                .template get<std::string>();
+        if (!io_->file_name(fparticles_pore_pressures).empty()) {
+          // Read and assign particles pore pressures
+          if (!mesh_->assign_particles_pore_pressures(
+                  particle_io->read_particles_scalar_properties(
+                      io_->file_name(fparticles_pore_pressures))))
+            throw std::runtime_error(
+                "Particles pore pressures are not properly assigned");
+        } else
+          throw std::runtime_error("Particle pore pressures JSON not found");
+      } else if (type == "water_table") {
+        // Initialise water tables
+        std::map<double, double> reference_points;
+        // Vertical direction
+        const unsigned dir_v = mesh_props["particles_pore_pressures"]["dir_v"]
+                                   .template get<unsigned>();
+        // Horizontal direction
+        const unsigned dir_h = mesh_props["particles_pore_pressures"]["dir_h"]
+                                   .template get<unsigned>();
+        // Iterate over water tables
+        for (const auto& water_table :
+             mesh_props["particles_pore_pressures"]["water_tables"]) {
+          // Position coordinate
+          double position = water_table.at("position").template get<double>();
+          // Direction
+          double h0 = water_table.at("h0").template get<double>();
+          // Add reference points to mesh
+          reference_points.insert(std::make_pair<double, double>(
+              static_cast<double>(position), static_cast<double>(h0)));
+        }
+        // Initialise particles pore pressures by watertable
+        mesh_->iterate_over_particles(std::bind(
+            &mpm::ParticleBase<Tdim>::initialise_pore_pressure_watertable,
+            std::placeholders::_1, dir_v, dir_h, this->gravity_,
+            reference_points));
+      } else
+        throw std::runtime_error(
+            "Particle pore pressures generator type is not properly "
+            "specified");
+    } else
+      throw std::runtime_error("Particle pore pressure JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle pore pressures are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
 //! Particle entity sets
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::particle_entity_sets(bool check_duplicates) {
@@ -1203,6 +1359,12 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
       std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
                 std::placeholders::_1, phase));
 
+  // Apply pressure constraint
+  mesh_->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::apply_pressure_constraint,
+                std::placeholders::_1, phase, this->dt_, this->step_),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
 #ifdef USE_MPI
   int mpi_size = 1;
 
@@ -1223,4 +1385,62 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
                 std::placeholders::_1, phase));
+}
+
+//! MPM implicit solver initialization
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::initialise_linear_solver(
+    const Json& lin_solver_props,
+    tsl::robin_map<
+        std::string,
+        std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>&
+        linear_solver) {
+  // Iterate over specific solver settings
+  for (const auto& solver : lin_solver_props) {
+    std::string dof = solver["dof"].template get<std::string>();
+    std::string solver_type = solver["solver_type"].template get<std::string>();
+    // NOTE: Only KrylovPETSC solver is supported for MPI
+#ifdef USE_MPI
+    // Get number of MPI ranks
+    int mpi_size = 1;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (solver_type != "KrylovPETSC" && mpi_size > 1) {
+      console_->warn(
+          "The linear solver for DOF:\'{}\' in MPI setting is "
+          "automatically set to default: \'KrylovPETSC\'. Only "
+          "\'KrylovPETSC\' solver is supported for MPI.",
+          dof);
+      solver_type = "KrylovPETSC";
+    }
+#endif
+    unsigned max_iter = solver["max_iter"].template get<unsigned>();
+    double tolerance = solver["tolerance"].template get<double>();
+    auto lin_solver =
+        Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                double>::instance()
+            ->create(solver_type, std::move(max_iter), std::move(tolerance));
+
+    // Specific settings
+    if (solver.contains("sub_solver_type"))
+      lin_solver->set_sub_solver_type(
+          solver["sub_solver_type"].template get<std::string>());
+    if (solver.contains("preconditioner_type"))
+      lin_solver->set_preconditioner_type(
+          solver["preconditioner_type"].template get<std::string>());
+    if (solver.contains("abs_tolerance"))
+      lin_solver->set_abs_tolerance(
+          solver["abs_tolerance"].template get<double>());
+    if (solver.contains("div_tolerance"))
+      lin_solver->set_div_tolerance(
+          solver["div_tolerance"].template get<double>());
+    if (solver.contains("verbosity"))
+      lin_solver->set_verbosity(solver["verbosity"].template get<unsigned>());
+
+    // Add solver set to map
+    linear_solver.insert(
+        std::pair<
+            std::string,
+            std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>>(
+            dof, lin_solver));
+  }
 }

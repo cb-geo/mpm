@@ -1,5 +1,5 @@
-#ifndef MPM_HDF5_H_
-#define MPM_HDF5_H_
+#ifndef MPM_POD_H_
+#define MPM_POD_H_
 
 // HDF5
 #include "hdf5.h"
@@ -9,7 +9,7 @@
 
 namespace mpm {
 // Define a struct of particle
-typedef struct HDF5Particle {
+typedef struct PODParticle {
   // Index
   mpm::Index id;
   // Mass
@@ -44,13 +44,15 @@ typedef struct HDF5Particle {
   unsigned nstate_vars;
   // State variables (init to zero)
   double svars[20] = {0};
-} HDF5Particle;
+  // Destructor
+  virtual ~PODParticle() = default;
+} PODParticle;
 
-namespace hdf5 {
+namespace pod {
 namespace particle {
 const hsize_t NFIELDS = 53;
 
-const size_t dst_size = sizeof(HDF5Particle);
+const size_t dst_size = sizeof(PODParticle);
 
 // Destination offset
 extern const size_t dst_offset[NFIELDS];
@@ -65,8 +67,8 @@ extern const char* field_names[NFIELDS];
 extern const hid_t field_type[NFIELDS];
 
 }  // namespace particle
-}  // namespace hdf5
+}  // namespace pod
 
 }  // namespace mpm
 
-#endif  // MPM_HDF5_H_
+#endif  // MPM_POD_H_

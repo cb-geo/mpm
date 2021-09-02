@@ -4,7 +4,7 @@
 // Write particles
 bool mpm::partio::write_particles(
     const std::string& filename,
-    const std::vector<mpm::HDF5Particle>& particles) {
+    const std::vector<mpm::PODParticle>& particles) {
   bool status = false;
 
   if (!particles.empty()) {

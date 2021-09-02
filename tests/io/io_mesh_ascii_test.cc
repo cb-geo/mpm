@@ -308,6 +308,59 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
     }
   }
 
+  // Check nodal pressure constraints file
+  SECTION("Check pressure constraints file") {
+    // Vector of friction constraints
+    std::vector<std::tuple<mpm::Index, double>> pressure_constraints;
+
+    // Pressure constraint
+    pressure_constraints.emplace_back(std::make_tuple(0, 300.5));
+    pressure_constraints.emplace_back(std::make_tuple(1, 500.5));
+    pressure_constraints.emplace_back(std::make_tuple(2, 250.5));
+    pressure_constraints.emplace_back(std::make_tuple(3, 0.0));
+
+    // Dump pressure constraints as an input file to be read
+    std::ofstream file;
+    file.open("pressure-constraints-2d.txt");
+    // Write particle coordinates
+    for (const auto& pressure_constraint : pressure_constraints) {
+      file << std::get<0>(pressure_constraint) << "\t";
+      file << std::get<1>(pressure_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read pressure constraints
+    SECTION("Check pressure constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read pressure constraints from a non-existant file
+      auto constraints = read_mesh->read_pressure_constraints(
+          "pressure-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints =
+          read_mesh->read_pressure_constraints("pressure-constraints-2d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == pressure_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < pressure_constraints.size(); ++i) {
+        REQUIRE(
+            std::get<0>(constraints.at(i)) ==
+            Approx(std::get<0>(pressure_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(constraints.at(i)) ==
+            Approx(std::get<1>(pressure_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
   SECTION("Check forces file") {
     // Vector of particle forces
     std::vector<std::tuple<mpm::Index, unsigned, double>> nodal_forces;
@@ -479,6 +532,51 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
         for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
           REQUIRE(stresses.at(i)[j] ==
                   Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check particles scalar properties file") {
+    // Particle scalar properties
+    std::map<mpm::Index, double> particles_scalars;
+    particles_scalars.emplace(std::make_pair(0, 10.5));
+    particles_scalars.emplace(std::make_pair(1, -40.5));
+    particles_scalars.emplace(std::make_pair(2, -60.5));
+    particles_scalars.emplace(std::make_pair(3, 80.5));
+
+    // Dump particle scalar properties as an input file to be read
+    std::ofstream file;
+    file.open("particles-scalars-2d.txt");
+    // Write particle scalar properties
+    for (const auto& scalars : particles_scalars) {
+      file << scalars.first << "\t";
+      file << scalars.second << "\n";
+    }
+
+    file.close();
+
+    // Check read particles scalar properties file
+    SECTION("Check read particles scalar properties file") {
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read particles scalar properties from a non-existant file
+      auto read_particles_scalars = io_mesh->read_particles_scalar_properties(
+          "particles-scalar-missing.txt");
+      // Check number of particles scalar properties
+      REQUIRE(read_particles_scalars.size() == 0);
+
+      // Check particles scalar properties
+      read_particles_scalars =
+          io_mesh->read_particles_scalar_properties("particles-scalars-2d.txt");
+
+      // Check number of particles
+      REQUIRE(read_particles_scalars.size() == particles_scalars.size());
+
+      // Check particles scalar properties
+      for (unsigned i = 0; i < particles_scalars.size(); ++i) {
+        REQUIRE(std::get<1>(read_particles_scalars.at(i)) ==
+                Approx(particles_scalars.at(i)).epsilon(Tolerance));
       }
     }
   }
@@ -828,6 +926,59 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
     }
   }
 
+  // Check nodal pressure constraints file
+  SECTION("Check pressure constraints file") {
+    // Vector of friction constraints
+    std::vector<std::tuple<mpm::Index, double>> pressure_constraints;
+
+    // Pressure constraint
+    pressure_constraints.emplace_back(std::make_tuple(0, 300.5));
+    pressure_constraints.emplace_back(std::make_tuple(1, 500.5));
+    pressure_constraints.emplace_back(std::make_tuple(2, 250.5));
+    pressure_constraints.emplace_back(std::make_tuple(3, 0.0));
+
+    // Dump pressure constraints as an input file to be read
+    std::ofstream file;
+    file.open("pressure-constraints-3d.txt");
+    // Write particle coordinates
+    for (const auto& pressure_constraint : pressure_constraints) {
+      file << std::get<0>(pressure_constraint) << "\t";
+      file << std::get<1>(pressure_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read pressure constraints
+    SECTION("Check pressure constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read pressure constraints from a non-existant file
+      auto constraints = read_mesh->read_pressure_constraints(
+          "pressure-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints =
+          read_mesh->read_pressure_constraints("pressure-constraints-3d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == pressure_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < pressure_constraints.size(); ++i) {
+        REQUIRE(
+            std::get<0>(constraints.at(i)) ==
+            Approx(std::get<0>(pressure_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(constraints.at(i)) ==
+            Approx(std::get<1>(pressure_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
   SECTION("Check forces file") {
     // Vector of particle forces
     std::vector<std::tuple<mpm::Index, unsigned, double>> nodal_forces;
@@ -1000,6 +1151,51 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
           REQUIRE(stresses.at(i)[j] ==
                   Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check particles scalar properties file") {
+    // Particle scalar properties
+    std::map<mpm::Index, double> particles_scalars;
+    particles_scalars.emplace(std::make_pair(0, 10.5));
+    particles_scalars.emplace(std::make_pair(1, -40.5));
+    particles_scalars.emplace(std::make_pair(2, -60.5));
+    particles_scalars.emplace(std::make_pair(3, 80.5));
+
+    // Dump particle scalar properties as an input file to be read
+    std::ofstream file;
+    file.open("particles-scalars-3d.txt");
+    // Write particle scalar properties
+    for (const auto& scalars : particles_scalars) {
+      file << scalars.first << "\t";
+      file << scalars.second << "\n";
+    }
+
+    file.close();
+
+    // Check read particles scalar properties file
+    SECTION("Check read particles scalar properties file") {
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read particles scalar properties from a non-existant file
+      auto read_particles_scalars = io_mesh->read_particles_scalar_properties(
+          "particles-scalar-missing.txt");
+      // Check number of particles scalar properties
+      REQUIRE(read_particles_scalars.size() == 0);
+
+      // Check particles scalar properties
+      read_particles_scalars =
+          io_mesh->read_particles_scalar_properties("particles-scalars-3d.txt");
+
+      // Check number of particles
+      REQUIRE(read_particles_scalars.size() == particles_scalars.size());
+
+      // Check particles scalar properties
+      for (unsigned i = 0; i < particles_scalars.size(); ++i) {
+        REQUIRE(std::get<1>(read_particles_scalars.at(i)) ==
+                Approx(particles_scalars.at(i)).epsilon(Tolerance));
       }
     }
   }

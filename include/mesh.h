@@ -10,6 +10,7 @@
 
 // Eigen
 #include "Eigen/Dense"
+#include <Eigen/Sparse>
 // MPI
 #ifdef USE_MPI
 #include "mpi.h"
@@ -30,7 +31,6 @@ using Json = nlohmann::json;
 #include "function_base.h"
 #include "generators/injection.h"
 #include "geometry.h"
-#include "hdf5_particle.h"
 #include "io.h"
 #include "io_mesh.h"
 #include "logger.h"
@@ -39,6 +39,8 @@ using Json = nlohmann::json;
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "pod_particle.h"
+#include "radial_basis_function.h"
 #include "traction.h"
 #include "vector.h"
 #include "velocity_constraint.h"
@@ -99,6 +101,9 @@ class Mesh {
 
   //! Return the number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
+
+  //! Return container of nodes
+  mpm::Vector<NodeBase<Tdim>> nodes() { return nodes_; }
 
   //! Return the number of nodes in rank
   mpm::Index nnodes_rank();
@@ -240,6 +245,10 @@ class Mesh {
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
+  //! Number of particles in the mesh with specific type
+  //! \param[in] particle particle_type A string denoting particle type
+  mpm::Index nparticles(const std::string& particle_type) const;
+
   //! Locate particles in a cell
   //! Iterate over all cells in a mesh to find the cell in which particles
   //! are located.
@@ -250,6 +259,12 @@ class Mesh {
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
   void iterate_over_particles(Toper oper);
+
+  //! Iterate over particles with predicate
+  //! \tparam Toper Callable object typically a baseclass functor
+  //! \tparam Tpred Predicate
+  template <typename Toper, typename Tpred>
+  void iterate_over_particles_predicate(Toper oper, Tpred pred);
 
   //! Iterate over particle set
   //! \tparam Toper Callable object typically a baseclass functor
@@ -392,20 +407,41 @@ class Mesh {
   void find_ghost_boundary_cells();
 
   //! Write HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \retval status Status of writing HDF5 output
-  bool write_particles_hdf5(unsigned phase, const std::string& filename);
+  bool write_particles_hdf5(const std::string& filename);
 
-  //! Read HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
+  //! Write HDF5 particles for two-phase-one-point particle
   //! \param[in] filename Name of HDF5 file to write particles data
+  //! \retval status Status of writing HDF5 output
+  bool write_particles_hdf5_twophase(const std::string& filename);
+
+  //! Read HDF5 particles with type name
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] typename Name of particle type name
+  //! \param[in] particle_type Particle type to be generated
   //! \retval status Status of reading HDF5 output
-  bool read_particles_hdf5(unsigned phase, const std::string& filename);
+  bool read_particles_hdf5(const std::string& filename,
+                           const std::string& type_name,
+                           const std::string& particle_type);
+
+  //! Read HDF5 particles for singlephase particle
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] particle_type Particle type to be generated
+  //! \retval status Status of reading HDF5 output
+  bool read_particles_hdf5(const std::string& filename,
+                           const std::string& particle_type);
+
+  //! Read HDF5 particles for twophase particle
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] particle_type Particle type to be generated
+  //! \retval status Status of reading HDF5 output
+  bool read_particles_hdf5_twophase(const std::string& filename,
+                                    const std::string& particle_type);
 
   //! Return HDF5 particles
   //! \retval particles_hdf5 Vector of HDF5 particles
-  std::vector<mpm::HDF5Particle> particles_hdf5() const;
+  std::vector<mpm::PODParticle> particles_hdf5() const;
 
   //! Return nodal coordinates
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
@@ -463,6 +499,101 @@ class Mesh {
 
   // Initialise the nodal properties' map
   void initialise_nodal_properties();
+
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Compute cell volume fraction
+  //! \ingroup MultiPhase
+  //! \details Compute cell volume fraction based on the number of particle
+  //! see (Kularathna & Soga 2017).
+  void compute_cell_vol_fraction();
+
+  //! Compute free surface
+  //! \ingroup MultiPhase
+  //! \param[in] method Type of method to use
+  //! \param[in] volume_tolerance for volume_fraction approach
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface(
+      const std::string& method = "density",
+      double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
+
+  //! Compute free surface by density method
+  //! \ingroup MultiPhase
+  //! \details Using simple approach of volume fraction approach as (Kularathna
+  //! & Soga, 2017) and density ratio comparison (Hamad, 2015). This method is
+  //! fast, but less accurate.
+  //! \param[in] volume_tolerance for volume_fraction approach
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface_by_density(
+      double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
+
+  //! Compute free surface by geometry method
+  //! \ingroup MultiPhase
+  //! \details Using a more expensive approach using neighbouring particles and
+  //! current geometry. This method combine multiple checks in order to simplify
+  //! and fasten the process: (1) Volume fraction approach as (Kularathna & Soga
+  //! 2017), (2) Density comparison approach as (Hamad, 2015), and (3) Geometry
+  //! based approach as (Marrone et al. 2010)
+  //! \param[in] volume_tolerance for volume_fraction approach
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface_by_geometry(
+      double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
+
+  //! \ingroup MultiPhase
+  //! \retval id_set Set of free surface node ids
+  std::set<mpm::Index> free_surface_nodes();
+
+  //! Get free surface cell set
+  //! \ingroup MultiPhase
+  //! \retval id_set Set of free surface cell ids
+  std::set<mpm::Index> free_surface_cells();
+
+  //! Get free surface particle set
+  //! \ingroup MultiPhase
+  //! \retval status Status of compute_free_surface
+  //! \retval id_set Set of free surface particle ids
+  std::set<mpm::Index> free_surface_particles();
+
+  //! Assign particles pore pressures
+  //! \ingroup MultiPhase
+  //! \param[in] particle_pore_pressure Initial pore pressure of particle
+  bool assign_particles_pore_pressures(
+      const std::vector<std::tuple<mpm::Index, double>>&
+          particle_pore_pressures);
+
+  //! Create a list of active nodes in mesh and assign active node id
+  //! (rank-wise)
+  //! \ingroup MultiPhase
+  unsigned assign_active_nodes_id();
+
+  //! Assign active node id (globally in All MPI ranks)
+  //! \ingroup MultiPhase
+  unsigned assign_global_active_nodes_id();
+
+  //! Return container of active nodes
+  //! \ingroup MultiPhase
+  mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }
+
+  //! Return global node indices
+  //! \ingroup MultiPhase
+  std::vector<Eigen::VectorXi> global_node_indices() const;
+
+  //! Compute correction force in the node
+  //! \ingroup MultiPhase
+  bool compute_nodal_correction_force(
+      const Eigen::SparseMatrix<double>& correction_matrix,
+      const Eigen::VectorXd& pressure_increment, double dt);
+
+  //! Compute correction force in the node for twophase
+  //! \ingroup MultiPhase
+  bool compute_nodal_correction_force_twophase(
+      const Eigen::SparseMatrix<double>& correction_matrix,
+      const Eigen::VectorXd& pressure_increment, double dt);
+
+  /**@}*/
 
  private:
   // Read particles from file
@@ -536,5 +667,6 @@ class Mesh {
 }  // namespace mpm
 
 #include "mesh.tcc"
+#include "mesh_multiphase.tcc"
 
 #endif  // MPM_MESH_H_

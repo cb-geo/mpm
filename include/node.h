@@ -66,6 +66,12 @@ class Node : public NodeBase<Tdim> {
   //! Return status
   bool status() const override { return status_; }
 
+  //! Assign solving status
+  void assign_solving_status(bool status) override { solving_status_ = status; }
+
+  //! Return solving status
+  bool solving_status() const override { return solving_status_; }
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -133,6 +139,21 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] mass_pressure Product of mass x pressure of a particle
   void update_mass_pressure(unsigned phase,
                             double mass_pressure) noexcept override;
+
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_pressure_constraint(
+      unsigned phase, double pressure,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Apply pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] step Step in analysis
+  void apply_pressure_constraint(unsigned phase, double dt = 0,
+                                 Index step = 0) noexcept override;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -264,6 +285,160 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  /**
+   * \defgroup MultiPhase Functions dealing with multi-phase MPM
+   */
+  /**@{*/
+
+  //! Return interpolated density at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  double density(unsigned phase) const override { return density_(phase); }
+
+  //! Compute nodal density
+  //! \ingroup MultiPhase
+  void compute_density() override;
+
+  //! Assign free surface
+  //! \ingroup MultiPhase
+  void assign_free_surface(bool free_surface) override {
+    node_mutex_.lock();
+    free_surface_ = free_surface;
+    node_mutex_.unlock();
+  }
+
+  //! Return free surface bool
+  //! \ingroup MultiPhase
+  bool free_surface() const override { return free_surface_; }
+
+  //! Initialise two-phase nodal properties
+  //! \ingroup MultiPhase
+  void initialise_twophase() noexcept override;
+
+  //! Update internal force (body force / traction force)
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  void update_drag_force_coefficient(bool update,
+                                     const VectorDim& drag_force) override;
+
+  //! Return drag force at a given node
+  //! \ingroup MultiPhase
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+
+  //! Compute acceleration and velocity for two phase
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept override;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \ingroup MultiPhase
+  //! \param[in] dt Timestep in analysis \param[in] damping_factor
+  //! Damping factor
+  bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept override;
+
+  //! Compute semi-implicit acceleration and velocity
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \details Can be used for both semi-implicit navier-stokes and two-phase
+  //! solvers
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_semi_implicit_corrector(
+      unsigned phase, double dt) override;
+
+  //! Compute semi-implicit acceleration and velocity with Cundall damping
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \details Can be used for both semi-implicit navier-stokes and two-phase
+  //! solvers
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_semi_implicit_corrector_cundall(
+      unsigned phase, double dt, double damping_factor);
+
+  //! Assign active id
+  //! \ingroup MultiPhase
+  void assign_active_id(Index id) override { active_id_ = id; }
+
+  //! Return active id
+  //! \ingroup MultiPhase
+  mpm::Index active_id() const override { return active_id_; }
+
+  //! Assign global active id
+  //! \ingroup MultiPhase
+  void assign_global_active_id(Index id) override { global_active_id_ = id; }
+
+  //! Return global active id
+  //! \ingroup MultiPhase
+  mpm::Index global_active_id() const override { return global_active_id_; }
+
+  //! Return nodal pressure constraint
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current_time current time of the analysis
+  //! \retval pressure constraint at proper time for given phase
+  double pressure_constraint(const unsigned phase,
+                             const double current_time) const override {
+    double constraint = std::numeric_limits<double>::max();
+    if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
+      const double scalar =
+          (pressure_function_.find(phase) != pressure_function_.end())
+              ? pressure_function_.at(phase)->value(current_time)
+              : 1.0;
+
+      constraint = scalar * pressure_constraints_.at(phase);
+    }
+    return constraint;
+  }
+
+  //! Update pressure increment at the node
+  //! \ingroup MultiPhase
+  void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
+                                 unsigned phase,
+                                 double current_time = 0.) override;
+
+  //! Return nodal pressure increment
+  //! \ingroup MultiPhase
+  double pressure_increment() const override { return pressure_increment_; }
+
+  //! Return map of velocity constraints
+  //! \ingroup MultiPhase
+  std::map<unsigned, double>& velocity_constraints() override {
+    return velocity_constraints_;
+  }
+
+  //! Update nodal intermediate velocity
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] acceleration_inter solved intermediate acceleration
+  //! \param[in] dt Timestep in analysis
+  void update_intermediate_acceleration_velocity(
+      const unsigned phase, const Eigen::MatrixXd& acceleration_inter,
+      double dt) override;
+
+  //! Update correction force
+  //! \ingroup MultiPhase
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] force Correction force from the particles in a cell
+  void update_correction_force(bool update, unsigned phase,
+                               const VectorDim& force) noexcept override;
+
+  //! Return correction force at a given node for a given phase
+  //! \ingroup MultiPhase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim correction_force(unsigned phase) const override {
+    return correction_force_.col(phase);
+  }
+
+  /**@}*/
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
@@ -279,6 +454,8 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
+  //! Solving status
+  bool solving_status_{false};
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
@@ -290,7 +467,7 @@ class Node : public NodeBase<Tdim> {
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
-  Eigen::Matrix<double, Tdim, 1> contact_displacement_;
+  VectorDim contact_displacement_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
@@ -299,6 +476,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Pressure constraint
+  std::map<unsigned, double> pressure_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node
@@ -309,6 +488,8 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Mathematical function for pressure
+  std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Concentrated force
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
   //! Mathematical function for force
@@ -319,9 +500,32 @@ class Node : public NodeBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
+  //! Global index for active node (in each rank)
+  Index active_id_{std::numeric_limits<Index>::max()};
+  //! Global index for active node (globally)
+  Index global_active_id_{std::numeric_limits<Index>::max()};
+
+  /**
+   * \defgroup MultiPhaseVariables Variables for multi-phase MPM
+   * @{
+   */
+  //! Free surface
+  bool free_surface_{false};
+  //! Signed distance
+  double signed_distance_;
+  //! Interpolated density
+  Eigen::Matrix<double, 1, Tnphases> density_;
+  //! p^(t+1) - beta * p^(t)
+  double pressure_increment_;
+  //! Correction force
+  Eigen::Matrix<double, Tdim, Tnphases> correction_force_;
+  //! Drag force
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
+  /**@}*/
 };  // Node class
 }  // namespace mpm
 
 #include "node.tcc"
+#include "node_multiphase.tcc"
 
 #endif  // MPM_NODE_H_
