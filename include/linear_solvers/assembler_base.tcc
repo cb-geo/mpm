@@ -9,7 +9,7 @@ bool mpm::AssemblerBase<Tdim>::assign_global_node_indices(
     global_node_indices_ = mesh_->global_node_indices();
 
 #ifdef USE_MPI
-     // Total number of active node (in all rank)
+    // Total number of active node (in all rank)
     global_active_dof_ = nglobal_active_node;
 
     // Initialise mapping vector

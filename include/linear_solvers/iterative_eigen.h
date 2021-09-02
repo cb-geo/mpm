@@ -55,7 +55,7 @@ class IterativeEigen : public SolverBase<Traits> {
   //! Verbosity
   using SolverBase<Traits>::verbosity_;
   //! Logger
-  using SolverBase<Traits>::console_;
+  std::unique_ptr<spdlog::logger> console_;
 };
 }  // namespace mpm
 

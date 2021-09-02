@@ -89,7 +89,6 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
   // Check point resume
   if (resume) {
-    this->initialise_particle_types();
     bool check_resume = this->checkpoint_resume();
     if (!check_resume) resume = false;
   }

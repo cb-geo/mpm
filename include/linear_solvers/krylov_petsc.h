@@ -70,7 +70,7 @@ class KrylovPETSC : public SolverBase<Traits> {
   //! Verbosity
   using SolverBase<Traits>::verbosity_;
   //! Logger
-  using SolverBase<Traits>::console_;
+  std::unique_ptr<spdlog::logger> console_;
   //! Global active dof
   unsigned global_active_dof_;
   //! Rank global Mapper

@@ -57,7 +57,7 @@ class Constraints {
   //! \param[in] pconstraint Pressure constraint at node
   bool assign_nodal_pressure_constraint(
       const std::shared_ptr<FunctionBase>& mfunction, int set_id,
-      const unsigned phase, const double pconstraint);
+      unsigned phase, double pconstraint);
 
   //! Assign nodal pressure constraints to nodes
   //! \param[in] pressure_constraints Constraint at node, pressure

@@ -77,7 +77,7 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Number of sparse matrix container size
   using AssemblerBase<Tdim>::sparse_row_size_;
   //! Logger
-  using AssemblerBase<Tdim>::console_;
+  std::unique_ptr<spdlog::logger> console_;
   //! Global node indices
   using AssemblerBase<Tdim>::global_node_indices_;
   //! Laplacian matrix

@@ -220,6 +220,8 @@ TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2Phase]") {
                                                  nullptr) == true);
         REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NLiquid, 7000,
                                                  nullptr) == true);
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NGas, 7000,
+                                                 nullptr) == false);
         // Check apply pressure constraint
         REQUIRE_NOTHROW(
             node->apply_pressure_constraint(mpm::NodePhase::NSolid));
@@ -968,6 +970,8 @@ TEST_CASE("Twophase Node is checked for 2D case", "[node][2D][2Phase]") {
                                                  nullptr) == true);
         REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NLiquid, 7000,
                                                  nullptr) == true);
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NGas, 7000,
+                                                 nullptr) == false);
         // Check apply pressure constraint
         REQUIRE_NOTHROW(
             node->apply_pressure_constraint(mpm::NodePhase::NSolid));
@@ -1884,6 +1888,8 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2Phase]") {
                                                  nullptr) == true);
         REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NLiquid, 7000,
                                                  nullptr) == true);
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::NGas, 7000,
+                                                 nullptr) == false);
         // Check apply pressure constraint
         REQUIRE_NOTHROW(
             node->apply_pressure_constraint(mpm::NodePhase::NSolid));

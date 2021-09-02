@@ -8,10 +8,20 @@ namespace mpm_test {
 bool write_json(unsigned dim, bool resume, const std::string& analysis,
                 const std::string& mpm_scheme, const std::string& file_name);
 
+// Write JSON Configuration file for navierstokes
+bool write_json_navierstokes(unsigned dim, bool resume,
+                             const std::string& analysis,
+                             const std::string& mpm_scheme,
+                             const std::string& file_name,
+                             const std::string& free_surface_type = "none",
+                             const std::string& linear_solver_type = "none");
+
 // Write JSON Configuration file for twophase
 bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
                          const std::string& mpm_scheme,
-                         const std::string& file_name);
+                         const std::string& file_name,
+                         const std::string& free_surface_type = "none",
+                         const std::string& linear_solver_type = "none");
 
 // Write JSON Entity Set
 bool write_entity_set();

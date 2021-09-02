@@ -67,8 +67,6 @@ class AssemblerEigenSemiImplicitTwoPhase
   using AssemblerBase<Tdim>::mesh_;
   //! Number of sparse matrix container size
   using AssemblerBase<Tdim>::sparse_row_size_;
-  //! Logger
-  using AssemblerBase<Tdim>::console_;
   //! Global node indices
   using AssemblerBase<Tdim>::global_node_indices_;
   //! Poisson RHS vector
@@ -77,6 +75,8 @@ class AssemblerEigenSemiImplicitTwoPhase
   using AssemblerEigenSemiImplicitNavierStokes<Tdim>::pressure_constraints_;
   //! Correction_matrix
   using AssemblerEigenSemiImplicitNavierStokes<Tdim>::correction_matrix_;
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
   //! Coefficient matrix for two-phase predictor
   std::map<unsigned, Eigen::SparseMatrix<double>> predictor_lhs_matrix_;
   //! RHS vector for two-phase predictor

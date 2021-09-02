@@ -83,10 +83,21 @@ TEST_CASE("MPM 2D Explicit TwoPhase implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE_NOTHROW(mpm->initialise_materials());
+    // Initialise mesh
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+
     // Test check point restart
     REQUIRE(mpm->checkpoint_resume() == true);
-    // Solve
-    REQUIRE(mpm->solve() == true);
+    {
+      // Solve
+      auto io = std::make_unique<mpm::IO>(argc, argv);
+      // Run explicit MPM
+      auto mpm_resume =
+          std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+      REQUIRE(mpm_resume->solve() == true);
+    }
   }
 
   SECTION("Check pressure smoothing") {
@@ -173,10 +184,21 @@ TEST_CASE("MPM 3D Explicit TwoPhase implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE_NOTHROW(mpm->initialise_materials());
+    // Initialise mesh
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+
     // Test check point restart
     REQUIRE(mpm->checkpoint_resume() == true);
-    // Solve
-    REQUIRE(mpm->solve() == true);
+    {
+      // Solve
+      auto io = std::make_unique<mpm::IO>(argc, argv);
+      // Run explicit MPM
+      auto mpm_resume =
+          std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+      REQUIRE(mpm_resume->solve() == true);
+    }
   }
 
   SECTION("Check pressure smoothing") {

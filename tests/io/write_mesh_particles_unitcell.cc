@@ -39,7 +39,8 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"isoparametric", false},
         {"node_type", node_type},
         {"boundary_conditions",
-         {{"velocity_constraints", {{"file", "velocity-constraints.txt"}}},
+         {{"velocity_constraints",
+           {{"file", "velocity-constraints-unitcell.txt"}}},
           {"friction_constraints", {{"file", "friction-constraints.txt"}}}}},
         {"cell_type", cell_type}}},
       {"particles",
@@ -112,9 +113,129 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
 }
 
 // Write JSON Configuration file for two-phase
+bool write_json_unitcell_navierstokes(unsigned dim, const std::string& analysis,
+                                      const std::string& mpm_scheme,
+                                      const std::string& file_name,
+                                      const std::string& free_surface_type,
+                                      const std::string& linear_solver_type) {
+  // Make json object with input files
+  // 2D
+  std::string dimension = "2d";
+  auto particle_type = "P2DFLUID";
+  auto node_type = "N2D";
+  auto cell_type = "ED2Q4";
+  auto io_type = "Ascii2D";
+  auto assembler_type = "EigenSemiImplicitNavierStokes2D";
+  std::string material = "Newtonian2D";
+  std::vector<double> gravity{{0., -9.81}};
+  std::vector<unsigned> material_id{{2}};
+  std::vector<double> xvalues{{0.0, 0.5, 1.0}};
+  std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
+
+  // 3D
+  if (dim == 3) {
+    dimension = "3d";
+    particle_type = "P3DFLUID";
+    node_type = "N3D";
+    cell_type = "ED3H8";
+    assembler_type = "EigenSemiImplicitNavierStokes3D";
+    io_type = "Ascii3D";
+    material = "Newtonian3D";
+    gravity.clear();
+    gravity = {0., 0., -9.81};
+  }
+
+  Json json_file = {
+      {"title", "Example JSON Input for MPM"},
+      {"mesh",
+       {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
+        {"io_type", io_type},
+        {"isoparametric", false},
+        {"node_type", node_type},
+        {"boundary_conditions",
+         {{"velocity_constraints",
+           {{"file", "velocity-constraints-unitcell.txt"}}},
+          {"pressure_constraints",
+           {{{"phase_id", 1},
+             {"file", "pore-pressure-constraints-unitcell.txt"}}}},
+          {"friction_constraints", {{"file", "friction-constraints.txt"}}}}},
+        {"cell_type", cell_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"generator",
+          {{"type", "file"},
+           {"io_type", io_type},
+           {"material_id", material_id},
+           {"pset_id", 0},
+           {"particle_type", particle_type},
+           {"check_duplicates", true},
+           {"location", "particles-" + dimension + "-unitcell.txt"}}}}}},
+      {"materials",
+       {{{"id", 2},
+         {"type", material},
+         {"density", 1000.},
+         {"bulk_modulus", 1.E+9},
+         {"mu", 0.3},
+         {"dynamic_viscosity", 0.}}}},
+      {"external_loading_conditions",
+       {{"gravity", gravity},
+        {"particle_surface_traction",
+         {{{"math_function_id", 0},
+           {"pset_id", -1},
+           {"dir", 1},
+           {"traction", 10.5}}}},
+        {"concentrated_nodal_forces",
+         {{{"math_function_id", 0},
+           {"nset_id", -1},
+           {"dir", 1},
+           {"force", 10.5}}}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"analysis",
+       {{"type", analysis},
+        {"mpm_scheme", mpm_scheme},
+        {"locate_particles", true},
+        {"pressure_smoothing", false},
+        {"pore_pressure_smoothing", false},
+        {"free_surface_detection",
+         {{"type", "geometry"}, {"volume_tolerance", 0.25}}},
+        {"dt", 0.0001},
+        {"nsteps", 10},
+        {"boundary_friction", 0.5},
+        {"semi_implicit", {{"beta", 1}, {"integration", "mp"}}},
+        {"free_surface_detection",
+         {{"type", free_surface_type}, {"volume_tolerance", 0.25}}},
+        {"linear_solver", {{"assembler_type", assembler_type}}},
+        {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
+        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+      {"post_processing",
+       {{"path", "results/"},
+        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
+        {"output_steps", 10}}}};
+
+  // Dump JSON as an input file to be read
+  std::ofstream file;
+  file.open((file_name + "-" + dimension + "-unitcell.json").c_str());
+  file << json_file.dump(2);
+  file.close();
+
+  return true;
+}
+
+// Write JSON Configuration file for two-phase
 bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
                                   const std::string& mpm_scheme,
-                                  const std::string& file_name) {
+                                  const std::string& file_name,
+                                  const std::string& free_surface_type,
+                                  const std::string& linear_solver_type) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
@@ -122,10 +243,11 @@ bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
   auto node_type = "N2D2P";
   auto cell_type = "ED2Q4";
   auto io_type = "Ascii2D";
+  auto assembler_type = "EigenSemiImplicitTwoPhase2D";
   std::string material = "LinearElastic2D";
   std::string liquid_material = "Newtonian2D";
-  std::vector<unsigned> material_id{{1, 2}};
   std::vector<double> gravity{{0., -9.81}};
+  std::vector<unsigned> material_id{{1, 2}};
   std::vector<double> xvalues{{0.0, 0.5, 1.0}};
   std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
 
@@ -135,6 +257,7 @@ bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
     particle_type = "P3D2PHASE";
     node_type = "N3D2P";
     cell_type = "ED3H8";
+    assembler_type = "EigenSemiImplicitTwoPhase3D";
     io_type = "Ascii3D";
     material = "LinearElastic3D";
     liquid_material = "Newtonian3D";
@@ -150,7 +273,11 @@ bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
         {"isoparametric", false},
         {"node_type", node_type},
         {"boundary_conditions",
-         {{"velocity_constraints", {{"file", "velocity-constraints.txt"}}},
+         {{"velocity_constraints",
+           {{"file", "velocity-constraints-unitcell.txt"}}},
+          {"pressure_constraints",
+           {{{"phase_id", 1},
+             {"file", "pore-pressure-constraints-unitcell.txt"}}}},
           {"friction_constraints", {{"file", "friction-constraints.txt"}}}}},
         {"cell_type", cell_type}}},
       {"particles",
@@ -214,9 +341,17 @@ bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
        {{"type", analysis},
         {"mpm_scheme", mpm_scheme},
         {"locate_particles", true},
+        {"pressure_smoothing", false},
+        {"pore_pressure_smoothing", false},
+        {"free_surface_detection",
+         {{"type", "geometry"}, {"volume_tolerance", 0.25}}},
         {"dt", 0.0001},
         {"nsteps", 10},
         {"boundary_friction", 0.5},
+        {"semi_implicit", {{"beta", 1}, {"integration", "mp"}}},
+        {"free_surface_detection",
+         {{"type", free_surface_type}, {"volume_tolerance", 0.25}}},
+        {"linear_solver", {{"assembler_type", assembler_type}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
@@ -297,6 +432,11 @@ bool write_mesh_2d_unitcell() {
   std::ofstream file_constraints;
   file_constraints.open("velocity-constraints-unitcell.txt");
   file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+
+  // Dump mesh pressure constraints
+  file_constraints.open("pore-pressure-constraints-unitcell.txt");
+  file_constraints << 4 << "\t" << 0 << "\n";
+  file_constraints << 5 << "\t" << 0 << "\n";
   file_constraints.close();
 
   return true;
@@ -443,7 +583,18 @@ bool write_mesh_3d_unitcell() {
   // Dump mesh velocity constraints
   std::ofstream file_constraints;
   file_constraints.open("velocity-constraints-unitcell.txt");
-  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints << 0 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints << 1 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints << 2 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints << 3 << "\t" << 3 << "\t" << 0 << "\n";
+  file_constraints.close();
+
+  // Dump mesh pressure constraints
+  file_constraints.open("pore-pressure-constraints-unitcell.txt");
+  file_constraints << 8 << "\t" << 0 << "\n";
+  file_constraints << 9 << "\t" << 0 << "\n";
+  file_constraints << 10 << "\t" << 0 << "\n";
+  file_constraints << 11 << "\t" << 0 << "\n";
   file_constraints.close();
 
   return true;

@@ -4,7 +4,8 @@ mpm::AssemblerEigenSemiImplicitNavierStokes<
     Tdim>::AssemblerEigenSemiImplicitNavierStokes(unsigned node_neighbourhood)
     : mpm::AssemblerBase<Tdim>(node_neighbourhood) {
   //! Logger
-  console_ = spdlog::stdout_color_mt("AssemblerEigenSemiImplicitNavierStokes");
+  std::string logger = "AssemblerEigenSemiImplicitNavierStokes::";
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
 //! Assemble Laplacian matrix

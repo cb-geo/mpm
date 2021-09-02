@@ -4,22 +4,25 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "mpm_explicit_twophase.h"
+#include "mpm_semi_implicit_navierstokes.h"
 #include "write_mesh_particles.h"
 
-// Check MPM Explicit
-TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
-          "[MPM][2D][Explicit][USL][2Phase]") {
+// Check MPM Semi-implicit Navier Stokes
+TEST_CASE("MPM 2D Semi-implicit Navier Stokes implementation is checked",
+          "[MPM][2D][Semi-implicit][2Phase]") {
   // Dimension
   const unsigned Dim = 2;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit-twophase-usl";
-  const std::string analysis = "MPMExplicitTwoPhase2D";
-  const std::string mpm_scheme = "usl";
+  const std::string fname = "mpm-semi-implicit-ns";
+  const std::string analysis = "MPMSemiImplicitNavierStokes2D";
+  const std::string mpm_scheme = "usf";
+  const std::string fsd_type = "density";
+  const std::string lin_solver_type = "IterativeEigen";
   bool resume = false;
-  REQUIRE(mpm_test::write_json_twophase(2, resume, analysis, mpm_scheme,
-                                        fname) == true);
+  REQUIRE(mpm_test::write_json_navierstokes(2, resume, analysis, mpm_scheme,
+                                            fname, fsd_type,
+                                            lin_solver_type) == true);
 
   // Write JSON Entity Sets file
   REQUIRE(mpm_test::write_entity_set() == true);
@@ -35,14 +38,15 @@ TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
   // clang-format off
   char* argv[] = {(char*)"./mpm",
                   (char*)"-f",  (char*)"./",
-                  (char*)"-i",  (char*)"mpm-explicit-twophase-usl-2d.json"};
+                  (char*)"-i",  (char*)"mpm-semi-implicit-ns-2d.json"};
   // clang-format on
 
   SECTION("Check initialisation") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
 
     // Initialise materials
     REQUIRE_NOTHROW(mpm->initialise_materials());
@@ -50,7 +54,6 @@ TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
     REQUIRE_NOTHROW(mpm->initialise_mesh());
     // Initialise particles
     REQUIRE_NOTHROW(mpm->initialise_particles());
-
     // Initialise external loading
     REQUIRE_NOTHROW(mpm->initialise_loads());
 
@@ -61,8 +64,9 @@ TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
   SECTION("Check solver") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
     // Test check point restart
@@ -71,17 +75,21 @@ TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
 
   SECTION("Check resume") {
     // Write JSON file
-    const std::string fname = "mpm-explicit-twophase-usl";
-    const std::string analysis = "MPMExplicitTwoPhase2D";
-    const std::string mpm_scheme = "usl";
+    const std::string fname = "mpm-semi-implicit-ns";
+    const std::string analysis = "MPMSemiImplicitNavierStokes2D";
+    const std::string mpm_scheme = "usf";
+    const std::string fsd_type = "density";
+    const std::string lin_solver_type = "IterativeEigen";
     bool resume = true;
-    REQUIRE(mpm_test::write_json_twophase(2, resume, analysis, mpm_scheme,
-                                          fname) == true);
+    REQUIRE(mpm_test::write_json_navierstokes(2, resume, analysis, mpm_scheme,
+                                              fname, fsd_type,
+                                              lin_solver_type) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
 
     // Initialise materials
     REQUIRE_NOTHROW(mpm->initialise_materials());
@@ -94,8 +102,8 @@ TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
       // Solve
       auto io = std::make_unique<mpm::IO>(argc, argv);
       // Run explicit MPM
-      auto mpm_resume =
-          std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+      auto mpm_resume = std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(
+          std::move(io));
       REQUIRE(mpm_resume->solve() == true);
     }
   }
@@ -103,27 +111,31 @@ TEST_CASE("MPM 2D Explicit USL TwoPhase implementation is checked",
   SECTION("Check pressure smoothing") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
     // Pressure smoothing
     REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Solid));
     REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Liquid));
   }
 }
 
-// Check MPM Explicit
-TEST_CASE("MPM 3D Explicit USL TwoPhase implementation is checked",
-          "[MPM][3D][Explicit][USL][2Phase]") {
+// Check MPM Semi Implicit
+TEST_CASE("MPM 3D Semi-implicit Navier Stokes implementation is checked",
+          "[MPM][3D][Semi-implicit][1Phase]") {
   // Dimension
   const unsigned Dim = 3;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit-twophase-usl";
-  const std::string analysis = "MPMExplicitTwoPhase3D";
-  const std::string mpm_scheme = "usl";
+  const std::string fname = "mpm-semi-implicit-ns";
+  const std::string analysis = "MPMSemiImplicitNavierStokes3D";
+  const std::string mpm_scheme = "usf";
+  const std::string fsd_type = "density";
+  const std::string lin_solver_type = "IterativeEigen";
   const bool resume = false;
-  REQUIRE(mpm_test::write_json_twophase(3, resume, analysis, mpm_scheme,
-                                        fname) == true);
+  REQUIRE(mpm_test::write_json_navierstokes(3, resume, analysis, mpm_scheme,
+                                            fname, fsd_type,
+                                            lin_solver_type) == true);
 
   // Write JSON Entity Sets file
   REQUIRE(mpm_test::write_entity_set() == true);
@@ -139,14 +151,15 @@ TEST_CASE("MPM 3D Explicit USL TwoPhase implementation is checked",
   // clang-format off
   char* argv[] = {(char*)"./mpm",
                   (char*)"-f",  (char*)"./",
-                  (char*)"-i",  (char*)"mpm-explicit-twophase-usl-3d.json"};
+                  (char*)"-i",  (char*)"mpm-semi-implicit-ns-3d.json"};
   // clang-format on
 
   SECTION("Check initialisation") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
 
     // Initialise materials
     REQUIRE_NOTHROW(mpm->initialise_materials());
@@ -162,8 +175,9 @@ TEST_CASE("MPM 3D Explicit USL TwoPhase implementation is checked",
   SECTION("Check solver") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
     // Test check point restart
@@ -172,17 +186,21 @@ TEST_CASE("MPM 3D Explicit USL TwoPhase implementation is checked",
 
   SECTION("Check resume") {
     // Write JSON file
-    const std::string fname = "mpm-explicit-twophase-usl";
-    const std::string analysis = "MPMExplicitTwoPhase3D";
-    const std::string mpm_scheme = "usl";
+    const std::string fname = "mpm-semi-implicit-ns";
+    const std::string analysis = "MPMSemiImplicitNavierStokes3D";
+    const std::string mpm_scheme = "usf";
+    const std::string fsd_type = "density";
+    const std::string lin_solver_type = "IterativeEigen";
     bool resume = true;
-    REQUIRE(mpm_test::write_json_twophase(3, resume, analysis, mpm_scheme,
-                                          fname) == true);
+    REQUIRE(mpm_test::write_json_navierstokes(3, resume, analysis, mpm_scheme,
+                                              fname, fsd_type,
+                                              lin_solver_type) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
 
     // Initialise materials
     REQUIRE_NOTHROW(mpm->initialise_materials());
@@ -195,8 +213,8 @@ TEST_CASE("MPM 3D Explicit USL TwoPhase implementation is checked",
       // Solve
       auto io = std::make_unique<mpm::IO>(argc, argv);
       // Run explicit MPM
-      auto mpm_resume =
-          std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+      auto mpm_resume = std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(
+          std::move(io));
       REQUIRE(mpm_resume->solve() == true);
     }
   }
@@ -204,8 +222,9 @@ TEST_CASE("MPM 3D Explicit USL TwoPhase implementation is checked",
   SECTION("Check pressure smoothing") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Run Semi Implicit MPM
+    auto mpm =
+        std::make_unique<mpm::MPMSemiImplicitNavierStokes<Dim>>(std::move(io));
     // Pressure smoothing
     REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Solid));
     REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Liquid));
