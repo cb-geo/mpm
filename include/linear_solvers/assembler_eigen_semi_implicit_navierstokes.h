@@ -61,14 +61,6 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Assemble corrector RHS
   bool assemble_corrector_right(double dt) override;
 
-  //! Return the total size of global dof in all rank
-  unsigned global_active_dof() override { return global_active_dof_; };
-
-  //! Return a vector to map local (rank) index to global index
-  std::vector<int> rank_global_mapper() override {
-    return rank_global_mapper_;
-  };
-
  protected:
   //! number of nodes
   using AssemblerBase<Tdim>::active_dof_;

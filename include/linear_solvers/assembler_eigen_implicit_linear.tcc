@@ -4,7 +4,8 @@ mpm::AssemblerEigenImplicitLinear<Tdim>::AssemblerEigenImplicitLinear(
     unsigned node_neighbourhood)
     : mpm::AssemblerBase<Tdim>(node_neighbourhood) {
   //! Logger
-  console_ = spdlog::stdout_color_mt("AssemblerEigenImplicitLinear");
+  std::string logger = "AssemblerEigenImplicitLinear::";
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
 //! Assemble stiffness matrix

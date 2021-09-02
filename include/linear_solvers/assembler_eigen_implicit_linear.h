@@ -64,14 +64,6 @@ class AssemblerEigenImplicitLinear : public AssemblerBase<Tdim> {
   }
   /**@{*/
 
-  //! Return the total size of global dof in all rank
-  unsigned global_active_dof() override { return global_active_dof_; };
-
-  //! Return a vector to map local (rank) index to global index
-  std::vector<int> rank_global_mapper() override {
-    return rank_global_mapper_;
-  };
-
  protected:
   //! number of nodes
   using AssemblerBase<Tdim>::active_dof_;
@@ -79,19 +71,14 @@ class AssemblerEigenImplicitLinear : public AssemblerBase<Tdim> {
   using AssemblerBase<Tdim>::mesh_;
   //! Number of sparse matrix container size
   using AssemblerBase<Tdim>::sparse_row_size_;
-  //! Logger
-  using AssemblerBase<Tdim>::console_;
   //! Global node indices
   using AssemblerBase<Tdim>::global_node_indices_;
   //! Number of total active_dof in all rank
   using AssemblerBase<Tdim>::global_active_dof_;
   //! Rank to Global mapper
   using AssemblerBase<Tdim>::rank_global_mapper_;
-
-  /**
-   * \defgroup ImplicitVariables Variables dealing with implicit MPM
-   */
-  /**@{*/
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
   //! Stiffness matrix
   Eigen::SparseMatrix<double> stiffness_matrix_;
   //! Residual force RHS vector

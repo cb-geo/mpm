@@ -221,14 +221,14 @@ class AssemblerBase {
         "AssemblerBase:: illegal operation!");
   };
 
-  //! Return the total size of global dof in all rank
-  virtual unsigned global_active_dof() = 0;
-
   //! Return number of total active_dof
   virtual unsigned active_dof() { return active_dof_; };
 
+  //! Return the total size of global dof in all rank
+  virtual unsigned global_active_dof() { return global_active_dof_; };
+
   //! Return a vector to map local (rank) index to global index
-  virtual std::vector<int> rank_global_mapper() = 0;
+  virtual std::vector<int> rank_global_mapper() { return rank_global_mapper_; };
 
   //! TwoPhase functions--------------------------------------------------------
   //! Assemble coefficient matrix for two-phase predictor
