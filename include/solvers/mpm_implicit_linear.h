@@ -31,11 +31,6 @@ class MPMImplicitLinear : public MPMBase<Tdim> {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
-  //! Initialise parameters of Newmark scheme
-  //! \ingroup Implicit
-  //! \param[in] newmark_props Newmark scheme properties
-  bool initialise_newmark(const Json& newmark_props);
-
   //! Initialise matrix
   //! \ingroup Implicit
   bool initialise_matrix();

@@ -4,22 +4,24 @@ mpm::MPMImplicitLinear<Tdim>::MPMImplicitLinear(const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
   console_ = spdlog::get("MPMImplicitLinear");
-  //! Stress update
-  stress_update_ = "newmark";
-  mpm_scheme_ = std::make_shared<mpm::MPMSchemeNewmark<Tdim>>(mesh_, dt_);
 
-  // Parameters of Newmark scheme
-  try {
-    if (mpm_scheme_->scheme() == "newmark") {
-      if (!initialise_newmark(analysis_.at("newmark")))
-        throw std::runtime_error(
-            "Parameters of Newmark scheme are not defined");
-    }
-  } catch (std::exception& exception) {
+  // Check if stress update is not newmark
+  if (stress_update_ != "newmark") {
     console_->warn(
-        "{} #{}: Parameters of Newmark scheme is not specified, using "
-        "beta = 0.25 and gamma = 0.5 as default",
-        __FILE__, __LINE__, exception.what());
+        "The stress_update_ scheme chosen is not available and automatically "
+        "set to default: \'newmark\'. Only \'newmark\' scheme is currently "
+        "supported for implicit solver.");
+    stress_update_ = "newmark";
+  }
+
+  // Initialise scheme
+  if (stress_update_ == "newmark") {
+    mpm_scheme_ = std::make_shared<mpm::MPMSchemeNewmark<Tdim>>(mesh_, dt_);
+    // Read parameters of Newmark scheme
+    if (analysis_.contains("newmark") && analysis_["newmark"].contains("beta"))
+      newmark_beta_ = analysis_["newmark"].at("beta").template get<double>();
+    if (analysis_.contains("newmark") && analysis_["newmark"].contains("gamma"))
+      newmark_gamma_ = analysis_["newmark"].at("gamma").template get<double>();
   }
 }
 
@@ -34,8 +36,15 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   int mpi_rank = 0;
   int mpi_size = 1;
 
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
   // Phase
-  const unsigned phase = 0;
+  const unsigned phase = mpm::ParticlePhase::SinglePhase;
 
   // Test if checkpoint resume is needed
   bool resume = false;
@@ -60,6 +69,11 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   // Resume or Initialise
   if (resume) {
     mesh_->resume_domain_cell_ranks();
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+#endif
 
     //! Particle entity sets and velocity constraints
     this->particle_entity_sets(false);
@@ -90,8 +104,15 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
   for (; step_ < nsteps_; ++step_) {
-
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
+
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    // Run load balancer at a specified frequency
+    if (step_ % nload_balance_steps_ == 0 && step_ != 0)
+      this->mpi_domain_decompose(false);
+#endif
+#endif
 
     // Inject particles
     mesh_->inject_particles(step_ * dt_);
@@ -122,12 +143,10 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
     this->compute_equilibrium_equation();
 
     // Assign displacement increment to nodes
-    const auto& active_nodes = mesh_->active_nodes();
-    const unsigned nactive_node = active_nodes.size();
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::update_displacement_increment,
                   std::placeholders::_1, assembler_->displacement_increment(),
-                  phase, nactive_node),
+                  phase, assembler_->active_dof()),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Update nodal velocity and acceleration -- Corrector step of Newmark
@@ -144,6 +163,13 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);
+
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    mesh_->transfer_halo_particles();
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+#endif
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs
@@ -164,27 +190,6 @@ bool mpm::MPMImplicitLinear<Tdim>::solve() {
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
-
-  return status;
-}
-
-// Initialise parameters of Newmark scheme
-template <unsigned Tdim>
-bool mpm::MPMImplicitLinear<Tdim>::initialise_newmark(
-    const Json& newmark_props) {
-
-  // Read newmark JSON object
-  bool status = true;
-  try {
-    // Read parameters of Newmark scheme
-    newmark_beta_ = newmark_props.at("beta").template get<double>();
-    newmark_gamma_ = newmark_props.at("gamma").template get<double>();
-
-  } catch (std::exception& exception) {
-    console_->warn("#{}: Parameters of Newmark scheme are undefined {} ",
-                   __LINE__, exception.what());
-    status = false;
-  }
 
   return status;
 }
@@ -231,6 +236,21 @@ bool mpm::MPMImplicitLinear<Tdim>::initialise_matrix() {
             analysis_["linear_solver"]["tolerance"].template get<double>();
       }
 
+      // NOTE: Only KrylovPETSC solver is supported for MPI
+#ifdef USE_MPI
+      // Get number of MPI ranks
+      int mpi_size = 1;
+      MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+      if (solver_type != "KrylovPETSC" && mpi_size > 1) {
+        console_->warn(
+            "The linear solver in MPI setting is automatically set to default: "
+            "\'KrylovPETSC\'. Only \'KrylovPETSC\' solver is supported for "
+            "MPI.");
+        solver_type = "KrylovPETSC";
+      }
+#endif
+
       // Create matrix solver
       auto lin_solver =
           Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
@@ -265,6 +285,9 @@ bool mpm::MPMImplicitLinear<Tdim>::reinitialise_matrix() {
 
     // Assigning matrix id globally (required for rank-to-global mapping)
     unsigned nglobal_active_node = nactive_node;
+#ifdef USE_MPI
+    nglobal_active_node = mesh_->assign_global_active_nodes_id();
+#endif
 
     // Assign global node indice
     assembler_->assign_global_node_indices(nactive_node, nglobal_active_node);
@@ -305,6 +328,31 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
 
     // Apply displacement constraints
     assembler_->apply_displacement_constraints();
+
+#ifdef USE_MPI
+    // Assign global active dof to solver
+    linear_solver_["displacement"]->assign_global_active_dof(
+        3 * assembler_->global_active_dof());
+
+    // Prepare rank global mapper
+    auto predictor_rgm = assembler_->rank_global_mapper();
+    auto predictor_rgm_y = assembler_->rank_global_mapper();
+    auto predictor_rgm_z = assembler_->rank_global_mapper();
+    std::for_each(
+        predictor_rgm_y.begin(), predictor_rgm_y.end(),
+        [size = assembler_->global_active_dof()](int& rgm) { rgm += size; });
+    std::for_each(predictor_rgm_z.begin(), predictor_rgm_z.end(),
+                  [size = assembler_->global_active_dof()](int& rgm) {
+                    rgm += 2 * size;
+                  });
+    predictor_rgm.insert(predictor_rgm.end(), predictor_rgm_y.begin(),
+                         predictor_rgm_y.end());
+    predictor_rgm.insert(predictor_rgm.end(), predictor_rgm_z.begin(),
+                         predictor_rgm_z.end());
+
+    // Assign rank global mapper to solver
+    linear_solver_["displacement"]->assign_rank_global_mapper(predictor_rgm);
+#endif
 
     // Solve matrix equation and assign solution to assembler
     assembler_->assign_displacement_increment(
