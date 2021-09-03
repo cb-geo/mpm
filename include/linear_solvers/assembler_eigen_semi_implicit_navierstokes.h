@@ -84,10 +84,6 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::VectorXd pressure_increment_;
   //! correction_matrix
   Eigen::SparseMatrix<double> correction_matrix_;
-  //! Number of total active_dof in all rank
-  using AssemblerBase<Tdim>::global_active_dof_;
-  //! Rank to Global mapper
-  using AssemblerBase<Tdim>::rank_global_mapper_;
 };
 }  // namespace mpm
 

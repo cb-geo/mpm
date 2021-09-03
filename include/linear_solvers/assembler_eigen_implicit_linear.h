@@ -73,10 +73,6 @@ class AssemblerEigenImplicitLinear : public AssemblerBase<Tdim> {
   using AssemblerBase<Tdim>::sparse_row_size_;
   //! Global node indices
   using AssemblerBase<Tdim>::global_node_indices_;
-  //! Number of total active_dof in all rank
-  using AssemblerBase<Tdim>::global_active_dof_;
-  //! Rank to Global mapper
-  using AssemblerBase<Tdim>::rank_global_mapper_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Stiffness matrix
