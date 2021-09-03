@@ -50,6 +50,10 @@ std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::pod() const {
   velocity.setZero();
   for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity_[j];
 
+  Eigen::Vector3d acceleration;
+  acceleration.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) acceleration[j] = this->acceleration_[j];
+
   // Particle local size
   Eigen::Vector3d nsize;
   nsize.setZero();
@@ -84,6 +88,10 @@ std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::pod() const {
   particle_data->velocity_x = velocity[0];
   particle_data->velocity_y = velocity[1];
   particle_data->velocity_z = velocity[2];
+
+  particle_data->acceleration_x = acceleration[0];
+  particle_data->acceleration_y = acceleration[1];
+  particle_data->acceleration_z = acceleration[2];
 
   particle_data->stress_xx = stress[0];
   particle_data->stress_yy = stress[1];
@@ -1007,6 +1015,9 @@ std::vector<uint8_t> mpm::TwoPhaseParticle<Tdim>::serialize() {
   // Velocity
   MPI_Pack(velocity_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
+  // Acceleration
+  MPI_Pack(acceleration_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
   // Stress
   MPI_Pack(stress_.data(), 6, MPI_DOUBLE, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
@@ -1141,6 +1152,9 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Velocity
   MPI_Unpack(data_ptr, data.size(), &position, velocity_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Acceleration
+  MPI_Unpack(data_ptr, data.size(), &position, acceleration_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Stress
   MPI_Unpack(data_ptr, data.size(), &position, stress_.data(), 6, MPI_DOUBLE,

@@ -72,6 +72,13 @@ bool mpm::Particle<Tdim>::initialise_particle(PODParticle& particle) {
   // Initialise velocity
   for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i) = velocity(i);
 
+  // Acceleration
+  Eigen::Vector3d acceleration;
+  acceleration << particle.acceleration_x, particle.acceleration_y,
+      particle.acceleration_z;
+  // Initialise acceleration
+  for (unsigned i = 0; i < Tdim; ++i) this->acceleration_(i) = acceleration(i);
+
   // Stress
   this->stress_[0] = particle.stress_xx;
   this->stress_[1] = particle.stress_yy;
@@ -198,6 +205,10 @@ std::shared_ptr<void> mpm::Particle<Tdim>::pod() const {
   particle_data->velocity_x = velocity[0];
   particle_data->velocity_y = velocity[1];
   particle_data->velocity_z = velocity[2];
+
+  particle_data->acceleration_x = acceleration[0];
+  particle_data->acceleration_y = acceleration[1];
+  particle_data->acceleration_z = acceleration[2];
 
   particle_data->stress_xx = stress[0];
   particle_data->stress_yy = stress[1];
@@ -985,8 +996,8 @@ int mpm::Particle<Tdim>::compute_pack_size() const {
   MPI_Pack_size(3 * 1, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
   total_size += partial_size;
 
-  // Coordinates, displacement, natural size, velocity
-  MPI_Pack_size(4 * Tdim, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  // Coordinates, displacement, natural size, velocity, acceleration
+  MPI_Pack_size(5 * Tdim, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
   total_size += partial_size;
   // Stress & strain
   MPI_Pack_size(6 * 2, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
@@ -1069,6 +1080,9 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   // Velocity
   MPI_Pack(velocity_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
+  // Acceleration
+  MPI_Pack(acceleration_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
   // Stress
   MPI_Pack(stress_.data(), 6, MPI_DOUBLE, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
@@ -1161,6 +1175,9 @@ void mpm::Particle<Tdim>::deserialize(
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Velocity
   MPI_Unpack(data_ptr, data.size(), &position, velocity_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Acceleration
+  MPI_Unpack(data_ptr, data.size(), &position, acceleration_.data(), Tdim,
              MPI_DOUBLE, MPI_COMM_WORLD);
   // Stress
   MPI_Unpack(data_ptr, data.size(), &position, stress_.data(), 6, MPI_DOUBLE,

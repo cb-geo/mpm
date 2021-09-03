@@ -79,6 +79,12 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     h5_particle.velocity_y = velocity[1];
     h5_particle.velocity_z = velocity[2];
 
+    Eigen::Vector3d acceleration;
+    acceleration << 15, 25, 0.0;
+    h5_particle.acceleration_x = acceleration[0];
+    h5_particle.acceleration_y = acceleration[1];
+    h5_particle.acceleration_z = acceleration[2];
+
     Eigen::Matrix<double, 6, 1> stress;
     stress << 11.5, -12.5, 13.5, 14.5, -15.5, 16.5;
     h5_particle.stress_xx = stress[0];
@@ -160,6 +166,12 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     REQUIRE(pvelocity.size() == Dim);
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(pvelocity(i) == Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check acceleration
+    auto pacceleration = rparticle->acceleration();
+    REQUIRE(pacceleration.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pacceleration(i) == Approx(acceleration(i)).epsilon(Tolerance));
 
     // Check stress
     auto pstress = rparticle->stress();
