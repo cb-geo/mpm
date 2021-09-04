@@ -70,23 +70,22 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_residual_force_right() {
     residual_force_rhs_vector_.resize(active_dof_ * Tdim);
     residual_force_rhs_vector_.setZero();
 
-    // Active nodes
-    const auto& active_nodes = mesh_->active_nodes();
-    const unsigned nactive_node = active_nodes.size();
     const unsigned solid = mpm::ParticlePhase::SinglePhase;
-    unsigned node_index = 0;
 
+    // Active nodes pointer
+    const auto& nodes = mesh_->active_nodes();
     // Iterate over nodes
-    for (auto node_itr = active_nodes.cbegin(); node_itr != active_nodes.cend();
-         ++node_itr) {
+    mpm::Index nid = 0;
+    for (auto node_itr = nodes.cbegin(); node_itr != nodes.cend(); ++node_itr) {
+      const Eigen::Matrix<double, Tdim, 1> residual_force =
+          (*node_itr)->external_force(solid) +
+          (*node_itr)->internal_force(solid);
 
       for (unsigned i = 0; i < Tdim; ++i) {
         // Nodal residual force
-        residual_force_rhs_vector_(nactive_node * i + node_index) +=
-            (*node_itr)->external_force(solid)(i) +
-            (*node_itr)->internal_force(solid)(i);
+        residual_force_rhs_vector_(active_dof_ * i + nid) = residual_force[i];
       }
-      node_index++;
+      nid++;
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
