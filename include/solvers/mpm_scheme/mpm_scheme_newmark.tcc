@@ -149,24 +149,6 @@ inline void mpm::MPMSchemeNewmark<Tdim>::compute_forces(
           &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
     }
   }  // Wait for tasks to finish
-
-#ifdef USE_MPI
-  // Run if there is more than a single MPI task
-  if (mpi_size_ > 1) {
-    // MPI all reduce external force
-    mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-        std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                  phase),
-        std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                  std::placeholders::_1, false, phase, std::placeholders::_2));
-    // MPI all reduce internal force
-    mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-        std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                  phase),
-        std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                  std::placeholders::_1, false, phase, std::placeholders::_2));
-  }
-#endif
 }
 
 // Compute particle kinematics
