@@ -55,6 +55,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_velocity_acceleration_newmark(
   //! Compute velocity and acceleration at the previous time step
   VectorDim previous_velocity;
   VectorDim previous_acceleration;
+  previous_velocity.setZero();
+  previous_acceleration.setZero();
   if (mass_(phase) > tolerance) {
     previous_velocity = momentum_.col(phase) / mass_(phase);
     previous_acceleration = inertia_.col(phase) / mass_(phase);
