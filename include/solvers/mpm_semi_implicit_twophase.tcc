@@ -264,48 +264,6 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
       }
     }  // Wait for tasks to finish
 
-#ifdef USE_MPI
-    // Run if there is more than a single MPI task
-    if (mpi_size > 1) {
-      // MPI all reduce external force of mixture
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                    mpm::NodePhase::NMixture),
-          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                    std::placeholders::_1, false, mpm::NodePhase::NMixture,
-                    std::placeholders::_2));
-      // MPI all reduce external force of pore fluid
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                    mpm::NodePhase::NLiquid),
-          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                    std::placeholders::_1, false, mpm::NodePhase::NLiquid,
-                    std::placeholders::_2));
-
-      // MPI all reduce internal force of mixture
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    mpm::NodePhase::NMixture),
-          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, mpm::NodePhase::NMixture,
-                    std::placeholders::_2));
-      // MPI all reduce internal force of pore liquid
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    mpm::NodePhase::NLiquid),
-          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, mpm::NodePhase::NLiquid,
-                    std::placeholders::_2));
-
-      // MPI all reduce drag force
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::drag_force_coefficient,
-                    std::placeholders::_1),
-          std::bind(&mpm::NodeBase<Tdim>::update_drag_force_coefficient,
-                    std::placeholders::_1, false, std::placeholders::_2));
-    }
-#endif
-
     // Reinitialise system matrices to solve predictor equation and PPE
     bool matrix_reinitialization_status = this->reinitialise_matrix();
     if (!matrix_reinitialization_status) {
