@@ -9,7 +9,7 @@ using Json = nlohmann::json;
 
 // Check MPM Semi-implicit Navier Stokes
 TEST_CASE("MPM 2D Semi-implicit Navier Stokes implementation is checked",
-          "[MPM][2D][Semi-implicit][2Phase]") {
+          "[MPM][2D][Semi-implicit][1Phase]") {
   // Dimension
   const unsigned Dim = 2;
 
