@@ -16,19 +16,13 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_inertial_force() noexcept {
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
-  // Get interpolated nodal acceleration
-  Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
-
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_acceleration +=
-        shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
 
   // Compute nodal inertial forces
   for (unsigned i = 0; i < nodes_.size(); ++i)
     nodes_[i]->update_external_force(
         true, mpm::ParticlePhase::Solid,
-        (-1. * nodal_acceleration * mass_ * shapefn_(i)));
+        (-1. * nodes_[i]->acceleration(mpm::ParticlePhase::Solid) * mass_ *
+         shapefn_(i)));
 }
 
 //! Map material stiffness matrix to cell (used in poisson equation LHS)

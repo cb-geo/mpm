@@ -35,11 +35,9 @@ inline void mpm::Cell<Tdim>::compute_local_mass_matrix(
 
   std::lock_guard<std::mutex> guard(cell_mutex_);
   for (unsigned i = 0; i < this->nnodes_; ++i) {
-    for (unsigned j = 0; j < this->nnodes_; ++j) {
-      for (unsigned k = 0; k < Tdim; ++k) {
-        stiffness_matrix_(Tdim * i + k, Tdim * j + k) +=
-            shapefn(i) * shapefn(j) * multiplier * pvolume;
-      }
+    for (unsigned k = 0; k < Tdim; ++k) {
+      stiffness_matrix_(Tdim * i + k, Tdim * i + k) +=
+          shapefn(i) * multiplier * pvolume;
     }
   }
 }
