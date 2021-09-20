@@ -9,6 +9,12 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
                          const std::string& mpm_scheme,
                          const std::string& file_name);
 
+// Write JSON Configuration file for implicit linear
+bool write_json_unitcell_implicit_linear(
+    unsigned dim, const std::string& analysis, const std::string& mpm_scheme,
+    const std::string& file_name,
+    const std::string& linear_solver_type = "none");
+
 // Write JSON Configuration file for navier stokes
 bool write_json_unitcell_navierstokes(
     unsigned dim, const std::string& analysis, const std::string& mpm_scheme,

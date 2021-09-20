@@ -96,7 +96,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
           {"uuid", file_name + "-" + dimension},
           {"step", 5}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
       {"post_processing",
        {{"path", "results/"},
         {"vtk", {"stresses", "strains", "velocities"}},
@@ -107,6 +107,133 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
   std::string fname = (file_name + "-" + dimension + ".json").c_str();
   std::ofstream file;
   file.open(fname, std::ios_base::out);
+  file << json_file.dump(2);
+  file.close();
+
+  return true;
+}
+
+// Write JSON Configuration file for implicit linear
+bool write_json_implicit_linear(unsigned dim, bool resume,
+                                const std::string& analysis,
+                                const std::string& mpm_scheme,
+                                const std::string& file_name,
+                                const std::string& linear_solver_type) {
+  // Make json object with input files
+  // 2D
+  std::string dimension = "2d";
+  auto particle_type = "P2D";
+  auto node_type = "N2D";
+  auto cell_type = "ED2Q4";
+  auto io_type = "Ascii2D";
+  auto assembler_type = "EigenImplicitLinear2D";
+  std::string entity_set_name = "entity_sets_0";
+  std::string material = "LinearElastic2D";
+  std::vector<double> gravity{{0., -9.81}};
+  std::vector<unsigned> material_id{{0}};
+  std::vector<double> xvalues{{0.0, 0.5, 1.0}};
+  std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
+
+  // 3D
+  if (dim == 3) {
+    dimension = "3d";
+    particle_type = "P3D";
+    node_type = "N3D";
+    cell_type = "ED3H8";
+    assembler_type = "EigenImplicitLinear3D";
+    io_type = "Ascii3D";
+    material = "LinearElastic3D";
+    gravity.clear();
+    gravity = {0., 0., -9.81};
+    entity_set_name = "entity_sets_1";
+  }
+
+  Json json_file = {
+      {"title", "Example JSON Input for MPM"},
+      {"mesh",
+       {{"mesh", "mesh-" + dimension + ".txt"},
+        {"entity_sets", entity_set_name + ".json"},
+        {"io_type", io_type},
+        {"check_duplicates", true},
+        {"isoparametric", false},
+        {"node_type", node_type},
+        {"boundary_conditions",
+         {{"displacement_constraints",
+           {{"file", "displacement-constraints.txt"}}}}},
+        {"cell_type", cell_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"generator",
+          {{"type", "file"},
+           {"material_id", material_id},
+           {"pset_id", 0},
+           {"io_type", io_type},
+           {"particle_type", particle_type},
+           {"check_duplicates", true},
+           {"location", "particles-" + dimension + ".txt"}}}}}},
+      {"materials",
+       {{{"id", 0},
+         {"type", material},
+         {"density", 1000.},
+         {"youngs_modulus", 1.0E+8},
+         {"poisson_ratio", 0.495}},
+        {{"id", 1},
+         {"type", material},
+         {"density", 2300.},
+         {"youngs_modulus", 1.5E+6},
+         {"poisson_ratio", 0.25}}}},
+      {"material_sets",
+       {{{"material_id", 1}, {"phase_id", 0}, {"pset_id", 2}}}},
+      {"external_loading_conditions",
+       {{"gravity", gravity},
+        {"particle_surface_traction",
+         {{{"math_function_id", 0},
+           {"pset_id", -1},
+           {"dir", 1},
+           {"traction", 10.5}}}},
+        {"concentrated_nodal_forces",
+         {{{"math_function_id", 0},
+           {"nset_id", -1},
+           {"dir", 1},
+           {"force", 10.5}}}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"analysis",
+       {{"type", analysis},
+        {"mpm_scheme", mpm_scheme},
+        {"locate_particles", true},
+        {"pressure_smoothing", true},
+        {"dt", 0.0001},
+        {"uuid", file_name + "-" + dimension},
+        {"nsteps", 10},
+        {"resume",
+         {{"resume", resume},
+          {"uuid", file_name + "-" + dimension},
+          {"step", 5}}},
+        {"linear_solver",
+         {{"assembler_type", assembler_type},
+          {"solver_settings",
+           {{{"dof", "displacement"},
+             {"solver_type", linear_solver_type},
+             {"sub_solver_type", "cg"},
+             {"preconditioner_type", "none"},
+             {"max_iter", 100},
+             {"tolerance", 1E-5},
+             {"verbosity", 0}}}}}},
+        {"damping", {{"type", "Cundall"}, {"damping_factor", 0.0}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
+      {"post_processing",
+       {{"path", "results/"},
+        {"vtk", {"stresses", "strains", "velocity"}},
+        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
+        {"output_steps", 5}}}};
+
+  // Dump JSON as an input file to be read
+  std::ofstream file;
+  file.open((file_name + "-" + dimension + ".json").c_str());
   file << json_file.dump(2);
   file.close();
 
@@ -230,7 +357,7 @@ bool write_json_navierstokes(unsigned dim, bool resume,
              {"tolerance", 1E-5},
              {"verbosity", 0}}}}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
       {"post_processing",
        {{"path", "results/"},
         {"vtk", {"stresses", "strains", "velocity"}},
@@ -389,7 +516,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
              {"tolerance", 1E-5},
              {"verbosity", 0}}}}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
       {"post_processing",
        {{"path", "results/"},
         {"vtk", {"stresses", "strains", "velocity"}},

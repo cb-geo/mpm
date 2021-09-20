@@ -8,6 +8,13 @@ namespace mpm_test {
 bool write_json(unsigned dim, bool resume, const std::string& analysis,
                 const std::string& mpm_scheme, const std::string& file_name);
 
+// Write JSON Configuration file for implicit linear
+bool write_json_implicit_linear(unsigned dim, bool resume,
+                                const std::string& analysis,
+                                const std::string& mpm_scheme,
+                                const std::string& file_name,
+                                const std::string& linear_solver_type = "none");
+
 // Write JSON Configuration file for navierstokes
 bool write_json_navierstokes(unsigned dim, bool resume,
                              const std::string& analysis,
