@@ -167,8 +167,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
       // delta check
       if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b)) {
         if (position == mpm::Position::Side or
-            position == mpm::Position::Corner or
-            position == mpm::Position::Bottom) {
+            position == mpm::Position::Corner) {
           // Apply constraint
           if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min,
                                                             a, b, position))

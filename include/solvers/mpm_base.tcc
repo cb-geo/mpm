@@ -971,8 +971,6 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
           position_ = mpm::Position::Side;
         else if (position == "corner")
           position_ = mpm::Position::Corner;
-        else if (position == "bottom")
-          position_ = mpm::Position::Bottom;
         else
           position_ = mpm::Position::None;
         // Add absorbing constraint to mesh

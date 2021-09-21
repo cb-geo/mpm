@@ -399,25 +399,15 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
           double force1 = 0.0;
           switch (position) {
             case mpm::Position::Corner:
-              force0 = 0.5 * h_min * absorbing_traction_(0);
-              force1 = 0.5 * h_min * absorbing_traction_(1);
-              break;
-            case mpm::Position::Bottom:
-              force0 = 0.5 * h_min * absorbing_traction_(0);
-              force1 = 1.0 * h_min * absorbing_traction_(1);
+              absorbing_force_ = 0.5 * h_min * absorbing_traction_;
               break;
             case mpm::Position::Side:
-              force0 = 1.0 * h_min * absorbing_traction_(0);
-              force1 = 0.5 * h_min * absorbing_traction_(1);
+              absorbing_force_ = h_min * absorbing_traction_;
               break;
             default:
               throw std::runtime_error("Invalid absorbing boundary position");
               break;
           }
-          // clang-format off
-          // cppcheck-suppress *
-          absorbing_force_ << force0, force1;
-          // clang-format on
           this->update_external_force(true, phase, -absorbing_force_);
         }
       }
