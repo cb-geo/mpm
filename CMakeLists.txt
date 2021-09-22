@@ -246,6 +246,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/nodes/node_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_implicit_linear_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_vector_test.cc

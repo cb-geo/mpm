@@ -387,9 +387,16 @@ class Particle : public ParticleBase<Tdim> {
   void compute_strain_newmark() noexcept override;
 
   //! Compute updated position of the particle by Newmark scheme
+  //! \ingroup Implicit
   //! \param[in] dt Analysis time step
   //! \param[in] velocity_update Update particle velocity from nodal vel
   void compute_updated_position_newmark(double dt) noexcept override;
+
+  //! Assign acceleration to the particle (used for test)
+  //! \ingroup Implicit
+  //! \param[in] acceleration A vector of particle acceleration
+  //! \retval status Assignment status
+  bool assign_acceleration(const VectorDim& acceleration) override;
   /**@}*/
 
  protected:

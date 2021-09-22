@@ -432,6 +432,16 @@ class ParticleBase {
         "ParticleBase:: "
         "illegal operation!");
   }
+
+  //! Assign acceleration to the particle (used for test)
+  //! \param[in] acceleration A vector of particle acceleration
+  //! \retval status Assignment status
+  virtual bool assign_acceleration(const VectorDim& acceleration) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_acceleration) in "
+        "ParticleBase:: "
+        "illegal operation!");
+  };
   /**@}*/
 
   //! Navier-Stokes functions----------------------------------

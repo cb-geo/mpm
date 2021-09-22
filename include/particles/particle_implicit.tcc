@@ -281,3 +281,12 @@ void mpm::Particle<Tdim>::compute_updated_position_newmark(double dt) noexcept {
   // Update displacement
   this->displacement_ += nodal_displacement;
 }
+
+// Assign acceleration to the particle
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_acceleration(
+    const Eigen::Matrix<double, Tdim, 1>& acceleration) {
+  // Assign acceleration
+  acceleration_ = acceleration;
+  return true;
+}
