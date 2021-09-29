@@ -62,6 +62,13 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (analysis_.find("resume") != analysis_.end())
     resume = analysis_["resume"]["resume"].template get<bool>();
 
+  // Enable repartitioning if resume is done with particles generated outside
+  // the MPM code.
+  bool repartition = false;
+  if (analysis_.find("resume") != analysis_.end() &&
+      analysis_["resume"].find("repartition") != analysis_["resume"].end())
+    repartition = analysis_["resume"]["repartition"].template get<bool>();
+
   // Pressure smoothing
   pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
@@ -85,18 +92,22 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     mesh_->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
+  bool initial_step = (resume == true) ? false : true;
   // Check point resume
   if (resume) {
     this->checkpoint_resume();
-    mesh_->resume_domain_cell_ranks();
+    if (repartition) {
+      this->mpi_domain_decompose(initial_step);
+    } else {
+      mesh_->resume_domain_cell_ranks();
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
-    MPI_Barrier(MPI_COMM_WORLD);
+      MPI_Barrier(MPI_COMM_WORLD);
 #endif
 #endif
+    }
   } else {
     // Domain decompose
-    bool initial_step = (resume == true) ? false : true;
     this->mpi_domain_decompose(initial_step);
   }
 
