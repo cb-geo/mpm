@@ -954,8 +954,10 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
   // Get MPI rank
   int mpi_rank = 0;
+  int mpi_size = 0;
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   const unsigned rank_max = std::numeric_limits<unsigned>::max();
   const unsigned ncells = this->ncells();
   // Vector of cell ranks
