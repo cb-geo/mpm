@@ -114,7 +114,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
     // Domain decompose
-    bool initial_step = (resume == true) ? false : true;
     this->mpi_domain_decompose(initial_step);
   }
 
