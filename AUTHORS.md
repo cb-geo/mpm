@@ -12,7 +12,7 @@
 * Bodhinanda Chandra, UC Berkeley, USA.
 * Weijian Liang, UC Berkeley, USA and HKUST, HK. [wliangab@ust.hk](wliangab@ust.hk)
 * Jeffrey Salmond, University of Cambridge, UK.
-* Wentao Xu,  UC Berkeley, USA.
+* Wentao Xu, University of Pennsylvania, USA. [wentaoxu@seas.upenn.edu](wentaoxu@seas.upenn.edu)
 * Xinyi Qian, UC Berkeley, USA.
 * Joel Given, UC Berkeley, USA. [joelgiven@berkeley.edu](joelgiven@berkeley.edu)
 * Yong Liang, UC Berkeley, USA. [yliang_sn@berkeley.edu](yliang_sn@berkeley.edu)
