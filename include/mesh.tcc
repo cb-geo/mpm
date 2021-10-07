@@ -965,8 +965,10 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
   // Get MPI rank
   int mpi_rank = 0;
+  int mpi_size = 0;
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   const unsigned ncells = this->ncells();
   // Vector of cell ranks
   std::vector<int> cell_ranks;
@@ -990,6 +992,13 @@ void mpm::Mesh<Tdim>::resume_domain_cell_ranks() {
   unsigned j = 0;
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     int recv_rank = recv_ranks.at(j);
+    if (recv_rank >= mpi_size) {
+      console_->error(
+          "Resuming analysis: Cell id {} has invalid MPI rank: {} larger than "
+          "MPI size: {}",
+          (*citr)->id(), recv_rank, mpi_size);
+      MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+    }
     (*citr)->rank(recv_rank);
     ++j;
   }

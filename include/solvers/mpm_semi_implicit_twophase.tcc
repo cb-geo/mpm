@@ -53,6 +53,13 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
   if (analysis_.find("resume") != analysis_.end())
     resume = analysis_["resume"]["resume"].template get<bool>();
 
+  // Enable repartitioning if resume is done with particles generated outside
+  // the MPM code.
+  bool repartition = false;
+  if (analysis_.find("resume") != analysis_.end() &&
+      analysis_["resume"].find("repartition") != analysis_["resume"].end())
+    repartition = analysis_["resume"]["repartition"].template get<bool>();
+
   // Pressure smoothing
   if (analysis_.find("pressure_smoothing") != analysis_.end())
     pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
@@ -79,14 +86,18 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
   }
 
   // Check point resume
+  bool initial_step = (resume == true) ? false : true;
   if (resume) {
-    mesh_->resume_domain_cell_ranks();
+    if (repartition) {
+      this->mpi_domain_decompose(initial_step);
+    } else {
+      mesh_->resume_domain_cell_ranks();
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
-    MPI_Barrier(MPI_COMM_WORLD);
+      MPI_Barrier(MPI_COMM_WORLD);
 #endif
 #endif
-
+    }
     //! Particle entity sets and velocity constraints
     this->particle_entity_sets(false);
     this->particle_velocity_constraints();
@@ -107,7 +118,6 @@ bool mpm::MPMSemiImplicitTwoPhase<Tdim>::solve() {
         &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
     // Domain decompose
-    bool initial_step = (resume == true) ? false : true;
     this->mpi_domain_decompose(initial_step);
   }
 
