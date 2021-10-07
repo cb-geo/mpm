@@ -25,7 +25,7 @@ void mpm::Particle<Tdim>::map_inertial_force() noexcept {
          shapefn_(i)));
 }
 
-//! Map material stiffness matrix to cell (used in poisson equation LHS)
+//! Map material stiffness matrix to cell (used in equilibrium equation LHS)
 template <unsigned Tdim>
 inline bool mpm::Particle<Tdim>::map_material_stiffness_matrix_to_cell() {
   bool status = true;
