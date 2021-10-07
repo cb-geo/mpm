@@ -89,10 +89,8 @@ TEST_CASE("MPM 2D Implicit Linear implementation is checked",
     // Initialise mesh
     REQUIRE_NOTHROW(mpm->initialise_mesh());
 
-    // Test check point restart
-    REQUIRE(mpm->checkpoint_resume() == true);
-    {
-      // Solve
+    SECTION("Check solver") {
+      // Create an IO object
       auto io = std::make_unique<mpm::IO>(argc, argv);
       // Run Implicit Linear MPM
       auto mpm_resume =
