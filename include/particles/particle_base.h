@@ -393,6 +393,16 @@ class ParticleBase {
     return 0;
   }
 
+  //! Reduce constitutive relations matrix depending on the dimension
+  virtual inline Eigen::MatrixXd reduce_dmatrix(
+      const Eigen::MatrixXd& dmatrix) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(reduce_dmatrix) in "
+        "ParticleBase:: "
+        "illegal operation!");
+  }
+
   //! Compute B matrix
   virtual inline Eigen::MatrixXd compute_bmatrix() {
     throw std::runtime_error(

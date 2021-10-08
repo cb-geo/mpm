@@ -203,6 +203,7 @@ target_link_libraries(mpm git)
 if(MPM_BUILD_TESTING)
   SET(test_src
     ${mpm_SOURCE_DIR}/tests/test_main.cc
+    ${mpm_SOURCE_DIR}/tests/cell_implicit_linear_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/contact_test.cc

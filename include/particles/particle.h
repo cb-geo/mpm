@@ -373,6 +373,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \ingroup Implicit
   inline bool map_material_stiffness_matrix_to_cell() override;
 
+  //! Reduce constitutive relations matrix depending on the dimension
+  //! \ingroup Implicit
+  //! \param[in] dmatrix Constitutive relations matrix in 3D
+  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial
+  //! dimension
+  inline Eigen::MatrixXd reduce_dmatrix(
+      const Eigen::MatrixXd& dmatrix) noexcept override;
+
   //! Compute B matrix of a particle, based on local coordinates
   inline Eigen::MatrixXd compute_bmatrix() noexcept override;
 
@@ -424,14 +432,6 @@ class Particle : public ParticleBase<Tdim> {
    * \defgroup Implicit Functions dealing with implicit MPM
    */
   /**@{*/
-  //! Reduce constitutive relations matrix depending on the dimension
-  //! \ingroup Implicit
-  //! \param[in] dmatrix Constitutive relations matrix in 3D
-  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial
-  //! dimension
-  inline Eigen::MatrixXd reduce_dmatrix(
-      const Eigen::MatrixXd& dmatrix) noexcept;
-
   //! Compute strain increment
   //! \ingroup Implicit
   //! \param[in] dn_dx The spatial gradient of shape function
