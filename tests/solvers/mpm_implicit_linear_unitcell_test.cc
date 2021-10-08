@@ -9,7 +9,7 @@ using Json = nlohmann::json;
 
 // Check MPM Implicit Linear
 TEST_CASE("MPM 2D Implicit Linear implementation is checked in unitcells",
-          "[MPM][2D][ImplicitLinear][1Phase][unitcell]") {
+          "[MPM][2D][Implicit][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 2;
 
@@ -67,7 +67,7 @@ TEST_CASE("MPM 2D Implicit Linear implementation is checked in unitcells",
 
 // Check MPM Implicit Linear
 TEST_CASE("MPM 3D Implicit Linear implementation is checked in unitcells",
-          "[MPM][3D][ImplicitLinear][1Phase][unitcell]") {
+          "[MPM][3D][Implicit][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 3;
 

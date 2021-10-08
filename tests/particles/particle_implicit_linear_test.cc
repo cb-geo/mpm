@@ -15,7 +15,7 @@
 
 //! \brief Check particle class for 2D case
 TEST_CASE("Implicit Linear Particle is checked for 2D case",
-          "[particle][2D][ImplicitLinear]") {
+          "[particle][2D][Implicit]") {
   // Dimension
   const unsigned Dim = 2;
   // Degree of freedom
@@ -395,7 +395,7 @@ TEST_CASE("Implicit Linear Particle is checked for 2D case",
 
 //! \brief Check particle class for 3D case
 TEST_CASE("Implicit Linear Particle is checked for 3D case",
-          "[particle][3D][ImplicitLinear]") {
+          "[particle][3D][Implicit]") {
   // Dimension
   const unsigned Dim = 3;
   // Dimension
