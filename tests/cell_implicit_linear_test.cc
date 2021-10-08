@@ -73,14 +73,6 @@ TEST_CASE("Implicit Linear Cell is checked for 2D case",
     nodes.emplace_back(node2);
     nodes.emplace_back(node3);
 
-    // Assign active id
-    unsigned int active_id = 0;
-    for (const auto& node : nodes) {
-      node->initialise_implicit();
-      node->assign_active_id(active_id);
-      active_id++;
-    }
-
     // Initialise cell properties
     cell->initialise();
 
@@ -120,8 +112,8 @@ TEST_CASE("Implicit Linear Cell is checked for 2D case",
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
+    jmaterial["youngs_modulus"] = 1.0;
+    jmaterial["poisson_ratio"] = 0.25;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
@@ -349,14 +341,6 @@ TEST_CASE("Implicit Linear Cell is checked for 3D case",
     cell->add_node(6, node6);
     cell->add_node(7, node7);
     REQUIRE(cell->nnodes() == 8);
-
-    // Assign active id
-    unsigned int active_id = 0;
-    for (const auto& node : nodes) {
-      node->initialise_implicit();
-      node->assign_active_id(active_id);
-      active_id++;
-    }
 
     // Initialise cell properties
     cell->initialise();

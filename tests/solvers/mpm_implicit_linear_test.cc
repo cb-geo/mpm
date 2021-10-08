@@ -76,8 +76,9 @@ TEST_CASE("MPM 2D Implicit Linear implementation is checked",
     const std::string mpm_scheme = "newmark";
     const std::string lin_solver_type = "IterativeEigen";
     bool resume = true;
-    REQUIRE(mpm_test::write_json_implicit_linear(
-                2, resume, analysis, mpm_scheme, lin_solver_type) == true);
+    REQUIRE(mpm_test::write_json_implicit_linear(2, resume, analysis,
+                                                 mpm_scheme, fname,
+                                                 lin_solver_type) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
@@ -89,7 +90,9 @@ TEST_CASE("MPM 2D Implicit Linear implementation is checked",
     // Initialise mesh
     REQUIRE_NOTHROW(mpm->initialise_mesh());
 
-    SECTION("Check solver") {
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == true);
+    {
       // Create an IO object
       auto io = std::make_unique<mpm::IO>(argc, argv);
       // Run Implicit Linear MPM
@@ -97,16 +100,6 @@ TEST_CASE("MPM 2D Implicit Linear implementation is checked",
           std::make_unique<mpm::MPMImplicitLinear<Dim>>(std::move(io));
       REQUIRE(mpm_resume->solve() == true);
     }
-  }
-
-  SECTION("Check pressure smoothing") {
-    // Create an IO object
-    auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run Implicit Linear MPM
-    auto mpm = std::make_unique<mpm::MPMImplicitLinear<Dim>>(std::move(io));
-    // Pressure smoothing
-    REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Solid));
-    REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Liquid));
   }
 }
 
@@ -201,15 +194,5 @@ TEST_CASE("MPM 3D Implicit Linear implementation is checked",
           std::make_unique<mpm::MPMImplicitLinear<Dim>>(std::move(io));
       REQUIRE(mpm_resume->solve() == true);
     }
-  }
-
-  SECTION("Check pressure smoothing") {
-    // Create an IO object
-    auto io = std::make_unique<mpm::IO>(argc, argv);
-    // Run Implicit Linear MPM
-    auto mpm = std::make_unique<mpm::MPMImplicitLinear<Dim>>(std::move(io));
-    // Pressure smoothing
-    REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Solid));
-    REQUIRE_NOTHROW(mpm->pressure_smoothing(mpm::ParticlePhase::Liquid));
   }
 }
