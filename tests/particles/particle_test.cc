@@ -152,6 +152,21 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       REQUIRE(particle->vector_data("velocities")(i) ==
               Approx(17.51).epsilon(Tolerance));
 
+    // Check vector data: accelerations
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
+
+    REQUIRE(particle->vector_data("accelerations").size() == Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->vector_data("accelerations")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_acceleration(acceleration) == true);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->vector_data("accelerations")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
     // Check vector data: invalid
     REQUIRE(particle->vector_data("invalid").size() == Dim);
     for (unsigned i = 0; i < particle->vector_data("invalid").size(); ++i)
@@ -361,6 +376,12 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(pvelocity.size() == Dim);
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(pvelocity(i) == Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check acceleration
+    auto pacceleration = particle->acceleration();
+    REQUIRE(pacceleration.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pacceleration(i) == Approx(acceleration(i)).epsilon(Tolerance));
 
     // Check stress
     auto pstress = particle->stress();
@@ -694,6 +715,21 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_velocity(velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check vector data: accelerations
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
+
+    REQUIRE(particle->vector_data("accelerations").size() == Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->vector_data("accelerations")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_acceleration(acceleration) == true);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->vector_data("accelerations")(i) ==
               Approx(17.51).epsilon(Tolerance));
 
     // Check vector data: invalid
@@ -1376,6 +1412,18 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(19.745).epsilon(Tolerance));
 
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 19.745;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_acceleration(acceleration) == true);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration()(i) == Approx(19.745).epsilon(Tolerance));
+
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
     REQUIRE(particle->assign_volume(-5.0) == false);
@@ -1520,6 +1568,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(pvelocity.size() == Dim);
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(pvelocity(i) == Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check acceleration
+    auto pacceleration = particle->acceleration();
+    REQUIRE(pacceleration.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pacceleration(i) == Approx(acceleration(i)).epsilon(Tolerance));
 
     // Check stress
     auto pstress = particle->stress();
@@ -1996,6 +2050,21 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_velocity(velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check vector data: accelerations
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
+
+    REQUIRE(particle->vector_data("accelerations").size() == Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->vector_data("accelerations")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_acceleration(acceleration) == true);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->vector_data("accelerations")(i) ==
               Approx(17.51).epsilon(Tolerance));
 
     // Check vector data: invalid
@@ -2745,6 +2814,18 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_velocity(velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_acceleration(acceleration) == true);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration()(i) == Approx(17.51).epsilon(Tolerance));
 
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
