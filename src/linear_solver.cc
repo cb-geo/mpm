@@ -3,6 +3,7 @@
 #include "assembler_eigen_semi_implicit_navierstokes.h"
 #include "assembler_eigen_semi_implicit_twophase.h"
 
+#include "direct_eigen.h"
 #include "iterative_eigen.h"
 #include "krylov_petsc.h"
 #include "solver_base.h"
@@ -38,6 +39,11 @@ static Register<mpm::AssemblerBase<3>,
     assembler_eigen_semi_implicit_twophase_3d("EigenSemiImplicitTwoPhase3D");
 
 // Linear Solver collections
+// Eigen SparseLU
+static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
+                mpm::DirectEigen<Eigen::SparseMatrix<double>>, unsigned, double>
+    solver_direct_eigen("DirectEigen");
+
 // Eigen Conjugate Gradient
 static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
                 mpm::IterativeEigen<Eigen::SparseMatrix<double>>, unsigned,
