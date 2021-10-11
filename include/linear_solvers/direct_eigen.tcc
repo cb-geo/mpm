@@ -23,11 +23,6 @@ Eigen::VectorXd mpm::DirectEigen<Traits>::solve(
 
       x = solver.solve(b);
 
-      if (verbosity_ >= 1) {
-        // std::cout << "estimated error: " << solver.solver.error() <<
-        // std::endl;
-      }
-
       if (solver.info() != Eigen::Success) {
         throw std::runtime_error("Fail to solve linear systems!\n");
       }
@@ -38,11 +33,6 @@ Eigen::VectorXd mpm::DirectEigen<Traits>::solve(
       solver.factorize(A);
 
       x = solver.solve(b);
-
-      if (verbosity_ >= 1) {
-        // std::cout << "estimated error: " << solver.solver.error() <<
-        // std::endl;
-      }
 
       if (solver.info() != Eigen::Success) {
         throw std::runtime_error("Fail to solve linear systems!\n");

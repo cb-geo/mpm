@@ -27,6 +27,8 @@ class KrylovPETSC : public SolverBase<Traits> {
     //! Logger
     std::string logger = "PETSCKrylovSolver::";
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+    //! Default sub solver type
+    sub_solver_type_ = "cg";
 
 #ifdef USE_PETSC
     abs_tolerance_ = PETSC_DEFAULT;
