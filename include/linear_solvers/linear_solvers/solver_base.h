@@ -61,7 +61,7 @@ class SolverBase {
 
  protected:
   //! Solver type
-  std::string sub_solver_type_{"cg"};
+  std::string sub_solver_type_;
   //! Preconditioner type
   std::string preconditioner_type_{"none"};
   //! Maximum number of iterations
