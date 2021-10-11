@@ -51,7 +51,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     if (analysis_.find("locate_particles") != analysis_.end())
       locate_particles_ = analysis_["locate_particles"].template get<bool>();
 
-    // Stress update method (USF/USL/MUSL)
+    // Stress update method (USF/USL/MUSL/Newmark)
     try {
       if (analysis_.find("mpm_scheme") != analysis_.end())
         stress_update_ = analysis_["mpm_scheme"].template get<std::string>();
@@ -233,6 +233,9 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
 
   // Read and assign velocity constraints
   this->nodal_velocity_constraints(mesh_props, mesh_io);
+
+  // Read and assign velocity constraints for implicit solver
+  this->nodal_displacement_constraints(mesh_props, mesh_io);
 
   // Read and assign friction constraints
   this->nodal_frictional_constraints(mesh_props, mesh_io);
@@ -921,6 +924,63 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
       throw std::runtime_error("Velocity constraints JSON not found");
   } catch (std::exception& exception) {
     console_->warn("#{}: Velocity constraints are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Nodal displacement constraints for implicit solver
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_displacement_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign displacement constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("displacement_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      // Iterate over displacement constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["displacement_constraints"]) {
+        // Displacement constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+          std::string displacement_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool displacement_constraints =
+              constraints_->assign_nodal_displacement_constraints(
+                  mesh_io->read_displacement_constraints(
+                      io_->file_name(displacement_constraints_file)));
+          if (!displacement_constraints)
+            throw std::runtime_error(
+                "Displacement constraints are not properly assigned");
+
+        } else {
+          // Get the math function
+          std::shared_ptr<FunctionBase> dfunction = nullptr;
+          if (constraints.find("math_function_id") != constraints.end())
+            dfunction = math_functions_.at(
+                constraints.at("math_function_id").template get<unsigned>());
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Direction
+          unsigned dir = constraints.at("dir").template get<unsigned>();
+          // Displacement
+          double displacement =
+              constraints.at("displacement").template get<double>();
+          // Add displacement constraint to mesh
+          auto displacement_constraint =
+              std::make_shared<mpm::DisplacementConstraint>(nset_id, dir,
+                                                            displacement);
+          bool displacement_constraints =
+              constraints_->assign_nodal_displacement_constraint(
+                  dfunction, nset_id, displacement_constraint);
+          if (!displacement_constraints)
+            throw std::runtime_error(
+                "Nodal displacement constraint is not properly assigned");
+        }
+      }
+    } else
+      throw std::runtime_error("Displacement constraints JSON not found");
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Displacement constraints are undefined {} ", __LINE__,
                    exception.what());
   }
 }

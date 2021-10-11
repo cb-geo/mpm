@@ -264,6 +264,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::displacement_;
   //! Velocity
   using Particle<Tdim>::velocity_;
+  //! Acceleration
+  using Particle<Tdim>::acceleration_;
   //! Effective stress of soil skeleton
   using Particle<Tdim>::stress_;
   //! Solid skeleton strains

@@ -286,6 +286,83 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Initialise nodal properties for implicit solver
+  //! \ingroup Impolicit
+  void initialise_implicit() noexcept override;
+
+  //! Update inertia at the nodes
+  //! \ingroup Implicit
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  void update_inertia(bool update, unsigned phase,
+                      const VectorDim& inertia) noexcept override;
+
+  //! Return inertia at a given node for a given phase
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim inertia(unsigned phase) const override {
+    return inertia_.col(phase);
+  }
+
+  //! Compute velocity and acceleration from the momentum and inertia
+  //! \ingroup Implicit
+  void compute_velocity_acceleration() override;
+
+  //! Return displacement at a given node for a given phase
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);
+  };
+
+  //! Update velocity and acceleration by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  void update_velocity_acceleration_newmark(unsigned phase, double newmark_beta,
+                                            double newmark_gamma,
+                                            double dt) override;
+
+  //! Assign displacement constraint for implicit solver
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \ingroup Implicit
+  //! \param[in] dir Direction of displacement constraint
+  //! \param[in] displacement Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_displacement_constraint(
+      const unsigned dir, const double displacement,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Return displacement constraint
+  //! \ingroup Implicit
+  double displacement_constraint(const unsigned dir,
+                                 const double current_time) const override {
+    double constraint = std::numeric_limits<double>::max();
+    if (displacement_constraints_.find(dir) !=
+        displacement_constraints_.end()) {
+      const double scalar =
+          (displacement_function_.find(dir) != displacement_function_.end())
+              ? displacement_function_.at(dir)->value(current_time)
+              : 1.0;
+
+      constraint = scalar * displacement_constraints_.at(dir);
+    }
+    return constraint;
+  }
+
+  //! Update displacement increment at the node
+  //! \ingroup Implicit
+  void update_displacement_increment(
+      const Eigen::VectorXd& displacement_increment, unsigned phase,
+      unsigned nactive_node) override;
+  /**@{*/
+
+  /**
    * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/
@@ -506,6 +583,20 @@ class Node : public NodeBase<Tdim> {
   Index global_active_id_{std::numeric_limits<Index>::max()};
 
   /**
+   * \defgroup ImplicitVariables Variables dealing with implicit MPM
+   */
+  /**@{*/
+  //! Inertia
+  Eigen::Matrix<double, Tdim, Tnphases> inertia_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
+  //! Displacement constraints
+  std::map<unsigned, double> displacement_constraints_;
+  //! Mathematical function for displacement
+  std::map<unsigned, std::shared_ptr<FunctionBase>> displacement_function_;
+  /**@}*/
+
+  /**
    * \defgroup MultiPhaseVariables Variables for multi-phase MPM
    * @{
    */
@@ -526,6 +617,7 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
+#include "node_implicit.tcc"
 #include "node_multiphase.tcc"
 
 #endif  // MPM_NODE_H_

@@ -103,6 +103,19 @@ class IOMeshAscii : public IOMesh<Tdim> {
   std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) override;
 
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Read displacement constraints file for implicit solver
+  //! \ingroup Implicit
+  //! \param[in] displacement_constraints_files file name with displacement
+  //! constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_displacement_constraints(
+          const std::string& displacement_constraints_file) override;
+  /**@}*/
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;

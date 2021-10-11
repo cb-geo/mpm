@@ -42,7 +42,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"dt", 0.001},
           {"nsteps", 1000},
           {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-          {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+          {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
         {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
 
     // Make json object with entity sets files

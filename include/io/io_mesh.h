@@ -114,6 +114,19 @@ class IOMesh {
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) = 0;
 
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Read displacement constraints file
+  //! \ingroup Implicit
+  //! \param[in] displacement_constraints_files file name with displacement
+  //! constraints
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_displacement_constraints(
+          const std::string& displacement_constraints_file) = 0;
+  /**@}*/
+
 };  // IOMesh class
 }  // namespace mpm
 

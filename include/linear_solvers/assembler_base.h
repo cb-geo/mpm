@@ -61,53 +61,174 @@ class AssemblerBase {
   }
 
   //! Create a pair between nodes and index in Matrix / Vector
-  virtual bool assign_global_node_indices(unsigned nactive_node,
-                                          unsigned nglobal_active_node) = 0;
+  bool assign_global_node_indices(unsigned nactive_node,
+                                  unsigned nglobal_active_node);
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Return stiffness matrix
+  //! \ingroup Implicit
+  virtual Eigen::SparseMatrix<double>& stiffness_matrix() {
+    throw std::runtime_error(
+        "Calling the base class function (stiffness_matrix) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Assemble stiffness matrix
+  //! \ingroup Implicit
+  virtual bool assemble_stiffness_matrix() {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_stiffness_matrix) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return residual force RHS vector
+  //! \ingroup Implicit
+  virtual Eigen::VectorXd& residual_force_rhs_vector() {
+    throw std::runtime_error(
+        "Calling the base class function (residual_force_rhs_vector) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Assemble residual force RHS vector
+  //! \ingroup Implicit
+  virtual bool assemble_residual_force_right() {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_residual_force_right) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign displacement constraints
+  //! \ingroup Implicit
+  virtual bool assign_displacement_constraints(double current_time) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_displacement_constraints) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Apply displacement constraints to equilibrium equation
+  //! \ingroup Implicit
+  virtual void apply_displacement_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function (apply_displacement_constraints) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Return displacement increment
+  //! \ingroup Implicit
+  virtual Eigen::VectorXd& displacement_increment() {
+    throw std::runtime_error(
+        "Calling the base class function (displacement_increment) in "
+        "AssemblerBase:: illegal operation!");
+  };
+
+  //! Assign displacement increment
+  //! \ingroup Implicit
+  virtual void assign_displacement_increment(
+      const Eigen::VectorXd& displacement_increment) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_displacement_increment) in "
+        "AssemblerBase:: illegal operation!");
+  };
+  /**@{*/
+
+  //! Navier-Stokes
+  //! functions-------------------------------------------------------- Return
+  //! laplacian matrix
+  virtual Eigen::SparseMatrix<double>& laplacian_matrix() {
+    throw std::runtime_error(
+        "Calling the base class function (laplacian_matrix) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Assemble laplacian matrix
-  virtual Eigen::SparseMatrix<double>& laplacian_matrix() = 0;
+  virtual bool assemble_laplacian_matrix(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_laplacian_matrix) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
 
-  //! Assemble laplacian matrix
-  virtual bool assemble_laplacian_matrix(double dt) = 0;
+  //! Return poisson RHS vector
+  virtual Eigen::VectorXd& poisson_rhs_vector() {
+    throw std::runtime_error(
+        "Calling the base class function (poisson_rhs_vector) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Assemble poisson RHS vector
-  virtual Eigen::VectorXd& poisson_rhs_vector() = 0;
-
-  //! Assemble poisson RHS vector
-  virtual bool assemble_poisson_right(double dt) = 0;
+  virtual bool assemble_poisson_right(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_poisson_right) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
 
   //! Assign free surface node id
   virtual void assign_free_surface(
-      const std::set<mpm::Index>& free_surface_id) = 0;
+      const std::set<mpm::Index>& free_surface_id) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_free_surface) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Assign pressure constraints
-  virtual bool assign_pressure_constraints(double beta,
-                                           double current_time) = 0;
+  virtual bool assign_pressure_constraints(double beta, double current_time) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_pressure_constraints) in "
+        "AssemblerBase:: illegal operation!");
+    return 0;
+  };
 
   //! Apply pressure constraints to poisson equation
-  virtual void apply_pressure_constraints() = 0;
+  virtual void apply_pressure_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function (apply_pressure_constraints) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Return pressure increment
-  virtual Eigen::VectorXd& pressure_increment() = 0;
+  virtual Eigen::VectorXd& pressure_increment() {
+    throw std::runtime_error(
+        "Calling the base class function (pressure_increment) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Assign pressure increment
   virtual void assign_pressure_increment(
-      const Eigen::VectorXd& pressure_increment) = 0;
+      const Eigen::VectorXd& pressure_increment) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_pressure_increment) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Return correction matrix
-  virtual Eigen::SparseMatrix<double>& correction_matrix() = 0;
+  virtual Eigen::SparseMatrix<double>& correction_matrix() {
+    throw std::runtime_error(
+        "Calling the base class function (correction_matrix) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Assemble corrector RHS
-  virtual bool assemble_corrector_right(double dt) = 0;
-
-  //! Return the total size of global dof in all rank
-  virtual unsigned global_active_dof() = 0;
+  virtual bool assemble_corrector_right(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (assemble_corrector_right) in "
+        "AssemblerBase:: illegal operation!");
+  };
 
   //! Return number of total active_dof
   virtual unsigned active_dof() { return active_dof_; };
 
+  //! Return the total size of global dof in all rank
+  virtual unsigned global_active_dof() { return global_active_dof_; };
+
   //! Return a vector to map local (rank) index to global index
-  virtual std::vector<int> rank_global_mapper() = 0;
+  virtual std::vector<int> rank_global_mapper() { return rank_global_mapper_; };
 
   //! TwoPhase functions--------------------------------------------------------
   //! Assemble coefficient matrix for two-phase predictor
@@ -178,7 +299,16 @@ class AssemblerBase {
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Number of sparse matrix container size
   unsigned sparse_row_size_;
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
+  //! Global node indices
+  std::vector<Eigen::VectorXi> global_node_indices_;
+  //! Number of total active_dof in all rank
+  unsigned global_active_dof_;
+  //! Rank to Global mapper
+  std::vector<int> rank_global_mapper_;
 };
 }  // namespace mpm
 
+#include "assembler_base.tcc"
 #endif  // MPM_ASSEMBLER_BASE_H_

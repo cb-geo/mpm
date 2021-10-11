@@ -203,6 +203,7 @@ target_link_libraries(mpm git)
 if(MPM_BUILD_TESTING)
   SET(test_src
     ${mpm_SOURCE_DIR}/tests/test_main.cc
+    ${mpm_SOURCE_DIR}/tests/cell_implicit_linear_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/contact_test.cc
@@ -240,11 +241,13 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/nodal_properties_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_implicit_linear_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_cell_crossing_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_implicit_linear_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
@@ -262,6 +265,8 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_implicit_linear_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_implicit_linear_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_navierstokes_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_navierstokes_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_semi_implicit_twophase_test.cc

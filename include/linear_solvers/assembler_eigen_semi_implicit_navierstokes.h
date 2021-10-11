@@ -18,10 +18,6 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! \param[in] node_neighbourhood Number of node neighbourhood considered
   AssemblerEigenSemiImplicitNavierStokes(unsigned node_neighbourhood);
 
-  //! Create a pair between nodes and index in Matrix / Vector
-  bool assign_global_node_indices(unsigned nactive_node,
-                                  unsigned nglobal_active_node) override;
-
   //! Return laplacian matrix
   Eigen::SparseMatrix<double>& laplacian_matrix() override {
     return laplacian_matrix_;
@@ -65,14 +61,6 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Assemble corrector RHS
   bool assemble_corrector_right(double dt) override;
 
-  //! Return the total size of global dof in all rank
-  unsigned global_active_dof() override { return global_active_dof_; };
-
-  //! Return a vector to map local (rank) index to global index
-  std::vector<int> rank_global_mapper() override {
-    return rank_global_mapper_;
-  };
-
  protected:
   //! number of nodes
   using AssemblerBase<Tdim>::active_dof_;
@@ -83,7 +71,7 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Global node indices
-  std::vector<Eigen::VectorXi> global_node_indices_;
+  using AssemblerBase<Tdim>::global_node_indices_;
   //! Laplacian matrix
   Eigen::SparseMatrix<double> laplacian_matrix_;
   //! Poisson RHS vector
@@ -96,10 +84,6 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::VectorXd pressure_increment_;
   //! correction_matrix
   Eigen::SparseMatrix<double> correction_matrix_;
-  //! Number of total active_dof in all rank
-  unsigned global_active_dof_;
-  //! Rank to Global mapper
-  std::vector<int> rank_global_mapper_;
 };
 }  // namespace mpm
 

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "displacement_constraint.h"
 #include "friction_constraint.h"
 #include "logger.h"
 #include "mesh.h"
@@ -63,6 +64,27 @@ class Constraints {
   bool assign_nodal_pressure_constraints(
       const unsigned phase,
       const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints);
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Assign nodal displacement constraints for implicit solver
+  //! \ingroup Implicit
+  //! \param[in] setid Node set id
+  //! \param[in] displacement_constraints Displacement constraint at node, dir,
+  //! velocity
+  bool assign_nodal_displacement_constraint(
+      const std::shared_ptr<FunctionBase>& dfunction, int set_id,
+      const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint);
+
+  //! Assign displacement constraints to nodes
+  //! \ingroup Implicit
+  //! \param[in] displacement_constraints Constraint at node, dir, and velocity
+  bool assign_nodal_displacement_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          displacement_constraints);
+  /**@}*/
 
  private:
   //! Mesh object

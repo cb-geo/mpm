@@ -64,3 +64,11 @@ Eigen::Matrix<double, 6, 1> mpm::LinearElastic<Tdim>::compute_stress(
   const Vector6d dstress = this->de_ * dstrain;
   return (stress + dstress);
 }
+
+//! Compute contitutive relations matrix
+template <unsigned Tdim>
+Eigen::Matrix<double, 6, 6> mpm::LinearElastic<Tdim>::compute_dmatrix(
+    const Vector6d& stress, const Vector6d& dstrain,
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
+  return de_;
+}

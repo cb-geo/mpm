@@ -5,6 +5,7 @@
 #include "mpm.h"
 #include "mpm_explicit.h"
 #include "mpm_explicit_twophase.h"
+#include "mpm_implicit_linear.h"
 #include "mpm_semi_implicit_navierstokes.h"
 #include "mpm_semi_implicit_twophase.h"
 
@@ -16,6 +17,16 @@ static Register<mpm::MPM, mpm::MPMExplicit<2>, const std::shared_ptr<mpm::IO>&>
 // 3D Explicit MPM
 static Register<mpm::MPM, mpm::MPMExplicit<3>, const std::shared_ptr<mpm::IO>&>
     mpm_explicit_3d("MPMExplicit3D");
+
+// 2D Implicit Linear MPM
+static Register<mpm::MPM, mpm::MPMImplicitLinear<2>,
+                const std::shared_ptr<mpm::IO>&>
+    mpm_implicit_linear_2d("MPMImplicitLinear2D");
+
+// 3D Implicit Linear MPM
+static Register<mpm::MPM, mpm::MPMImplicitLinear<3>,
+                const std::shared_ptr<mpm::IO>&>
+    mpm_implicit_linear_3d("MPMImplicitLinear3D");
 
 // 2D SemiImplicit Navier Stokes MPM
 static Register<mpm::MPM, mpm::MPMSemiImplicitNavierStokes<2>,
@@ -46,4 +57,5 @@ static Register<mpm::MPM, mpm::MPMSemiImplicitTwoPhase<2>,
 static Register<mpm::MPM, mpm::MPMSemiImplicitTwoPhase<3>,
                 const std::shared_ptr<mpm::IO>&>
     mpm_semi_implicit_twophase_3d("MPMSemiImplicitTwoPhase3D");
+
 }  // namespace mpm

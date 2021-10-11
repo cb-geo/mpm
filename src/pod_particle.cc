@@ -19,6 +19,9 @@ const size_t dst_offset[NFIELDS] = {
     HOFFSET(PODParticle, velocity_x),
     HOFFSET(PODParticle, velocity_y),
     HOFFSET(PODParticle, velocity_z),
+    HOFFSET(PODParticle, acceleration_x),
+    HOFFSET(PODParticle, acceleration_y),
+    HOFFSET(PODParticle, acceleration_z),
     HOFFSET(PODParticle, stress_xx),
     HOFFSET(PODParticle, stress_yy),
     HOFFSET(PODParticle, stress_zz),
@@ -77,6 +80,9 @@ const size_t dst_sizes[NFIELDS] = {
     sizeof(particle.velocity_x),
     sizeof(particle.velocity_y),
     sizeof(particle.velocity_z),
+    sizeof(particle.acceleration_x),
+    sizeof(particle.acceleration_y),
+    sizeof(particle.acceleration_z),
     sizeof(particle.stress_xx),
     sizeof(particle.stress_yy),
     sizeof(particle.stress_zz),
@@ -134,6 +140,9 @@ const char* field_names[NFIELDS] = {
     "velocity_x",
     "velocity_y",
     "velocity_z",
+    "acceleration_x",
+    "acceleration_y",
+    "acceleration_z",
     "stress_xx",
     "stress_yy",
     "stress_zz",
@@ -182,13 +191,13 @@ const hid_t field_type[NFIELDS] = {
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
-    H5T_NATIVE_DOUBLE, H5T_NATIVE_HBOOL,  H5T_NATIVE_LLONG,  H5T_NATIVE_UINT,
-    H5T_NATIVE_UINT,   H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
+    H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
+    H5T_NATIVE_HBOOL,  H5T_NATIVE_LLONG,  H5T_NATIVE_UINT,   H5T_NATIVE_UINT,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
-    H5T_NATIVE_DOUBLE};
+    H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE};
 }  // namespace particle
 }  // namespace pod
 }  // namespace mpm

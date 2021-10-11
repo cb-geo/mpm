@@ -23,6 +23,7 @@
 #include "mpm.h"
 #include "mpm_scheme.h"
 #include "mpm_scheme_musl.h"
+#include "mpm_scheme_newmark.h"
 #include "mpm_scheme_usf.h"
 #include "mpm_scheme_usl.h"
 #include "particle.h"
@@ -57,9 +58,6 @@ class MPMBase : public MPM {
 
   //! Initialise particles
   void initialise_particles() override;
-
-  //! Initialise particle types
-  void initialise_particle_types() override;
 
   //! Initialise materials
   void initialise_materials() override;
@@ -186,6 +184,21 @@ class MPMBase : public MPM {
   //! Initialise damping
   //! \param[in] damping_props Damping properties
   bool initialise_damping(const Json& damping_props);
+
+  //! Initialise particle types
+  void initialise_particle_types();
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Nodal displacement constraints for implicit solver
+  //! \ingroup Implicit
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_displacement_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+  /**@}*/
 
  protected:
   // Generate a unique id for the analysis

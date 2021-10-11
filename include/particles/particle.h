@@ -353,6 +353,60 @@ class Particle : public ParticleBase<Tdim> {
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
 
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Map particle mass, momentum and inertia to nodes
+  //! \ingroup Implicit
+  void map_mass_momentum_inertia_to_nodes() noexcept override;
+
+  //! Map inertial force
+  //! \ingroup Implicit
+  void map_inertial_force() noexcept override;
+
+  //! Return acceleration of the particle
+  //! \ingroup Implicit
+  VectorDim acceleration() const override { return acceleration_; }
+
+  //! Map material stiffness matrix to cell (used in equilibrium equation LHS)
+  //! \ingroup Implicit
+  inline bool map_material_stiffness_matrix_to_cell() override;
+
+  //! Reduce constitutive relations matrix depending on the dimension
+  //! \ingroup Implicit
+  //! \param[in] dmatrix Constitutive relations matrix in 3D
+  //! \retval reduced_dmatrix Reduced constitutive relation matrix for spatial
+  //! dimension
+  inline Eigen::MatrixXd reduce_dmatrix(
+      const Eigen::MatrixXd& dmatrix) noexcept override;
+
+  //! Compute B matrix of a particle, based on local coordinates
+  inline Eigen::MatrixXd compute_bmatrix() noexcept override;
+
+  //! Map mass matrix to cell (used in equilibrium equation LHS)
+  //! \ingroup Implicit
+  //! \param[in] newmark_beta parameter beta of Newmark scheme
+  //! \param[in] dt parameter beta of Newmark scheme
+  inline bool map_mass_matrix_to_cell(double newmark_beta, double dt) override;
+
+  //! Compute strain using nodal displacement
+  //! \ingroup Implicit
+  void compute_strain_newmark() noexcept override;
+
+  //! Compute updated position of the particle by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] dt Analysis time step
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  void compute_updated_position_newmark(double dt) noexcept override;
+
+  //! Assign acceleration to the particle (used for test)
+  //! \ingroup Implicit
+  //! \param[in] acceleration A vector of particle acceleration
+  //! \retval status Assignment status
+  bool assign_acceleration(const VectorDim& acceleration) override;
+  /**@}*/
+
  protected:
   //! Initialise particle material container
   //! \details This function allocate memory and initialise the material related
@@ -363,6 +417,7 @@ class Particle : public ParticleBase<Tdim> {
   void initialise_material(unsigned phase_size = 1);
 
   //! Compute strain rate
+  //! \ingroup Implicit
   //! \param[in] dn_dx The spatial gradient of shape function
   //! \param[in] phase Index to indicate phase
   //! \retval strain rate at particle inside a cell
@@ -372,6 +427,19 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute pack size
   //! \retval pack size of serialized object
   virtual int compute_pack_size() const;
+
+  /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Compute strain increment
+  //! \ingroup Implicit
+  //! \param[in] dn_dx The spatial gradient of shape function
+  //! \param[in] phase Index to indicate phase
+  //! \retval strain increment at particle inside a cell
+  inline Eigen::Matrix<double, 6, 1> compute_strain_increment(
+      const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
+  /**@}*/
 
   //! particle id
   using ParticleBase<Tdim>::id_;
@@ -449,9 +517,18 @@ class Particle : public ParticleBase<Tdim> {
   //! Pack size
   unsigned pack_size_{0};
 
+  /**
+   * \defgroup ImplicitVariables Variables dealing with implicit MPM
+   */
+  /**@{*/
+  //! Acceleration
+  Eigen::Matrix<double, Tdim, 1> acceleration_;
+  /**@}*/
+
 };  // Particle class
 }  // namespace mpm
 
 #include "particle.tcc"
+#include "particle_implicit.tcc"
 
 #endif  // MPM_PARTICLE_H__

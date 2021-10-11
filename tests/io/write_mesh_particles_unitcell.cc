@@ -94,13 +94,117 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"nsteps", 10},
         {"boundary_friction", 0.5},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
       {"post_processing",
        {{"path", "results/"},
         {"vtk", {"mass", "volume", "test_variable"}},
         {"vtk_statevars",
          {{{"phase_id", 0}, {"statevars", "test_statevar"}},
           {{"phase_id", 4}, {"statevars", {"test_statevar"}}}}},
+        {"output_steps", 10}}}};
+
+  // Dump JSON as an input file to be read
+  std::ofstream file;
+  file.open((file_name + "-" + dimension + "-unitcell.json").c_str());
+  file << json_file.dump(2);
+  file.close();
+
+  return true;
+}
+
+// Write JSON Configuration file for implicit linear
+bool write_json_unitcell_implicit_linear(
+    unsigned dim, const std::string& analysis, const std::string& mpm_scheme,
+    const std::string& file_name, const std::string& linear_solver_type) {
+  // Make json object with input files
+  // 2D
+  std::string dimension = "2d";
+  auto particle_type = "P2D";
+  auto node_type = "N2D";
+  auto cell_type = "ED2Q4";
+  auto io_type = "Ascii2D";
+  auto assembler_type = "EigenImplicitLinear2D";
+  std::string material = "LinearElastic2D";
+  std::vector<double> gravity{{0., -9.81}};
+  std::vector<unsigned> material_id{{1}};
+  std::vector<double> xvalues{{0.0, 0.5, 1.0}};
+  std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
+
+  // 3D
+  if (dim == 3) {
+    dimension = "3d";
+    particle_type = "P3D";
+    node_type = "N3D";
+    cell_type = "ED3H8";
+    assembler_type = "EigenImplicitLinear3D";
+    io_type = "Ascii3D";
+    material = "LinearElastic3D";
+    gravity.clear();
+    gravity = {0., 0., -9.81};
+  }
+
+  Json json_file = {
+      {"title", "Example JSON Input for MPM"},
+      {"mesh",
+       {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
+        {"io_type", io_type},
+        {"isoparametric", false},
+        {"node_type", node_type},
+        {"boundary_conditions",
+         {{"displacement_constraints",
+           {{"file", "displacement-constraints-unitcell.txt"}}}}},
+        {"cell_type", cell_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"generator",
+          {{"type", "file"},
+           {"io_type", io_type},
+           {"material_id", material_id},
+           {"pset_id", 0},
+           {"particle_type", particle_type},
+           {"check_duplicates", true},
+           {"location", "particles-" + dimension + "-unitcell.txt"}}}}}},
+      {"materials",
+       {{{"id", 0},
+         {"type", material},
+         {"density", 1000.},
+         {"youngs_modulus", 1.0E+8},
+         {"poisson_ratio", 0.495}},
+        {{"id", 1},
+         {"type", material},
+         {"density", 2300.},
+         {"youngs_modulus", 1.5E+6},
+         {"poisson_ratio", 0.25}}}},
+      {"external_loading_conditions",
+       {{"gravity", gravity},
+        {"particle_surface_traction",
+         {{{"math_function_id", 0},
+           {"pset_id", -1},
+           {"dir", 1},
+           {"traction", 10.5}}}},
+        {"concentrated_nodal_forces",
+         {{{"math_function_id", 0},
+           {"nset_id", -1},
+           {"dir", 1},
+           {"force", 10.5}}}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"analysis",
+       {{"type", analysis},
+        {"mpm_scheme", mpm_scheme},
+        {"locate_particles", true},
+        {"pressure_smoothing", false},
+        {"dt", 0.0001},
+        {"nsteps", 10},
+        {"linear_solver", {{"assembler_type", assembler_type}}},
+        {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
+      {"post_processing",
+       {{"path", "results/"},
+        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
         {"output_steps", 10}}}};
 
   // Dump JSON as an input file to be read
@@ -215,7 +319,7 @@ bool write_json_unitcell_navierstokes(unsigned dim, const std::string& analysis,
          {{"type", free_surface_type}, {"volume_tolerance", 0.25}}},
         {"linear_solver", {{"assembler_type", assembler_type}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
       {"post_processing",
        {{"path", "results/"},
         {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
@@ -353,7 +457,7 @@ bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
          {{"type", free_surface_type}, {"volume_tolerance", 0.25}}},
         {"linear_solver", {{"assembler_type", assembler_type}}},
         {"damping", {{"type", "Cundall"}, {"damping_factor", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
+        {"newmark", {{"beta", 0.25}, {"gamma", 0.5}}}}},
       {"post_processing",
        {{"path", "results/"},
         {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},

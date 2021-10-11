@@ -284,6 +284,68 @@ class NodeBase {
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
   /**
+   * \defgroup Implicit Functions dealing with implicit MPM
+   */
+  /**@{*/
+  //! Initialise nodal properties for implicit solver
+  //! \ingroup Implicit
+  virtual void initialise_implicit() noexcept = 0;
+
+  //! Update nodal inertia
+  //! \ingroup Implicit
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] inertia Inertia from the particles in a cell
+  virtual void update_inertia(bool update, unsigned phase,
+                              const VectorDim& inertia) noexcept = 0;
+
+  //! Return inertia
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim inertia(unsigned phase) const = 0;
+
+  //! Compute velocity and acceleration from the momentum and inertia
+  //! \ingroup Implicit
+  virtual void compute_velocity_acceleration() = 0;
+
+  //! Return displacement
+  //! \ingroup Implicit
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim displacement(unsigned phase) const = 0;
+
+  //! Update velocity and acceleration by Newmark scheme
+  //! \ingroup Implicit
+  //! \param[in] newmark_beta Parameter beta of Newmark scheme
+  //! \param[in] newmark_gamma Parameter gamma of Newmark scheme
+  //! \param[in] dt Time-step
+  virtual void update_velocity_acceleration_newmark(unsigned phase,
+                                                    double newmark_beta,
+                                                    double newmark_gamma,
+                                                    double dt) = 0;
+
+  //! Assign displacement constraint for implicit solver
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \ingroup Implicit
+  //! \param[in] dir Direction of displacement constraint
+  //! \param[in] displacement Applied pressure constraint
+  //! \param[in] function math function
+  virtual bool assign_displacement_constraint(
+      const unsigned dir, const double displacement,
+      const std::shared_ptr<FunctionBase>& function) = 0;
+
+  //! Return displacement constraint
+  //! \ingroup Implicit
+  virtual double displacement_constraint(const unsigned dir,
+                                         const double current_time) const = 0;
+
+  //! Update displacement increment at the node
+  //! \ingroup Implicit
+  virtual void update_displacement_increment(
+      const Eigen::VectorXd& displacement_increment, unsigned phase,
+      unsigned nactive_node) = 0;
+  /**@{*/
+
+  /**
    * \defgroup MultiPhase Functions dealing with multi-phase MPM
    */
   /**@{*/

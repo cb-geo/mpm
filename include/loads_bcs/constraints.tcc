@@ -51,6 +51,62 @@ bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraints(
   return status;
 }
 
+//! Assign nodal displacement constraints
+template <unsigned Tdim>
+bool mpm::Constraints<Tdim>::assign_nodal_displacement_constraint(
+    const std::shared_ptr<FunctionBase>& dfunction, int set_id,
+    const std::shared_ptr<mpm::DisplacementConstraint>& dconstraint) {
+  bool status = true;
+  try {
+    int set_id = dconstraint->setid();
+    auto nset = mesh_->nodes(set_id);
+    if (nset.size() == 0)
+      throw std::runtime_error(
+          "Node set is empty for assignment of displacement constraints");
+
+    unsigned dir = dconstraint->dir();
+    double displacement = dconstraint->displacement();
+    for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+      if (!(*nitr)->assign_displacement_constraint(dir, displacement,
+                                                   dfunction))
+        throw std::runtime_error(
+            "Failed to initialise displacement constraint at node");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign displacement constraints to nodes
+template <unsigned Tdim>
+bool mpm::Constraints<Tdim>::assign_nodal_displacement_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        displacement_constraints) {
+  bool status = true;
+  try {
+    for (const auto& displacement_constraint : displacement_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(displacement_constraint);
+      // Direction
+      unsigned dir = std::get<1>(displacement_constraint);
+      // Displacement
+      double displacement = std::get<2>(displacement_constraint);
+
+      // Apply constraint
+      if (!mesh_->node(nid)->assign_displacement_constraint(dir, displacement,
+                                                            nullptr))
+        throw std::runtime_error(
+            "Nodal displacement constraints assignment failed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign friction constraints to nodes
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_frictional_constraint(
