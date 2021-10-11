@@ -240,6 +240,117 @@ TEST_CASE("Linear solver test", "[linear_solver]") {
     }
   }
 
+  SECTION("Eigen Direct solver") {
+    // Construct Eigen solver
+    std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>
+        eigen_matrix_solver =
+            Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                    double>::instance()
+                ->create("DirectEigen", std::move(max_iter),
+                         std::move(rel_tolerance));
+
+    // Initiate sub_solver_type "SparseLU"
+    std::string sub_solver_type = "lu";
+    REQUIRE_NOTHROW(eigen_matrix_solver->set_sub_solver_type(sub_solver_type));
+
+    SECTION("Eigen Direct 3x3 solver") {
+      // Construct matrix and vector
+      const auto& A = CreateSymmetricTestMatrix3x3();
+      Eigen::VectorXd b(3);
+      b << 6.0, 3.0, -9.0;
+
+      // Solve
+      auto x_eigen = eigen_matrix_solver->solve(A, b);
+
+      // Check
+      REQUIRE(x_eigen(0) == Approx(2.).epsilon(Tolerance));
+      REQUIRE(x_eigen(1) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(x_eigen(2) == Approx(-3.).epsilon(Tolerance));
+
+      SECTION("Eigen Direct verbosity") {
+        // Verbosity 1
+        REQUIRE_NOTHROW(eigen_matrix_solver->set_verbosity(1));
+
+        // Solve ldlt "SimplicialLDLT"
+        REQUIRE_NOTHROW(eigen_matrix_solver->set_sub_solver_type("ldlt"));
+        x_eigen.setZero();
+        x_eigen = eigen_matrix_solver->solve(A, b);
+
+        // Solve lu "SparseLU"
+        REQUIRE_NOTHROW(eigen_matrix_solver->set_sub_solver_type("lu"));
+        x_eigen = eigen_matrix_solver->solve(A, b);
+
+        // Verbosity 3
+        REQUIRE_NOTHROW(eigen_matrix_solver->set_verbosity(3));
+        x_eigen = eigen_matrix_solver->solve(A, b);
+      }
+    }
+
+    SECTION("Eigen Direct 5x5 solver") {
+      // Construct matrix and vector
+      const auto& A = CreateRandomSymmetricTestMatrix(5);
+      const auto& b = CreateRandomRHSVector(5);
+
+      // Solve
+      const auto& x_eigen = eigen_matrix_solver->solve(A, b);
+
+      // Check
+      REQUIRE(x_eigen(0) == Approx(0.0120451).epsilon(Tolerance));
+      REQUIRE(x_eigen(1) == Approx(0.0059998).epsilon(Tolerance));
+      REQUIRE(x_eigen(2) == Approx(-0.0002562).epsilon(Tolerance));
+      REQUIRE(x_eigen(3) == Approx(-0.00243321).epsilon(Tolerance));
+      REQUIRE(x_eigen(4) == Approx(-0.0137986).epsilon(Tolerance));
+    }
+
+    SECTION("Eigen Direct 50x50 solver") {
+      unsigned dim = 50;
+
+      // Construct matrix and vector
+      const auto& A = CreateRandomSymmetricTestMatrix(dim, 1);
+      const auto& b = CreateRandomRHSVector(dim, 1);
+
+      // Solve
+      auto x_eigen = eigen_matrix_solver->solve(A, b);
+
+      // Check vector
+      Eigen::VectorXd check(dim);
+      check << 0.00953087, 0.00267145, 0.00090515, -0.0051681, -0.0118201,
+          -0.00524066, 0.00351178, -0.00226483, 0.00881954, 0.00402078,
+          -0.00374931, 0.00389581, 0.0278946, 0.00086471, 0.0108373, 0.00994061,
+          -0.0152397, -0.0131817, 0.00237895, 0.0107676, 0.0020594, 0.0167911,
+          -0.00424347, 0.000822635, 0.00284699, -0.000252711, 0.004012,
+          -0.0193392, -0.00497733, 0.00414727, -0.0191148, -0.00433217,
+          -0.00845599, 0.00625809, 0.00608814, 0.00172608, -0.0319379,
+          -0.0120693, -0.0199266, -0.0136787, 0.011165, 0.000247912,
+          -0.00396258, -0.00169115, 0.00979188, 0.0168016, 0.0106938,
+          -0.00551589, 0.0140779, 0.00212647;
+
+      // Check
+      for (unsigned i = 0; i < dim; i++)
+        REQUIRE(x_eigen(i) == Approx(check(i)).epsilon(Tolerance));
+
+      SECTION("Eigen CG 50x50 sub solver type") {
+        // Change lu to ldlt
+        REQUIRE_NOTHROW(eigen_matrix_solver->set_sub_solver_type("ldlt"));
+
+        // Solve
+        x_eigen.setZero();
+        x_eigen = eigen_matrix_solver->solve(A, b);
+
+        // Check
+        for (unsigned i = 0; i < dim; i++)
+          REQUIRE(x_eigen(i) == Approx(check(i)).epsilon(Tolerance));
+
+        // Change to error - unavailable subsolver type
+        REQUIRE_NOTHROW(eigen_matrix_solver->set_sub_solver_type("error"));
+
+        // Solve but x is zero size
+        x_eigen = eigen_matrix_solver->solve(A, b);
+        REQUIRE(x_eigen.size() == 0);
+      }
+    }
+  }
+
 #if USE_PETSC
   SECTION("PETSC solver") {
     std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>>
