@@ -17,9 +17,9 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_stiffness_matrix() {
     stiffness_matrix_.resize(active_dof_ * Tdim, active_dof_ * Tdim);
     stiffness_matrix_.setZero();
 
-    // Reserve storage for sparse matrix
-    stiffness_matrix_.reserve(
-        Eigen::VectorXi::Constant(active_dof_ * Tdim, sparse_row_size_ * Tdim));
+    // Triplets and reserve storage for sparse matrix
+    std::vector<Eigen::Triplet<double>> tripletList;
+    tripletList.reserve(active_dof_ * Tdim * sparse_row_size_ * Tdim);
 
     // Cell pointer
     const auto& cells = mesh_->cells();
@@ -43,10 +43,12 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_stiffness_matrix() {
           for (unsigned j = 0; j < nids.size(); ++j) {
             for (unsigned k = 0; k < Tdim; ++k) {
               for (unsigned l = 0; l < Tdim; ++l) {
-                stiffness_matrix_.coeffRef(
-                    nactive_node * k + global_node_indices_.at(cid)(i),
-                    nactive_node * l + global_node_indices_.at(cid)(j)) +=
-                    cell_stiffness(Tdim * i + k, Tdim * j + l);
+                if (std::abs(cell_stiffness(Tdim * i + k, Tdim * j + l)) >
+                    std::numeric_limits<double>::epsilon())
+                  tripletList.push_back(Eigen::Triplet<double>(
+                      nactive_node * k + global_node_indices_.at(cid)(i),
+                      nactive_node * l + global_node_indices_.at(cid)(j),
+                      cell_stiffness(Tdim * i + k, Tdim * j + l)));
               }
             }
           }
@@ -54,6 +56,10 @@ bool mpm::AssemblerEigenImplicitLinear<Tdim>::assemble_stiffness_matrix() {
         ++cid;
       }
     }
+
+    // Fast assembly from triplets
+    stiffness_matrix_.setFromTriplets(tripletList.begin(), tripletList.end());
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

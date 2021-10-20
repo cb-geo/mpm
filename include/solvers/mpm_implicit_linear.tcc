@@ -345,16 +345,16 @@ bool mpm::MPMImplicitLinear<Tdim>::compute_equilibrium_equation() {
         Tdim * assembler_->global_active_dof());
 
     // Prepare rank global mapper
-    std::vector<int> predictor_rgm;
+    std::vector<int> matrix_rgm;
     for (unsigned dir = 0; dir < Tdim; ++dir) {
       auto dir_rgm = assembler_->rank_global_mapper();
       std::for_each(dir_rgm.begin(), dir_rgm.end(),
                     [size = assembler_->global_active_dof(),
                      dir = dir](int& rgm) { rgm += dir * size; });
-      predictor_rgm.insert(predictor_rgm.end(), dir_rgm.begin(), dir_rgm.end());
+      matrix_rgm.insert(matrix_rgm.end(), dir_rgm.begin(), dir_rgm.end());
     }
     // Assign rank global mapper to solver
-    linear_solver_["displacement"]->assign_rank_global_mapper(predictor_rgm);
+    linear_solver_["displacement"]->assign_rank_global_mapper(matrix_rgm);
 #endif
 
     // Solve matrix equation and assign solution to assembler
