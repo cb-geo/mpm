@@ -395,14 +395,29 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::apply_absorbing_constraint(
         // Update external force
         if (Tdim == 2) {
           Eigen::Matrix<double, Tdim, 1> absorbing_force_;
-          double force0 = 0.0;
-          double force1 = 0.0;
           switch (position) {
             case mpm::Position::Corner:
               absorbing_force_ = 0.5 * h_min * absorbing_traction_;
               break;
-            case mpm::Position::Side:
+            case mpm::Position::Edge:
               absorbing_force_ = h_min * absorbing_traction_;
+              break;
+            default:
+              throw std::runtime_error("Invalid absorbing boundary position");
+              break;
+          }
+          this->update_external_force(true, phase, -absorbing_force_);
+        } else if (Tdim == 3) {
+          Eigen::Matrix<double, Tdim, 1> absorbing_force_;
+          switch (position) {
+            case mpm::Position::Corner:
+              absorbing_force_ = 0.25 * pow(h_min, 2) * absorbing_traction_;
+              break;
+            case mpm::Position::Edge:
+              absorbing_force_ = 0.5 * pow(h_min, 2) * absorbing_traction_;
+              break;
+            case mpm::Position::Face:
+              absorbing_force_ = pow(h_min, 2) * absorbing_traction_;
               break;
             default:
               throw std::runtime_error("Invalid absorbing boundary position");

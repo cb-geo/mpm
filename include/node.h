@@ -215,11 +215,11 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply absorbing constraint
   //! Directions can take values between 0 and Dim * Nphases
-  //! \param[in] dir Direction of absorbing constraint
+  //! \param[in] dir Direction of p-wave propagation in model
   //! \param[in] delta Virtual viscous layer thickness
-  //! \param[in] h_min Characteristic Length
-  //! \param[in] a Equation constant
-  //! \param[in] a Equation constant
+  //! \param[in] h_min Characteristic length (cell height)
+  //! \param[in] a Dimensionless dashpot weight factor, p-wave
+  //! \param[in] b Dimensionless dashpot weight factor, s-wave
   //! \param[in] position Nodal position along boundary
   bool apply_absorbing_constraint(unsigned dir, double delta, double h_min,
                                   double a, double b,

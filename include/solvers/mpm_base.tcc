@@ -967,10 +967,12 @@ void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
         // position
         std::string position =
             constraints.at("position").template get<std::string>();
-        if (position == "side")
-          position_ = mpm::Position::Side;
-        else if (position == "corner")
+        if (position == "corner")
           position_ = mpm::Position::Corner;
+        else if (position == "edge")
+          position_ = mpm::Position::Edge;
+        else if (position == "face")
+          position_ = mpm::Position::Face;
         else
           position_ = mpm::Position::None;
         // Add absorbing constraint to mesh

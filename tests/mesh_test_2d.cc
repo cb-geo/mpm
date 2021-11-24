@@ -1282,26 +1282,26 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
           // Constraint
           absorbing_constraints.emplace_back(
-              std::make_tuple(0, 0, 1, 3, 2, 2, mpm::Position::Side));
+              std::make_tuple(0, 0, 1, 3, 2, 2, mpm::Position::Edge));
           absorbing_constraints.emplace_back(
-              std::make_tuple(1, 1, 2, 4, 1, 1, mpm::Position::Side));
+              std::make_tuple(1, 1, 2, 4, 1, 1, mpm::Position::Edge));
           absorbing_constraints.emplace_back(
-              std::make_tuple(2, 0, 1, 1, 1, 1, mpm::Position::Side));
+              std::make_tuple(2, 0, 1, 1, 1, 1, mpm::Position::Edge));
           absorbing_constraints.emplace_back(
-              std::make_tuple(3, 1, 3, 2, 3, 3, mpm::Position::Side));
+              std::make_tuple(3, 1, 3, 2, 3, 3, mpm::Position::Edge));
 
           REQUIRE(constraints->assign_nodal_absorbing_constraints(
                       absorbing_constraints) == true);
 
           // When constraints fail: invalid direction
           absorbing_constraints.emplace_back(
-              std::make_tuple(3, 2, 3, 2, 3, 3, mpm::Position::Side));
+              std::make_tuple(3, 2, 3, 2, 3, 3, mpm::Position::Edge));
           REQUIRE(constraints->assign_nodal_absorbing_constraints(
                       absorbing_constraints) == false);
 
           // When constraints fail: invalid delta
           absorbing_constraints.emplace_back(
-              std::make_tuple(3, 1, 1, 3, 1, 1, mpm::Position::Side));
+              std::make_tuple(3, 1, 1, 3, 1, 1, mpm::Position::Edge));
           REQUIRE(constraints->assign_nodal_absorbing_constraints(
                       absorbing_constraints) == false);
 

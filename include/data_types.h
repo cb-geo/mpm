@@ -36,9 +36,10 @@ inline double zero() {
 
 //! Position type
 //! None: No position is specified
-//! Side: Nodes along model vertical or horizontal sides
-//! Corner: Nodes at model corner
-enum class Position { None, Side, Corner };
+//! Corner: Nodes at boundary corners
+//! Edge: Nodes along boundary edges
+//! Face: Nodes on boundary faces
+enum class Position { None, Corner, Edge, Face };
 
 }  // namespace mpm
 
