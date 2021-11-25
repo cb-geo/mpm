@@ -1150,7 +1150,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       set_id, friction_constraint) == false);
         }
 
-        // Test assign absorbing constraint 
+        // Test assign absorbing constraint
         SECTION("Check assign absorbing constraints") {
           tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
           node_sets[0] = std::vector<mpm::Index>{0, 2};
