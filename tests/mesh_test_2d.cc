@@ -1150,10 +1150,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       set_id, friction_constraint) == false);
         }
 
+        // Test assign absorbing constraint 
         SECTION("Check assign absorbing constraints") {
           tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
           node_sets[0] = std::vector<mpm::Index>{0, 2};
           node_sets[1] = std::vector<mpm::Index>{1, 3};
+          node_sets[2] = std::vector<mpm::Index>{};
 
           REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
@@ -1168,6 +1170,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           for (double i = 0; i < 4; ++i) {
             REQUIRE_NOTHROW(
                 mesh->node(i)->initialise_property_handle(0, nodal_properties));
+            mesh->node(i)->append_material_id(0);
           }
 
           int set_id = 0;
@@ -1176,11 +1179,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           double h_min = 1;
           double a = 1;
           double b = 1;
+          mpm::Position pos = mpm::Position::Edge;
 
           // Add absorbing constraint to mesh
           auto absorbing_constraint =
               std::make_shared<mpm::AbsorbingConstraint>(set_id, dir, delta,
-                                                         h_min, a, b);
+                                                         h_min, a, b, pos);
           REQUIRE(constraints->assign_nodal_absorbing_constraint(
                       set_id, absorbing_constraint) == true);
 
@@ -1192,13 +1196,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           b = 2;
           // Add absorbing constraint to mesh
           absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
-              set_id, dir, delta, h_min, a, b);
-          REQUIRE(constraints->assign_nodal_absorbing_constraint(
-                      set_id, absorbing_constraint) == true);
-
-          // Add absorbing constraint to all nodes in mesh
-          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
-              set_id, dir, delta, h_min, a, b);
+              set_id, dir, delta, h_min, a, b, pos);
           REQUIRE(constraints->assign_nodal_absorbing_constraint(
                       set_id, absorbing_constraint) == true);
 
@@ -1206,15 +1204,25 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           dir = 3;
           // Add absorbing constraint to mesh
           absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
-              set_id, dir, delta, h_min, a, b);
+              set_id, dir, delta, h_min, a, b, pos);
           REQUIRE(constraints->assign_nodal_absorbing_constraint(
                       set_id, absorbing_constraint) == false);
 
           // When constraints fail: invalid delta
+          dir = 1;
           delta = 0;
           // Add absorbing constraint to mesh
           absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
-              set_id, dir, delta, h_min, a, b);
+              set_id, dir, delta, h_min, a, b, pos);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == false);
+
+          // When constraints fail: empty node set
+          delta = 3;
+          set_id = 2;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b, pos);
           REQUIRE(constraints->assign_nodal_absorbing_constraint(
                       set_id, absorbing_constraint) == false);
         }
@@ -1294,18 +1302,21 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       absorbing_constraints) == true);
 
           // When constraints fail: invalid direction
+          absorbing_constraints.clear();
           absorbing_constraints.emplace_back(
               std::make_tuple(3, 2, 3, 2, 3, 3, mpm::Position::Edge));
           REQUIRE(constraints->assign_nodal_absorbing_constraints(
                       absorbing_constraints) == false);
 
           // When constraints fail: invalid delta
+          absorbing_constraints.clear();
           absorbing_constraints.emplace_back(
               std::make_tuple(3, 1, 1, 3, 1, 1, mpm::Position::Edge));
           REQUIRE(constraints->assign_nodal_absorbing_constraints(
                       absorbing_constraints) == false);
 
           // When constraints fail: invalid position
+          absorbing_constraints.clear();
           absorbing_constraints.emplace_back(
               std::make_tuple(0, 0, 1, 3, 2, 2, mpm::Position::None));
           REQUIRE(constraints->assign_nodal_absorbing_constraints(
