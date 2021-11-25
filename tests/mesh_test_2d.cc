@@ -1194,6 +1194,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           h_min = 12;
           a = 2;
           b = 2;
+          pos = mpm::Position::Corner;
           // Add absorbing constraint to mesh
           absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
               set_id, dir, delta, h_min, a, b, pos);
@@ -1220,6 +1221,15 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // When constraints fail: empty node set
           delta = 3;
           set_id = 2;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b, pos);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == false);
+
+          // When constraints fail: invalid absorbing boundary position
+          set_id = 1;
+          pos = mpm::Position::None;
           // Add absorbing constraint to mesh
           absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
               set_id, dir, delta, h_min, a, b, pos);
