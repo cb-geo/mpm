@@ -8,28 +8,28 @@ Geomechanics MPM uses a `JSON` input file. The following file structure is used.
 {
     "title": "Exmaple Title",
     "mesh": {
-        ...
+        
     },
     "particles":[
-        {...}
+
     ],
     "materials":[
-        {...}
+
     ],
     "material_sets":[
-        {...}
+
     ],
     "external_loading_conditions":{
-        ...
+
     },
     "math_functions": [
-        {...}
+
     ],
     "analysis": {
-        ...
+
     },
     "post_processing": {
-        ...
+
     }
 
 }
@@ -41,23 +41,45 @@ The `mesh` object define the mesh (node and cells) and boundary conditions. The 
 
 ```JSON
 {
-    ...
+
     "mesh":{
         "mesh": "mesh.txt",
         "entity_sets": "entity_sets.json",
-        "boundary_conditions":{
-            ...
-        },
         "particles_volumes": "particles-volume.txt",
         "particles_stresses": "particles-stresses.txt",
         "particle_cells": "particles-cells.txt",
+        "boundary_conditions":{
+            "velocity_constraints": [
+                {
+                    "nset_id": 0,
+                    "dir": 1,
+                    "velocity": 0.0
+                }
+            ],
+            "friction_constraints": [
+                {
+                    "nset_id": 1,
+                    "dir" 1,
+                    "sign_n": -1,
+                    "friction" 0.5
+                }
+            ],
+            "nodal_euler_angles": "nodal-euler-angles.txt",
+            "particles_velocity_constraints": [
+                {
+                    "pset_id": 0,
+                    "dir": 0,
+                    "velocity": 0.0
+                }
+            ]
+        },
+        "cell_type": "ED2Q4",
         "isoparametric": false,
         "check_duplicates": false,
-        "cell_type": "ED2Q4",
         "io_type": "Ascii3D",
         "node_type": "N2D"
     },
-    ...
+
 }
 ```
 
@@ -81,36 +103,16 @@ The `mesh` object define the mesh (node and cells) and boundary conditions. The 
 
 Optional boundary conditions include nodal friction constraints, velocity constraints, and Euler angles, as well as particle velocity constraints. 
 
-```
-"boundary_conditions": {
-    "velocity_constraints": [
-        {
-            "nset_id": 0,
-            "dir": 1,
-            "velocity": 0.0
-        }
-    ],
-    "friction_constraints": [
-        {
-            "nset_id": 1,
-            "dir" 1,
-            "sign_n": -1,
-            "friction" 0.5
-        }
-    ],
-    "nodal_euler_angles": "nodal-euler-angles.txt",
-    "particles_velocity_constraints": [
-        {
-            "pset_id": 0,
-            "dir": 0,
-            "velocity": 0.0
-        }
-    ]
-}
-```
-For nodal and velocity constraints, `"nset_id"` and `"pset_id"` correspond to defined sets within the entity sets JSON file; `"dir"` is the direction of the constaint `(0|1|2)`; `"velocity"` is the specified velocity in declared direction.
+For nodal and velocity constraints:
+* `"nset_id"` and `"pset_id"` correspond to defined sets within the entity sets JSON file.
+* `"dir"` is the direction of the constraint `(0|1|2)`.
+* `"velocity"` is the specified velocity in declared direction.
 
-For friction constraints, `"nest_id"` correspond to defined nodal sets within the entity sets JSON file; `"dir"` is the direction of resistance `(0|1|2)`; `"sign_n"` is the sign of the normal vector to the friction plane `(-1|+1)`; `"friction"` is the frictional coefficient. 
+For friction constraints:
+* `"nest_id"` correspond to defined nodal sets within the entity sets JSON file.
+* `"dir"` is the direction of resistance `(0|1|2)`.
+* `"sign_n"` is the sign of the normal vector to the friction plane `(-1|+1)`.
+* `"friction"` is the frictional coefficient. 
 
 ### Cell Type
 
