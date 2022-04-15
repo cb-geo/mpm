@@ -1,4 +1,5 @@
 #include "vtk_writer.h"
+#include <boost/filesystem.hpp>
 
 #ifdef USE_VTK
 
@@ -223,7 +224,7 @@ void VtkWriter::write_mesh(
 void VtkWriter::write_parallel_vtk(const std::string& filename,
                                    const std::string& attribute, int mpi_size,
                                    unsigned step, unsigned max_steps,
-                                   unsigned ncomponents) {
+                                   double step_size, unsigned ncomponents) {
 
   // If the number of components is 1, set as scalar or vector / tensor
   std::string data_type;
@@ -278,6 +279,46 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
   pvtk.open(filename);
   pvtk << ppolydata;
   pvtk.close();
+  
+  // Write parallel grouping VTK file
+
+  std::string output_path = filename.substr(0, filename.find_last_of("\\/"));
+  std::ofstream group_vtk;
+  std::string group_filename = output_path + "/" + attribute + ".pvd";
+  std::string group_data;
+
+  std::stringstream group_parts_file;
+  group_parts_file.str(std::string());
+  group_parts_file << attribute;
+  group_parts_file.fill('0');
+  int digits = log10(max_steps) + 1;
+  group_parts_file.width(digits);
+  group_parts_file << step;
+  group_parts_file << ".pvtp";
+
+  boost::filesystem::path file_check(group_filename);
+  
+  if (boost::filesystem::exists(file_check)) {
+    group_vtk.open(group_filename, std::fstream::app);
+    group_data = "\t<DataSet timestep=\"" + std::to_string(step * step_size) +
+      "\" file=\"./" + group_parts_file.str() + "\"/>\n";
+    group_vtk << group_data;
+  } else {
+    group_vtk.open(group_filename);
+    group_data =
+        "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\" "
+        "byte_order=\"LittleEndian\">\n<Collection>\n\t<DataSet timestep=\"" +
+        std::to_string(step * step_size) + "\" file=\"./" +
+        group_parts_file.str() + "\"/>\n";
+    group_vtk << group_data;
+  }
+
+  if (step == max_steps - 1) {
+    std::string closing = "</Collection>\n</VTKFile>";
+    group_vtk << closing;
+  }
+  
+  group_vtk.close();
 }
 
 #endif
