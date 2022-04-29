@@ -279,7 +279,7 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
   pvtk.open(filename);
   pvtk << ppolydata;
   pvtk.close();
-  
+
   // Write parallel grouping VTK file
 
   std::string output_path = filename.substr(0, filename.find_last_of("\\/"));
@@ -297,11 +297,11 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
   group_parts_file << ".pvtp";
 
   boost::filesystem::path file_check(group_filename);
-  
+
   if (boost::filesystem::exists(file_check)) {
     group_vtk.open(group_filename, std::fstream::app);
     group_data = "\t<DataSet timestep=\"" + std::to_string(step * step_size) +
-      "\" file=\"./" + group_parts_file.str() + "\"/>\n";
+                 "\" file=\"./" + group_parts_file.str() + "\"/>\n";
     group_vtk << group_data;
   } else {
     group_vtk.open(group_filename);
@@ -317,7 +317,7 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
     std::string closing = "</Collection>\n</VTKFile>";
     group_vtk << closing;
   }
-  
+
   group_vtk.close();
 }
 
