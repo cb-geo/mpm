@@ -369,7 +369,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
       (3. * std::pow(Mtc_, 2) * sin(3. / 2. * lode_angle)) / (2. * (3. + Mtc_));
 
   // Compute dtheta / dsigma
-  const Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(stress);
+  const Vector6d dtheta_dsigma = -1. * mpm::materials::dtheta_dsigma(stress);
 
   // dF_dsigma is in compression negative
   const Vector6d dF_dsigma =
