@@ -541,7 +541,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
                                .string();
 
       vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
-                                     max_steps);
+                                     max_steps, dt_);
     }
 #endif
   }
@@ -562,7 +562,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
                                .string();
 
       vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
-                                     max_steps);
+                                     max_steps, dt_);
     }
 #endif
   }
@@ -583,7 +583,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
                                .string();
 
       vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
-                                     max_steps, 9);
+                                     max_steps, dt_, 9);
     }
 #endif
   }
@@ -609,7 +609,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
                                  .string();
         unsigned ncomponents = 1;
         vtk_writer->write_parallel_vtk(parallel_file, phase_attribute, mpi_size,
-                                       step, max_steps, ncomponents);
+                                       step, max_steps, dt_, ncomponents);
       }
 #endif
     }
