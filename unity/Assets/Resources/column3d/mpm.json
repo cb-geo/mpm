@@ -1,0 +1,85 @@
+{
+  "title": "Hydrostatic column",
+  "mesh": {
+    "mesh": "mesh.txt",
+    "entity_sets": "entity_sets.json",
+    "check_duplicates": true,
+    "cell_type": "ED3H8",
+    "isoparametric": false,
+    "io_type": "Ascii3D",
+    "node_type": "N3D",
+    "boundary_conditions": {
+        "velocity_constraints": [
+            {
+                "nset_id" : 0,
+                "dir": 0,
+                "velocity": 0.00
+            },
+            {
+                "nset_id" : 1,
+                "dir": 1,
+                "velocity": 0.00
+            },
+            {
+                "nset_id" : 2,
+                "dir": 2,
+                "velocity": 0.00
+            }
+        ]
+    }
+  },
+  "particles": [
+    {
+      "generator": {
+        "check_duplicates": true,
+        "location": "particles2.txt",
+        "io_type": "Ascii3D",
+        "pset_id": 0,
+        "particle_type": "P3D",
+        "material_id": 0,
+        "type": "file"
+      }
+    }
+  ],
+  "materials": [
+    {
+      "id" : 0,
+      "type": "MohrCoulomb3D",
+      "density": 1800.0,
+      "poisson_ratio": 0.2,
+      "youngs_modulus": 35700,
+      "softening": true,
+      "friction": 20,
+      "dilation": 0,
+      "cohesion": 0.1,
+      "residual_friction": 10,
+      "residual_dilation": 0,
+      "residual_cohesion": 0.1,
+      "peak_pdstrain": 0,
+      "residual_pdstrain": 0.01,
+      "tension_cutoff": 0
+    }  
+  ],
+  "external_loading_conditions": {
+      "gravity": [0, -9.81 , 0]
+  },
+  "analysis": {
+    "type": "MPMExplicit3D",
+    "stress_update": "usl",
+    "locate_particles": false,
+    "dt": 5E-5,
+    "uuid": "column3d",
+    "nsteps": 1E5,
+    "velocity_update": true,
+    "resume": {
+      "resume": false,
+      "uuid": "column3d",
+      "step": 7000
+    }
+  },
+  "post_processing": {
+    "path": "results_gns/",
+    "output_steps": 100,
+    "vtk": ["velocities","displacements"]
+  }
+}
