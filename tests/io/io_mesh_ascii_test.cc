@@ -247,6 +247,63 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
     }
   }
 
+  SECTION("Check acceleration constraints file") {
+    // Vector of acceleration constraints
+    std::vector<std::tuple<mpm::Index, unsigned, double>>
+        acceleration_constraints;
+
+    // Constraint
+    acceleration_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+    acceleration_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+    acceleration_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
+    acceleration_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("acceleration-constraints-2d.txt");
+    // Write particle coordinates
+    for (const auto& acceleration_constraint : acceleration_constraints) {
+      file << std::get<0>(acceleration_constraint) << "\t";
+      file << std::get<1>(acceleration_constraint) << "\t";
+      file << std::get<2>(acceleration_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read acceleration constraints
+    SECTION("Check acceleration constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read constraints from a non-existant file
+      auto constraints = read_mesh->read_acceleration_constraints(
+          "acceleration-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints = read_mesh->read_acceleration_constraints(
+          "acceleration-constraints-2d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == acceleration_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < acceleration_constraints.size(); ++i) {
+        REQUIRE(std::get<0>(constraints.at(i)) ==
+                Approx(std::get<0>(acceleration_constraints.at(i)))
+                    .epsilon(Tolerance));
+        REQUIRE(std::get<1>(constraints.at(i)) ==
+                Approx(std::get<1>(acceleration_constraints.at(i)))
+                    .epsilon(Tolerance));
+        REQUIRE(std::get<2>(constraints.at(i)) ==
+                Approx(std::get<2>(acceleration_constraints.at(i)))
+                    .epsilon(Tolerance));
+      }
+    }
+  }
+
   SECTION("Check friction constraints file") {
     // Vector of friction constraints
     std::vector<std::tuple<mpm::Index, unsigned, int, double>>
@@ -337,7 +394,7 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
-      // Try to read constrtaints from a non-existant file
+      // Try to read forces from a non-existant file
       auto forces = read_mesh->read_forces("forces-missing.txt");
       // Check number of forces
       REQUIRE(forces.size() == 0);
@@ -479,6 +536,54 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
         for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
           REQUIRE(stresses.at(i)[j] ==
                   Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check math function file") {
+    // Vector of math function entries
+    std::array<std::vector<double>, 2> entries;
+
+    // Populate the math function entries
+    for (int i = 0; i < 3; ++i) {
+      entries[0].push_back(0.7 * i);
+      entries[1].push_back(2.2 * i);
+    }
+
+    // Dump the math entries as an input file to be read
+    std::ofstream file;
+    file.open("math-function-2d.csv");
+    // Write math entries for x and fx
+    for (int i = 0; i < 3; ++i)
+      file << entries[0][i] << "," << entries[1][i] << "\n";
+
+    file.close();
+
+    // Check read math funciton file
+    SECTION("Check math function entries") {
+      // Create an io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read math funciton entries from a non-existant file
+      auto math_function_values =
+          io_mesh->read_math_functions("math-function-missing.csv");
+      // Check number of math function entries
+      REQUIRE(math_function_values[0].size() == 0);
+      REQUIRE(math_function_values[1].size() == 0);
+
+      // Check math function reading
+      math_function_values =
+          io_mesh->read_math_functions("math-function-2d.csv");
+      // Check number of entries from math function file
+      REQUIRE(math_function_values[0].size() == entries[0].size());
+      REQUIRE(math_function_values[1].size() == entries[1].size());
+      REQUIRE(math_function_values[0].size() == math_function_values[1].size());
+
+      // Check entry values
+      for (unsigned i = 0; i < 2; ++i) {
+        for (unsigned j = 0; j < entries[0].size(); ++j)
+          REQUIRE(math_function_values[i][j] ==
+                  Approx(entries[i][j]).epsilon(Tolerance));
       }
     }
   }
@@ -740,7 +845,7 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
-      // Try to read constrtaints from a non-existant file
+      // Try to read constraints from a non-existant file
       auto constraints = read_mesh->read_velocity_constraints(
           "velocity-constraints-missing.txt");
       // Check number of constraints
@@ -763,6 +868,63 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         REQUIRE(
             std::get<2>(constraints.at(i)) ==
             Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check acceleration constraints file") {
+    // Vector of particle coordinates
+    std::vector<std::tuple<mpm::Index, unsigned, double>>
+        acceleration_constraints;
+
+    // Constraint
+    acceleration_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+    acceleration_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+    acceleration_constraints.emplace_back(std::make_tuple(2, 2, -12.5));
+    acceleration_constraints.emplace_back(std::make_tuple(3, 0, 0.0));
+
+    // Dump constratints as an input file to be read
+    std::ofstream file;
+    file.open("acceleration-constraints-3d.txt");
+    // Write particle coordinates
+    for (const auto& acceleration_constraint : acceleration_constraints) {
+      file << std::get<0>(acceleration_constraint) << "\t";
+      file << std::get<1>(acceleration_constraint) << "\t";
+      file << std::get<2>(acceleration_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read acceleration constraints
+    SECTION("Check acceleration constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read constraints from a non-existant file
+      auto constraints = read_mesh->read_acceleration_constraints(
+          "acceleration-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints = read_mesh->read_acceleration_constraints(
+          "acceleration-constraints-3d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == acceleration_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < acceleration_constraints.size(); ++i) {
+        REQUIRE(std::get<0>(constraints.at(i)) ==
+                Approx(std::get<0>(acceleration_constraints.at(i)))
+                    .epsilon(Tolerance));
+        REQUIRE(std::get<1>(constraints.at(i)) ==
+                Approx(std::get<1>(acceleration_constraints.at(i)))
+                    .epsilon(Tolerance));
+        REQUIRE(std::get<2>(constraints.at(i)) ==
+                Approx(std::get<2>(acceleration_constraints.at(i)))
+                    .epsilon(Tolerance));
       }
     }
   }
@@ -1000,6 +1162,54 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
           REQUIRE(stresses.at(i)[j] ==
                   Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check math function file") {
+    // Vector of math function entries
+    std::array<std::vector<double>, 2> entries;
+
+    // Populate the math function entries
+    for (int i = 0; i < 4; ++i) {
+      entries[0].push_back(0.3 * i);
+      entries[1].push_back(2.6 * i);
+    }
+
+    // Dump the math entries as an input file to be read
+    std::ofstream file;
+    file.open("math-function-3d.csv");
+    // Write math entries for x and fx
+    for (int i = 0; i < 4; ++i)
+      file << entries[0][i] << "," << entries[1][i] << "\n";
+
+    file.close();
+
+    // Check read math funciton file
+    SECTION("Check math function entries") {
+      // Create an io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read math funciton entries from a non-existant file
+      auto math_function_values =
+          io_mesh->read_math_functions("math-function-missing.csv");
+      // Check number of math function entries
+      REQUIRE(math_function_values[0].size() == 0);
+      REQUIRE(math_function_values[1].size() == 0);
+
+      // Check math function reading
+      math_function_values =
+          io_mesh->read_math_functions("math-function-3d.csv");
+      // Check number of entries from math function file
+      REQUIRE(math_function_values[0].size() == entries[0].size());
+      REQUIRE(math_function_values[1].size() == entries[1].size());
+      REQUIRE(math_function_values[0].size() == math_function_values[1].size());
+
+      // Check entry values
+      for (unsigned i = 0; i < 2; ++i) {
+        for (unsigned j = 0; j < entries[0].size(); ++j)
+          REQUIRE(math_function_values[i][j] ==
+                  Approx(entries[i][j]).epsilon(Tolerance));
       }
     }
   }

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "acceleration_constraint.h"
 #include "friction_constraint.h"
 #include "logger.h"
 #include "mesh.h"
@@ -33,6 +34,21 @@ class Constraints {
   bool assign_nodal_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
+
+  //! Assign nodal acceleration constraints
+  //! \param[in] setid Node set id
+  //! \param[in] acceleration_constraints Accelerartion constraint at node, dir,
+  //! acceleration
+  bool assign_nodal_acceleration_constraint(
+      int set_id,
+      const std::shared_ptr<mpm::AccelerationConstraint>& constraint);
+
+  //! Assign acceleartion constraints to nodes
+  //! \param[in] acceleration_constraints Constraint at node, dir, and
+  //! acceleration
+  bool assign_nodal_acceleration_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          acceleration_constraints);
 
   //! Assign nodal frictional constraints
   //! \param[in] setid Node set id
