@@ -24,6 +24,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
+#include "absorbing_constraint.h"
 #include "cell.h"
 #include "factory.h"
 #include "friction_constraint.h"

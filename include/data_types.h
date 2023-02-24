@@ -34,6 +34,13 @@ inline double zero() {
   return 0.;
 }
 
+//! Position type
+//! None: No position is specified
+//! Corner: Nodes at boundary corners
+//! Edge: Nodes along boundary edges
+//! Face: Nodes on boundary faces
+enum class Position { None, Corner, Edge, Face };
+
 }  // namespace mpm
 
 #endif  // MPM_DATA_TYPES_H_

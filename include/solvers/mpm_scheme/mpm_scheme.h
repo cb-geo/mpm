@@ -57,6 +57,9 @@ class MPMScheme {
       const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
       unsigned step, bool concentrated_nodal_forces);
 
+  //! Assign relevant properties for absorbing boundary
+  virtual inline void absorbing_boundary_properties();
+
   //! Compute acceleration velocity position
   //! \param[in] velocity_update Velocity or acceleration update flag
   //! \param[in] phase Phase of particle

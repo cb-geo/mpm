@@ -1261,6 +1261,67 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                       set_id, friction_constraint) == false);
         }
 
+        // Test assign absorbing constraint
+        SECTION("Check assign absorbing constraints") {
+          tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+          node_sets[0] = std::vector<mpm::Index>{0, 2};
+          node_sets[1] = std::vector<mpm::Index>{1, 3};
+          node_sets[2] = std::vector<mpm::Index>{};
+
+          REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
+          // Assign nodal properties
+          auto nodal_properties = std::make_shared<mpm::NodalProperties>();
+          nodal_properties->create_property("density", 1, 1);
+          nodal_properties->create_property("wave_velocities", Dim, 1);
+          nodal_properties->create_property("displacements", Dim, 1);
+          for (double i = 0; i < 4; ++i) {
+            REQUIRE_NOTHROW(
+                mesh->node(i)->initialise_property_handle(0, nodal_properties));
+            mesh->node(i)->append_material_id(0);
+          }
+
+          int set_id = 0;
+          unsigned dir = 0;
+          double delta = 1;
+          double h_min = 1;
+          double a = 1;
+          double b = 1;
+          mpm::Position pos = mpm::Position::Edge;
+
+          // Add absorbing constraint to mesh
+          auto absorbing_constraint =
+              std::make_shared<mpm::AbsorbingConstraint>(set_id, dir, delta,
+                                                         h_min, a, b, pos);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == true);
+
+          pos = mpm::Position::Corner;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b, pos);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == true);
+
+          pos = mpm::Position::Face;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b, pos);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == true);
+
+          // When constraints fail: invalid absorbing boundary position
+          pos = mpm::Position::None;
+          // Add absorbing constraint to mesh
+          absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+              set_id, dir, delta, h_min, a, b, pos);
+          REQUIRE(constraints->assign_nodal_absorbing_constraint(
+                      set_id, absorbing_constraint) == false);
+        }
+
         // Test assign velocity constraints to nodes
         SECTION("Check assign velocity constraints to nodes") {
           // Vector of particle coordinates

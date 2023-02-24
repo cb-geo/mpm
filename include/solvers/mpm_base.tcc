@@ -236,6 +236,9 @@ void mpm::MPMBase<Tdim>::initialise_mesh() {
   // Read and assign friction constraints
   this->nodal_frictional_constraints(mesh_props, mesh_io);
 
+  // Read and assign absorbing constraintes
+  this->nodal_absorbing_constraints(mesh_props, mesh_io);
+
   // Initialise cell
   auto cells_begin = std::chrono::steady_clock::now();
   // Shape function name
@@ -934,6 +937,78 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
   } catch (std::exception& exception) {
     console_->warn("#{}: Friction conditions are undefined {} ", __LINE__,
                    exception.what());
+  }
+}
+
+// Assign nodal absorbing constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_absorbing_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign absorbing constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("absorbing_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      // Iterate over absorbing constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["absorbing_constraints"]) {
+        // Set id
+        int nset_id = constraints.at("nset_id").template get<int>();
+        // Direction
+        unsigned dir = constraints.at("dir").template get<unsigned>();
+        // Delta
+        double delta = constraints.at("delta").template get<double>();
+        // h_min
+        double h_min = constraints.at("h_min").template get<double>();
+        // a
+        double a = constraints.at("a").template get<double>();
+        // b
+        double b = constraints.at("b").template get<double>();
+        // position
+        std::string position =
+            constraints.at("position").template get<std::string>();
+        if (position == "corner")
+          position_ = mpm::Position::Corner;
+        else if (position == "edge")
+          position_ = mpm::Position::Edge;
+        else if (position == "face")
+          position_ = mpm::Position::Face;
+        else
+          position_ = mpm::Position::None;
+        // Add absorbing constraint to mesh
+        auto absorbing_constraint = std::make_shared<mpm::AbsorbingConstraint>(
+            nset_id, dir, delta, h_min, a, b, position_);
+        bool absorbing_constraints =
+            constraints_->assign_nodal_absorbing_constraint(
+                nset_id, absorbing_constraint);
+        if (!absorbing_constraints)
+          throw std::runtime_error(
+              "Nodal absorbing constraint is not properly assigned");
+        absorbing_boundary_ = true;
+        absorbing_nset_id_.emplace_back(nset_id);
+        absorbing_constraint_.emplace_back(absorbing_constraint);
+      }
+    } else
+      throw std::runtime_error("Absorbing constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Absorbing conditions are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Apply nodal absorbing constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_absorbing_constraints() {
+  for (int i = 0; i < absorbing_nset_id_.size(); i++) {
+    auto nset_id_ = absorbing_nset_id_.at(i);
+    auto a_constraint_ = absorbing_constraint_.at(i);
+    bool absorbing_constraints =
+        constraints_->assign_nodal_absorbing_constraint(nset_id_,
+                                                        a_constraint_);
+    if (!absorbing_constraints)
+      throw std::runtime_error(
+          "Nodal absorbing constraint is not properly assigned");
   }
 }
 

@@ -105,3 +105,83 @@ bool mpm::Constraints<Tdim>::assign_nodal_friction_constraints(
   }
   return status;
 }
+
+//! Apply absorbing constraints to nodes
+template <unsigned Tdim>
+bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraint(
+    int nset_id,
+    const std::shared_ptr<mpm::AbsorbingConstraint>& absorbing_constraint) {
+  bool status = true;
+  try {
+    // int set_id = absorbing_constraint->setid();
+    int set_id = nset_id;
+    auto nset = mesh_->nodes(set_id);
+    if (nset.size() == 0)
+      throw std::runtime_error(
+          "Node set is empty for application of absorbing constraints");
+    unsigned dir = absorbing_constraint->dir();
+    double delta = absorbing_constraint->delta();
+    double h_min = absorbing_constraint->h_min();
+    double a = absorbing_constraint->a();
+    double b = absorbing_constraint->b();
+    mpm::Position position = absorbing_constraint->position();
+    if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b))
+      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+        if (!(*nitr)->apply_absorbing_constraint(dir, delta, h_min, a, b,
+                                                 position))
+          throw std::runtime_error(
+              "Failed to apply absorbing constraint at node");
+      }
+    else
+      throw std::runtime_error("Invalid value for delta");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign absorbing constraints to nodes
+template <unsigned Tdim>
+bool mpm::Constraints<Tdim>::assign_nodal_absorbing_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double, double, double,
+                                 double, mpm::Position>>&
+        absorbing_constraints) {
+  bool status = true;
+  try {
+    for (const auto& absorbing_constraint : absorbing_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(absorbing_constraint);
+      // Direction
+      unsigned dir = std::get<1>(absorbing_constraint);
+      // Delta
+      double delta = std::get<2>(absorbing_constraint);
+      // h_min
+      double h_min = std::get<3>(absorbing_constraint);
+      // a
+      double a = std::get<4>(absorbing_constraint);
+      // b
+      double b = std::get<5>(absorbing_constraint);
+      // Position
+      mpm::Position position = std::get<6>(absorbing_constraint);
+      // delta check
+      if (delta >= h_min / (2 * a) and delta >= h_min / (2 * b)) {
+        if (position == mpm::Position::Corner or
+            position == mpm::Position::Edge or
+            position == mpm::Position::Face) {
+          // Apply constraint
+          if (!mesh_->node(nid)->apply_absorbing_constraint(dir, delta, h_min,
+                                                            a, b, position))
+            throw std::runtime_error(
+                "Nodal absorbing constraints assignment failed");
+        } else
+          throw std::runtime_error("Invalid position");
+      } else
+        throw std::runtime_error("Invalid value for delta");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
