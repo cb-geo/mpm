@@ -156,8 +156,25 @@ class ParticleBase {
   //! Map multimaterial displacements to nodes
   virtual void map_multimaterial_displacements_to_nodes() noexcept = 0;
 
+  //! Map multimaterial domain to nodes
+  virtual void map_multimaterial_domain_to_nodes() noexcept = 0;
+
   //! Map multimaterial domain gradients to nodes
   virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
+
+  //! Map multimaterial rigid constraint
+  virtual void map_multimaterial_rigid_constraint() noexcept = 0;
+
+  //! Map multimaterial body force
+  //! \param[in] pgravity Gravity
+  virtual void map_multimaterial_body_force(
+      const VectorDim& pgravity) noexcept = 0;
+
+  //! Map multimaterial traction force
+  virtual void map_multimaterial_traction_force() noexcept = 0;
+
+  //! Map multimaterial internal force
+  virtual void map_multimaterial_internal_force() noexcept = 0;
 
   //! Assign material
   virtual bool assign_material(const std::shared_ptr<Material<Tdim>>& material,
@@ -202,7 +219,7 @@ class ParticleBase {
   virtual double pressure(unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
   //! Compute strain
-  virtual void compute_strain(double dt) noexcept = 0;
+  virtual void compute_strain(double dt, bool interface) noexcept = 0;
 
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
@@ -260,6 +277,12 @@ class ParticleBase {
   //! Compute updated position
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Compute updated position of the particle from contact nodes
+  //! \param[in] dt Analysis time step
+  //! \param[in] velocity_update Update particle velocity from nodal vel
+  virtual void compute_contact_updated_position(
+      double dt, bool velocity_update) noexcept = 0;
 
   //! Return a state variable
   virtual double state_variable(
@@ -324,6 +347,8 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
+  //! Constrained status
+  bool constrained_{false};
   //! Reference coordinates (in a cell)
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell

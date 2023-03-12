@@ -9,20 +9,15 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSL<Tdim>>(mesh_, dt_);
   else
     mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSF<Tdim>>(mesh_, dt_);
-
-  //! Interface scheme
-  if (this->interface_)
-    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_);
-  else
-    contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
 }
 
 //! MPM Explicit compute stress strain
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
   // Iterate over each particle to calculate strain
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1,
+                dt_, interface_));
 
   // Iterate over each particle to update particle volume
   mesh_->iterate_over_particles(std::bind(
@@ -73,7 +68,19 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
   // Interface
-  interface_ = io_->analysis_bool("interface");
+  if (analysis_.find("interface") != analysis_.end())
+    interface_ = analysis_["interface"]["interface"].template get<bool>();
+
+  // Interface scheme
+  if (interface_) {
+    double friction = analysis_["interface"]["friction"].template get<double>();
+    std::string normal_type =
+        analysis_["interface"]["normal_type"].template get<std::string>();
+    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_, friction,
+                                                            normal_type);
+  } else {
+    contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
+  }
 
   // Initialise material
   this->initialise_materials();
@@ -146,22 +153,37 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Mass momentum and compute velocity at nodes
     mpm_scheme_->compute_nodal_kinematics(phase);
 
-    // Map material properties to nodes
-    contact_->compute_contact_forces();
+    // Compute mass, momentum and velocity at the contact nodes
+    contact_->compute_nodal_kinematics();
 
     // Update stress first
-    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_,
+                                          interface_);
 
     // Compute forces
     mpm_scheme_->compute_forces(gravity_, phase, step_,
                                 set_node_concentrated_force_);
 
+    // Compute internal and external forces at contact nodes
+    contact_->compute_contact_forces(gravity_, phase, (step_ * dt_),
+                                     set_node_concentrated_force_);
+
     // Particle kinematics
-    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
-                                             damping_factor_);
+    mpm_scheme_->compute_particle_kinematics(phase, "Cundall", damping_factor_);
+
+    // Nodal kinematics at contact nodes
+    contact_->compute_contact_kinematics(dt_);
+
+    // Compute particle updated position
+    if (interface_) {
+      contact_->update_particles_contact(dt_, velocity_update_);
+    } else {
+      mpm_scheme_->update_particles(velocity_update_);
+    }
 
     // Update Stress Last
-    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_,
+                                           interface_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);

@@ -28,20 +28,26 @@ class MPMScheme {
   //! Compute stress and strain
   //! \param[in] phase Phase to smooth pressure
   //! \param[in] pressure_smoothing Enable or disable pressure smoothing
+  //! \param[in] interface Enable or disable interface
   virtual inline void compute_stress_strain(unsigned phase,
-                                            bool pressure_smoothing);
+                                            bool pressure_smoothing,
+                                            bool interface);
 
   //! Precompute stress and strain (empty call)
   //! \param[in] phase Phase to smooth pressure
   //! \param[in] pressure_smoothing Enable or disable pressure smoothing
+  //! \param[in] interface Enable or disable interface
   virtual inline void precompute_stress_strain(unsigned phase,
-                                               bool pressure_smoothing) = 0;
+                                               bool pressure_smoothing,
+                                               bool interface) = 0;
 
   //! Postcompute stress and strain (empty call)
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing
+  //! \param[in] interface Enable or disable interface
   virtual inline void postcompute_stress_strain(unsigned phase,
-                                                bool pressure_smoothing) = 0;
+                                                bool pressure_smoothing,
+                                                bool interface) = 0;
 
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
@@ -58,13 +64,15 @@ class MPMScheme {
       unsigned step, bool concentrated_nodal_forces);
 
   //! Compute acceleration velocity position
-  //! \param[in] velocity_update Velocity or acceleration update flag
   //! \param[in] phase Phase of particle
   //! \param[in] damping_type Type of damping
   //! \param[in] damping_factor Value of critical damping
   virtual inline void compute_particle_kinematics(
-      bool velocity_update, unsigned phase, const std::string& damping_type,
-      double damping_factor);
+      unsigned phase, const std::string& damping_type, double damping_factor);
+
+  //! Update particles
+  //! \param[in] velocity_update Velocity or acceleration update flag
+  virtual inline void update_particles(bool velocity_update);
 
   //! Compute particle location
   //! \param[in] locate_particles Flag to enable locate particles, if set to
