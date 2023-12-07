@@ -70,7 +70,19 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
                                // Theta
                                {"theta", 0.},
                                // Plastic deviatoric strain
-                               {"pdstrain", 0.}};
+                               {"pdstrain", 0.},
+                               // Elastic energy
+                               {"E_el", 0.},
+                               // Plastic work
+                               {"W_pl", 0.},
+                               // Flag for current failure because of tensile stress
+                               {"tensile_fail_curr", 0},
+                               // Flag for current failure because of shear stress
+                               {"shear_fail_curr", 0},
+                               // Flag for past or current failure because of tensile stress
+                               {"tensile_fail", 0},
+                               // Flag for past or current failure because of shear stress
+                               {"shear_fail", 0}};
   return state_vars;
 }
 
@@ -78,7 +90,7 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
 template <unsigned Tdim>
 std::vector<std::string> mpm::MohrCoulomb<Tdim>::state_variables() const {
   const std::vector<std::string> state_vars = {
-      "phi", "psi", "cohesion", "epsilon", "rho", "theta", "pdstrain"};
+      "phi", "psi", "cohesion", "epsilon", "rho", "theta", "pdstrain", "E_el", "W_pl", "tensile_fail_curr", "shear_fail_curr", "tensile_fail", "shear_fail"};
   return state_vars;
 }
 
@@ -392,10 +404,21 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   auto yield_type = this->compute_yield_state(&yield_function, (*state_vars));
   // Initialise value of yield function based on stress
   double yield{std::numeric_limits<double>::max()};
-  if (yield_type == mpm::mohrcoulomb::FailureState::Tensile)
+  if (yield_type == mpm::mohrcoulomb::FailureState::Tensile){
     yield = yield_function(0);
-  if (yield_type == mpm::mohrcoulomb::FailureState::Shear)
+    (*state_vars).at("tensile_fail_curr") = 1;
+  }
+  else (*state_vars).at("tensile_fail_curr") = 0;
+
+  if (yield_type == mpm::mohrcoulomb::FailureState::Shear){
     yield = yield_function(1);
+    (*state_vars).at("shear_fail_curr") = 1;
+  }
+  else (*state_vars).at("shear_fail_curr") = 0;
+
+  (*state_vars).at("tensile_fail") = (*state_vars).at("tensile_fail") || (*state_vars).at("tensile_fail_curr");
+  (*state_vars).at("shear_fail") = (*state_vars).at("shear_fail") || (*state_vars).at("shear_fail_curr");
+
   // Compute plastic multiplier based on stress input (Lambda)
   double softening = 0.;
   double dp_dq = 0.;
@@ -460,6 +483,18 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_stress_invariants(updated_stress, state_vars);
   // Update plastic deviatoric strain
   (*state_vars).at("pdstrain") += dpdstrain;
+
+  // Update elastic energy
+  Vector6d Id({1, 1, 1, 0, 0, 0}); // Identity in Voigt notation
+  Vector6d dstress = updated_stress - stress; // Stress increment
+  double tr_dsig = dstress(0) + dstress(1) + dstress(2); // Trace of the stress increment tensor
+  Vector6d deps_el = ((1+poisson_ratio_)*dstress - poisson_ratio_*tr_dsig*Id) / youngs_modulus_; // Elastic deformation increment (only true strain coefficients)
+  Vector6d strain_coefs({1, 1, 1, 2, 2, 2}); // coefficients necessary below
+  (*state_vars).at("E_el") += updated_stress.cwiseProduct(deps_el.cwiseProduct(strain_coefs)).sum()*ptr->volume(); // with 2*sigma_xy*eps_xy + .. on the out-of-diagonal terms, this is the correct expression sigma_ij:depsilon^el_ij (times volume)
+
+  // Update plastic work
+  Vector6d deps_pl = dstrain - deps_el.cwiseProduct(strain_coefs); // Plastic deformation increment in Voigt notation (with engineering strain coefficents)
+  (*state_vars).at("W_pl") += updated_stress.cwiseProduct(deps_pl).sum()*ptr->volume();
 
   return updated_stress;
 }
