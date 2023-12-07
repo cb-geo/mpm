@@ -117,9 +117,19 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
       REQUIRE(state_variables.at("theta") == Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("pdstrain") == Approx(0.).epsilon(Tolerance));
 
-      const std::vector<std::string> state_vars = {
-          "phi", "psi", "cohesion", "epsilon", "rho", "theta", "pdstrain", "E_el",
-          "W_pl", "tensile_fail_curr", "shear_fail_curr", "tensile_fail", "shear_fail"};
+      const std::vector<std::string> state_vars = {"phi",
+                                                   "psi",
+                                                   "cohesion",
+                                                   "epsilon",
+                                                   "rho",
+                                                   "theta",
+                                                   "pdstrain",
+                                                   "E_el",
+                                                   "W_pl",
+                                                   "tensile_fail_curr",
+                                                   "shear_fail_curr",
+                                                   "tensile_fail",
+                                                   "shear_fail"};
       auto state_vars_test = material->state_variables();
       REQUIRE(state_vars == state_vars_test);
     }
