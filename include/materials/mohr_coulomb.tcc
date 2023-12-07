@@ -485,11 +485,13 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   (*state_vars).at("pdstrain") += dpdstrain;
 
   // Update elastic energy
-  Vector6d Id({1, 1, 1, 0, 0, 0}); // Identity in Voigt notation
+  Vector6d Id; // Identity in Voigt notation
+  Id << 1, 1, 1, 0, 0, 0; // the direct brace initialization would require a recent (e.g., Ubuntu 22.04) environment
   Vector6d dstress = updated_stress - stress; // Stress increment
   double tr_dsig = dstress(0) + dstress(1) + dstress(2); // Trace of the stress increment tensor
   Vector6d deps_el = ((1+poisson_ratio_)*dstress - poisson_ratio_*tr_dsig*Id) / youngs_modulus_; // Elastic deformation increment (only true strain coefficients)
-  Vector6d strain_coefs({1, 1, 1, 2, 2, 2}); // coefficients necessary below
+  Vector6d strain_coefs; // coefficients necessary below
+  strain_coefs << 1, 1, 1, 2, 2, 2;
   (*state_vars).at("E_el") += updated_stress.cwiseProduct(deps_el.cwiseProduct(strain_coefs)).sum()*ptr->volume(); // with 2*sigma_xy*eps_xy + .. on the out-of-diagonal terms, this is the correct expression sigma_ij:depsilon^el_ij (times volume)
 
   // Update plastic work
