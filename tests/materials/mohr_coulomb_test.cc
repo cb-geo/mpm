@@ -116,6 +116,12 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
       REQUIRE(state_variables.at("rho") == Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("theta") == Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("pdstrain") == Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("e_el") == 0.);
+      REQUIRE(state_variables.at("w_pl") == 0.);
+      REQUIRE(state_variables.at("tensile_fail_curr") == 0);
+      REQUIRE(state_variables.at("tensile_fail") == 0);
+      REQUIRE(state_variables.at("shear_fail_curr") == 0);
+      REQUIRE(state_variables.at("shear_fail") == 0);
 
       const std::vector<std::string> state_vars = {"phi",
                                                    "psi",
@@ -124,8 +130,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
                                                    "rho",
                                                    "theta",
                                                    "pdstrain",
-                                                   "E_el",
-                                                   "W_pl",
+                                                   "e_el",
+                                                   "w_pl",
                                                    "tensile_fail_curr",
                                                    "shear_fail_curr",
                                                    "tensile_fail",
@@ -566,6 +572,11 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
       REQUIRE(updated_stress(3) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
+      // Check whether failure flag state variables (after being computed in compute_stress) are correct
+      REQUIRE(state_variables.at("shear_fail") == 1);
+      REQUIRE(state_variables.at("shear_fail_curr") == 1);
+      REQUIRE(state_variables.at("tensile_fail") == 0);
+      REQUIRE(state_variables.at("tensile_fail_curr") == 0);
     }
   }
 }
@@ -2866,6 +2877,10 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check plastic strain
       REQUIRE(state_variables.at("pdstrain") ==
               Approx(0.0007751567).epsilon(Tolerance));
+      // In the present workflow, all failure flags remain at 0 ?...
+      // Check plastic work and elastic energy
+      REQUIRE(state_variables.at("e_el") == Approx(15.33614017380).epsilon(Tolerance));
+      REQUIRE(state_variables.at("w_pl") == Approx(4.5135130001).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain >  pdstrain_residual)
@@ -3373,6 +3388,14 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check plastic strain
       REQUIRE(state_variables.at("pdstrain") ==
               Approx(0.0002112522).epsilon(Tolerance));
+      // Check failure flags
+      REQUIRE(state_variables.at("shear_fail") == 1);
+      REQUIRE(state_variables.at("shear_fail_curr") == 1);
+      REQUIRE(state_variables.at("tensile_fail") == 0);
+      REQUIRE(state_variables.at("tensile_fail_curr") == 0);
+      // Check plastic work and elastic energy
+      REQUIRE(state_variables.at("e_el") == Approx(1.153960429).epsilon(Tolerance));
+      REQUIRE(state_variables.at("w_pl") == Approx(1.0964114497).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain >  pdstrain_residual)

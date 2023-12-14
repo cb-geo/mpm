@@ -71,10 +71,10 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
                                {"theta", 0.},
                                // Plastic deviatoric strain
                                {"pdstrain", 0.},
-                               // Elastic energy
-                               {"E_el", 0.},
-                               // Plastic work
-                               {"W_pl", 0.},
+                               // Elastic energy (volume-specific)
+                               {"e_el", 0.},
+                               // Plastic work (volume-specific)
+                               {"w_pl", 0.},
                                // Flag for current failure because of tensile stress
                                {"tensile_fail_curr", 0},
                                // Flag for current failure because of shear stress
@@ -90,7 +90,7 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
 template <unsigned Tdim>
 std::vector<std::string> mpm::MohrCoulomb<Tdim>::state_variables() const {
   const std::vector<std::string> state_vars = {
-      "phi", "psi", "cohesion", "epsilon", "rho", "theta", "pdstrain", "E_el", "W_pl", "tensile_fail_curr", "shear_fail_curr", "tensile_fail", "shear_fail"};
+      "phi", "psi", "cohesion", "epsilon", "rho", "theta", "pdstrain", "e_el", "w_pl", "tensile_fail_curr", "shear_fail_curr", "tensile_fail", "shear_fail"};
   return state_vars;
 }
 
@@ -492,11 +492,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   Vector6d deps_el = ((1+poisson_ratio_)*dstress - poisson_ratio_*tr_dsig*Id) / youngs_modulus_; // Elastic deformation increment (only true strain coefficients)
   Vector6d strain_coefs; // coefficients necessary below
   strain_coefs << 1, 1, 1, 2, 2, 2;
-  (*state_vars).at("E_el") += updated_stress.cwiseProduct(deps_el.cwiseProduct(strain_coefs)).sum()*ptr->volume(); // with 2*sigma_xy*eps_xy + .. on the out-of-diagonal terms, this is the correct expression sigma_ij:depsilon^el_ij (times volume)
+  (*state_vars).at("e_el") += updated_stress.cwiseProduct(deps_el.cwiseProduct(strain_coefs)).sum(); // with 2*sigma_xy*eps_xy + .. on the out-of-diagonal terms, this is the correct expression sigma_ij:depsilon^el_ij
 
   // Update plastic work
   Vector6d deps_pl = dstrain - deps_el.cwiseProduct(strain_coefs); // Plastic deformation increment in Voigt notation (with engineering strain coefficents)
-  (*state_vars).at("W_pl") += updated_stress.cwiseProduct(deps_pl).sum()*ptr->volume();
+  (*state_vars).at("w_pl") += updated_stress.cwiseProduct(deps_pl).sum();
 
   return updated_stress;
 }
