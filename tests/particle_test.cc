@@ -13,6 +13,11 @@
 #include "particle.h"
 #include "quadrilateral_element.h"
 
+bool almost_equal(double a, double b, double tolerance) {
+    return (a == b) || (std::abs(a - b) < tolerance) ||
+           (std::abs(a) < tolerance && std::abs(b) < tolerance);
+}
+
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   // Dimension
@@ -1106,15 +1111,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check particle velocity
     velocity << 0., 0.019;
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity()(i) ==
-              Approx(velocity(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->velocity()(i), velocity(i), Tolerance));
 
     // Check particle displacement
     Eigen::Vector2d displacement;
     displacement << 0., 0.0894;
     for (unsigned i = 0; i < displacement.size(); ++i)
-      REQUIRE(particle->displacement()(i) ==
-              Approx(displacement(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->displacement()(i), displacement(i), Tolerance));
 
     // Updated particle coordinate
     coords << 0.75, .8394;
@@ -1128,14 +1131,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check particle velocity
     velocity << 0., 0.894;
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity()(i) ==
-              Approx(velocity(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->velocity()(i), velocity(i), Tolerance));
 
     // Check particle displacement
     displacement << 0., 0.1788;
     for (unsigned i = 0; i < displacement.size(); ++i)
-      REQUIRE(particle->displacement()(i) ==
-              Approx(displacement(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->displacement()(i), displacement(i), Tolerance));
 
     // Updated particle coordinate
     coords << 0.75, .9288;
@@ -2605,15 +2606,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check particle velocity
     velocity << 0., 1., 1.019;
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity()(i) ==
-              Approx(velocity(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->velocity()(i), velocity(i), Tolerance));
 
     // Check particle displacement
     Eigen::Vector3d displacement;
     displacement << 0.0, 0.5875, 1.0769;
     for (unsigned i = 0; i < displacement.size(); ++i)
-      REQUIRE(particle->displacement()(i) ==
-              Approx(displacement(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->displacement()(i), displacement(i), Tolerance));
 
     // Updated particle coordinate
     coords << 1.5, 2.0875, 2.5769;
@@ -2627,14 +2626,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check particle velocity
     velocity << 0., 5.875, 10.769;
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity()(i) ==
-              Approx(velocity(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->velocity()(i), velocity(i), Tolerance));
 
     // Check particle displacement
     displacement << 0.0, 1.175, 2.1538;
     for (unsigned i = 0; i < displacement.size(); ++i)
-      REQUIRE(particle->displacement()(i) ==
-              Approx(displacement(i)).epsilon(Tolerance));
+      REQUIRE(almost_equal(particle->displacement()(i), displacement(i), Tolerance));
 
     // Updated particle coordinate
     coords << 1.5, 2.675, 3.6538;

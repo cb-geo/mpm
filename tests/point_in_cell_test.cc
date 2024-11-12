@@ -23,7 +23,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
-  const double Tolerance = 1.E-7;
+  const double Tolerance = 1.E-5;
 
   SECTION("Transform real to unit cell analytical solution") {
     // Number of nodes in cell

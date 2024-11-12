@@ -1,218 +1,129 @@
-//
-// Copyright(c) 2015 Gabi Melman.
+// Copyright(c) 2015-present, Gabi Melman & spdlog contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
-//
 
 #pragma once
 
-// Loggers registy of unique name->logger pointer
-// An attempt to create a logger with an already existing name will be ignored
+// Loggers registry of unique name->logger pointer
+// An attempt to create a logger with an already existing name will result with spdlog_ex exception.
 // If user requests a non existing logger, nullptr will be returned
 // This class is thread safe
 
-#include "spdlog/common.h"
-#include "spdlog/details/periodic_worker.h"
-#include "spdlog/logger.h"
+#include <spdlog/common.h>
+#include <spdlog/details/periodic_worker.h>
 
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
 namespace spdlog {
+class logger;
+
 namespace details {
 class thread_pool;
 
-class registry
-{
+class SPDLOG_API registry {
 public:
+    using log_levels = std::unordered_map<std::string, level::level_enum>;
     registry(const registry &) = delete;
     registry &operator=(const registry &) = delete;
 
-    void register_logger(std::shared_ptr<logger> new_logger)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        auto logger_name = new_logger->name();
-        throw_if_exists_(logger_name);
-        loggers_[logger_name] = new_logger;
-    }
+    void register_logger(std::shared_ptr<logger> new_logger);
+    void initialize_logger(std::shared_ptr<logger> new_logger);
+    std::shared_ptr<logger> get(const std::string &logger_name);
+    std::shared_ptr<logger> default_logger();
 
-    void register_and_init(std::shared_ptr<logger> new_logger)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        auto logger_name = new_logger->name();
-        throw_if_exists_(logger_name);
+    // Return raw ptr to the default logger.
+    // To be used directly by the spdlog default api (e.g. spdlog::info)
+    // This make the default API faster, but cannot be used concurrently with set_default_logger().
+    // e.g do not call set_default_logger() from one thread while calling spdlog::info() from
+    // another.
+    logger *get_default_raw();
 
-        // set the global formatter pattern
-        new_logger->set_formatter(formatter_->clone());
+    // set default logger and add it to the registry if not registered already.
+    // default logger is stored in default_logger_ (for faster retrieval) and in the loggers_ map.
+    // Note: Make sure to unregister it when no longer needed or before calling again with a new
+    // logger.
+    void set_default_logger(std::shared_ptr<logger> new_default_logger);
 
-        if (err_handler_)
-        {
-            new_logger->set_error_handler(err_handler_);
-        }
+    void set_tp(std::shared_ptr<thread_pool> tp);
 
-        new_logger->set_level(level_);
-        new_logger->flush_on(flush_level_);
-
-        // add to registry
-        loggers_[logger_name] = new_logger;
-    }
-
-    std::shared_ptr<logger> get(const std::string &logger_name)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        auto found = loggers_.find(logger_name);
-        return found == loggers_.end() ? nullptr : found->second;
-    }
-
-    void set_tp(std::shared_ptr<thread_pool> tp)
-    {
-        std::lock_guard<std::recursive_mutex> lock(tp_mutex_);
-        tp_ = std::move(tp);
-    }
-
-    std::shared_ptr<thread_pool> get_tp()
-    {
-        std::lock_guard<std::recursive_mutex> lock(tp_mutex_);
-        return tp_;
-    }
+    std::shared_ptr<thread_pool> get_tp();
 
     // Set global formatter. Each sink in each logger will get a clone of this object
-    void set_formatter(std::unique_ptr<formatter> formatter)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        formatter_ = std::move(formatter);
-        for (auto &l : loggers_)
-        {
-            l.second->set_formatter(formatter_->clone());
-        }
-    }
+    void set_formatter(std::unique_ptr<formatter> formatter);
 
-    void set_level(level::level_enum log_level)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        for (auto &l : loggers_)
-        {
-            l.second->set_level(log_level);
-        }
-        level_ = log_level;
-    }
+    void enable_backtrace(size_t n_messages);
 
-    void flush_on(level::level_enum log_level)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        for (auto &l : loggers_)
-        {
-            l.second->flush_on(log_level);
-        }
-        flush_level_ = log_level;
-    }
+    void disable_backtrace();
 
-    void flush_every(std::chrono::seconds interval)
-    {
+    void set_level(level::level_enum log_level);
+
+    void flush_on(level::level_enum log_level);
+
+    template <typename Rep, typename Period>
+    void flush_every(std::chrono::duration<Rep, Period> interval) {
         std::lock_guard<std::mutex> lock(flusher_mutex_);
-        std::function<void()> clbk(std::bind(&registry::flush_all, this));
-        periodic_flusher_.reset(new periodic_worker(clbk, interval));
+        auto clbk = [this]() { this->flush_all(); };
+        periodic_flusher_ = details::make_unique<periodic_worker>(clbk, interval);
     }
 
-    void set_error_handler(log_err_handler handler)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        for (auto &l : loggers_)
-        {
-            l.second->set_error_handler(handler);
-        }
-        err_handler_ = handler;
+    std::unique_ptr<periodic_worker> &get_flusher() {
+        std::lock_guard<std::mutex> lock(flusher_mutex_);
+        return periodic_flusher_;
     }
 
-    void apply_all(std::function<void(std::shared_ptr<logger>)> fun)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        for (auto &l : loggers_)
-        {
-            fun(l.second);
-        }
-    }
+    void set_error_handler(err_handler handler);
 
-    void flush_all()
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        for (auto &l : loggers_)
-        {
-            l.second->flush();
-        }
-    }
+    void apply_all(const std::function<void(const std::shared_ptr<logger>)> &fun);
 
-    void drop(const std::string &logger_name)
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        loggers_.erase(logger_name);
-    }
+    void flush_all();
 
-    void drop_all()
-    {
-        std::lock_guard<std::mutex> lock(logger_map_mutex_);
-        loggers_.clear();
-    }
+    void drop(const std::string &logger_name);
 
-    // clean all reasources and threads started by the registry
-    void shutdown()
-    {
-        {
-            std::lock_guard<std::mutex> lock(flusher_mutex_);
-            periodic_flusher_.reset();
-        }
+    void drop_all();
 
-        drop_all();
+    // clean all resources and threads started by the registry
+    void shutdown();
 
-        {
-            std::lock_guard<std::recursive_mutex> lock(tp_mutex_);
-            tp_.reset();
-        }
-    }
+    std::recursive_mutex &tp_mutex();
 
-    std::recursive_mutex &tp_mutex()
-    {
-        return tp_mutex_;
-    }
+    void set_automatic_registration(bool automatic_registration);
 
-    static registry &instance()
-    {
-        static registry s_instance;
-        return s_instance;
-    }
+    // set levels for all existing/future loggers. global_level can be null if should not set.
+    void set_levels(log_levels levels, level::level_enum *global_level);
+
+    static registry &instance();
+
+    void apply_logger_env_levels(std::shared_ptr<logger> new_logger);
 
 private:
-    registry()
-        : formatter_(new pattern_formatter("%+"))
-    {
-    }
+    registry();
+    ~registry();
 
-    ~registry()
-    {
-        /*std::lock_guard<std::mutex> lock(flusher_mutex_);
-        periodic_flusher_.reset();*/
-    }
-
-    void throw_if_exists_(const std::string &logger_name)
-    {
-        if (loggers_.find(logger_name) != loggers_.end())
-        {
-            throw spdlog_ex("logger with name '" + logger_name + "' already exists");
-        }
-    }
-
+    void throw_if_exists_(const std::string &logger_name);
+    void register_logger_(std::shared_ptr<logger> new_logger);
+    bool set_level_from_cfg_(logger *logger);
     std::mutex logger_map_mutex_, flusher_mutex_;
     std::recursive_mutex tp_mutex_;
     std::unordered_map<std::string, std::shared_ptr<logger>> loggers_;
+    log_levels log_levels_;
     std::unique_ptr<formatter> formatter_;
-    level::level_enum level_ = level::info;
+    spdlog::level::level_enum global_log_level_ = level::info;
     level::level_enum flush_level_ = level::off;
-    log_err_handler err_handler_;
+    err_handler err_handler_;
     std::shared_ptr<thread_pool> tp_;
     std::unique_ptr<periodic_worker> periodic_flusher_;
+    std::shared_ptr<logger> default_logger_;
+    bool automatic_registration_ = true;
+    size_t backtrace_n_messages_ = 0;
 };
 
-} // namespace details
-} // namespace spdlog
+}  // namespace details
+}  // namespace spdlog
+
+#ifdef SPDLOG_HEADER_ONLY
+    #include "registry-inl.h"
+#endif
