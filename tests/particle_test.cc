@@ -2,6 +2,7 @@
 
 #include "catch.hpp"
 
+#include "assertion.h"
 #include "cell.h"
 #include "element.h"
 #include "function_base.h"
@@ -12,11 +13,6 @@
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
-
-bool almost_equal(double a, double b, double tolerance) {
-    return (a == b) || (std::abs(a - b) < tolerance) ||
-           (std::abs(a) < tolerance && std::abs(b) < tolerance);
-}
 
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {

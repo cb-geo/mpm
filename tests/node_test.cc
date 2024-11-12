@@ -5,9 +5,11 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
+#include "assertion.h"
 #include "function_base.h"
 #include "geometry.h"
 #include "node.h"
+
 
 // Check node class for 1D case
 TEST_CASE("Node is checked for 1D case", "[node][1D]") {
@@ -1549,9 +1551,9 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
         // Check that the acceleration is 0 in local coordinate
         REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
-                Approx(0).epsilon(Tolerance));
+               Approx(0).epsilon(Tolerance));
         REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(2) ==
-                Approx(0).epsilon(Tolerance));
+               Approx(0).epsilon(Tolerance));
       }
 
       SECTION("Check general velocity constraints in all directions") {
@@ -1589,8 +1591,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         // Check apply constraints
         acceleration << 0, 0, 0;
         for (unsigned i = 0; i < Dim; ++i)
-          REQUIRE(node->acceleration(Nphase)(i) ==
-                  Approx(acceleration(i)).epsilon(Tolerance));
+          REQUIRE(almost_equal(node->acceleration(Nphase)(i), acceleration(i), Tolerance));
 
         // Check that the acceleration is 0 in local coordinate
         REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
