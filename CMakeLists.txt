@@ -2,6 +2,13 @@ project(mpm LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# 编译错误自动分析功能
+option(ENABLE_ERROR_ANALYSIS "Enable automatic error analysis on build failure" OFF)
+
+if(ENABLE_ERROR_ANALYSIS)
+  message(STATUS "Enabled automatic error analysis")
+endif()
+
 cmake_minimum_required(VERSION 3.12)
 
 SET(CMAKE_COLOR_MAKEFILE ON)
