@@ -15,7 +15,18 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
     contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_);
   else
     contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
+
+  //! Real-time monitoring
+  real_time_monitoring_ = io_->analysis_bool("real_time_monitoring");
+  if (io_->analysis_has_key("dashboard_url")) {
+    dashboard_url_ = io_->analysis_string("dashboard_url");
+  }
 }
+
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 //! MPM Explicit compute stress strain
 template <unsigned Tdim>
@@ -34,6 +45,95 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
   // Iterate over each particle to compute stress
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
+}
+
+//! Send real-time data to web dashboard
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::send_real_time_data(unsigned step, double time) {
+  if (!real_time_monitoring_) return;
+
+  // Collect stress and strain data
+  double avg_stress_xx = 0.0, avg_stress_yy = 0.0, avg_stress_zz = 0.0;
+  double avg_strain_xx = 0.0, avg_strain_yy = 0.0, avg_strain_zz = 0.0;
+  double max_stress_xx = -std::numeric_limits<double>::max();
+  double min_stress_xx = std::numeric_limits<double>::max();
+  size_t particle_count = 0;
+
+  // Iterate over all particles to compute averages and extremes
+  mesh_->iterate_over_particles([&](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+    if (!particle->status()) return;
+
+    auto stress = particle->stress();
+    auto strain = particle->strain();
+
+    avg_stress_xx += stress[0];
+    avg_stress_yy += stress[1];
+    avg_stress_zz += stress[2];
+    avg_strain_xx += strain[0];
+    avg_strain_yy += strain[1];
+    avg_strain_zz += strain[2];
+
+    max_stress_xx = std::max(max_stress_xx, stress[0]);
+    min_stress_xx = std::min(min_stress_xx, stress[0]);
+
+    particle_count++;
+  });
+
+  if (particle_count == 0) return;
+
+  // Compute averages
+  avg_stress_xx /= particle_count;
+  avg_stress_yy /= particle_count;
+  avg_stress_zz /= particle_count;
+  avg_strain_xx /= particle_count;
+  avg_strain_yy /= particle_count;
+  avg_strain_zz /= particle_count;
+
+  // Create JSON data
+  json data = {
+    {"step", step},
+    {"total_steps", nsteps_},
+    {"time", time},
+    {"average_stress_xx", avg_stress_xx},
+    {"average_stress_yy", avg_stress_yy},
+    {"average_stress_zz", avg_stress_zz},
+    {"average_strain_xx", avg_strain_xx},
+    {"average_strain_yy", avg_strain_yy},
+    {"average_strain_zz", avg_strain_zz},
+    {"max_stress_xx", max_stress_xx},
+    {"min_stress_xx", min_stress_xx}
+  };
+
+  // Convert JSON to string
+  std::string json_str = data.dump();
+
+  // Initialize CURL
+  CURL *curl = curl_easy_init();
+  if (curl) {
+    // Set URL
+    curl_easy_setopt(curl, CURLOPT_URL, dashboard_url_.c_str());
+
+    // Set POST request
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+
+    // Set POST data
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_str.c_str());
+
+    // Set headers
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+    // Perform request
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+      console_->warn("Failed to send real-time data: {}", curl_easy_strerror(res));
+    }
+
+    // Cleanup
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+  }
 }
 
 //! MPM Explicit solver
@@ -162,6 +262,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
+
+    // Send real-time data to dashboard
+    send_real_time_data(step_, step_ * dt_);
 
     // Locate particles
     mpm_scheme_->locate_particles(this->locate_particles_);

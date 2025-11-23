@@ -26,6 +26,9 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! \param[in] phase Phase to smooth pressure
   void compute_stress_strain(unsigned phase);
 
+  //! Collect and send real-time data
+  void send_real_time_data(unsigned step, double time);
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPMBase<Tdim>::uuid_;
@@ -81,6 +84,11 @@ class MPMExplicit : public MPMBase<Tdim> {
   bool pressure_smoothing_{false};
   //! Interface
   bool interface_{false};
+
+  //! Real-time monitoring flag
+  bool real_time_monitoring_{false};
+  //! Web dashboard URL
+  std::string dashboard_url_{"http://localhost:5000/simulation_data"};
 
 };  // MPMExplicit class
 }  // namespace mpm
