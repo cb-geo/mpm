@@ -15,7 +15,6 @@
 #include "quadrilateral_element.h"
 
 #ifdef USE_MPI
-#ifdef USE_KAHIP
 //! Check transfer of particles across MPI tasks
 TEST_CASE("MPI transfer particle is checked in 2D",
           "[particle][mpi][transfer][2D]") {
@@ -323,6 +322,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       }
     }
 
+#ifdef USE_GRAPH_PARTITIONING
     // Transfer non-rank particles
     if (mpi_size == 4) {
       // Initialize MPI
@@ -348,6 +348,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       // Transfer particle to the correct MPI rank
       REQUIRE_NOTHROW(mesh->transfer_nonrank_particles(exchange_cells));
     }
+#endif
   }
 }
 
@@ -695,6 +696,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       }
     }
 
+#ifdef USE_GRAPH_PARTITIONING
     // Transfer non-rank particles
     if (mpi_size == 4) {
       // Initialize MPI
@@ -720,7 +722,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       // Transfer particle to the correct MPI rank
       REQUIRE_NOTHROW(mesh->transfer_nonrank_particles(exchange_cells));
     }
+#endif
   }
 }
-#endif
 #endif
